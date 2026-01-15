@@ -3,193 +3,430 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Cache Prevention -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <title>Hiyas ng Bulacan Museum - Virtual Tour</title>
     
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     
-    <!-- Hotspot Component -->
+    <!-- Enhanced Hotspot Component -->
     <script>
-        AFRAME.registerComponent('hotspot', {
+        AFRAME.registerComponent('nav-hotspot', {
             schema: {
-                scene: { type: 'string' },
+                target: { type: 'string' },      // Target scene ID
+                label: { type: 'string' },       // Display label
+                icon: { type: 'string', default: 'arrow' }, // arrow, door, stairs, etc.
+                position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
                 rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
             },
+            
             init: function() {
                 const el = this.el;
                 const data = this.data;
                 
-                // Create hotspot visual
-                el.setAttribute('geometry', 'primitive: circle; radius: 0.1');
-                el.setAttribute('material', 'color: #FFD700; opacity: 0.7; transparent: true');
+                // Create container
+                el.setAttribute('position', data.position);
                 el.setAttribute('rotation', data.rotation);
+                el.classList.add('clickable');
+                el.setAttribute('data-hotspot', 'true');
                 
-                // Add animation for visibility
-                el.setAttribute('animation', {
+                // Create outer ring (pulsing)
+                const ring = document.createElement('a-ring');
+                ring.setAttribute('radius-inner', '0.08');
+                ring.setAttribute('radius-outer', '0.12');
+                ring.setAttribute('color', '#FFD700');
+                ring.setAttribute('opacity', '0.6');
+                ring.setAttribute('shader', 'flat');
+                ring.setAttribute('animation', {
                     property: 'scale',
-                    to: '1.1 1.1 1.1',
+                    to: '1.2 1.2 1',
                     dir: 'alternate',
                     loop: true,
-                    dur: 1000
+                    dur: 1200,
+                    easing: 'easeInOutSine'
                 });
+                el.appendChild(ring);
                 
-                // Add text label
-                const text = document.createElement('a-entity');
-                text.setAttribute('text', {
-                    value: data.scene,
+                // Create inner circle (hover effect)
+                const circle = document.createElement('a-circle');
+                circle.setAttribute('radius', '0.06');
+                circle.setAttribute('color', '#FFFFFF');
+                circle.setAttribute('opacity', '0');
+                circle.setAttribute('shader', 'flat');
+                circle.setAttribute('class', 'hotspot-inner');
+                el.appendChild(circle);
+                
+                // Create icon based on type
+                const icon = this.createIcon(data.icon);
+                if (icon) {
+                    icon.setAttribute('position', '0 0 0.001');
+                    icon.setAttribute('scale', '0.04 0.04 1');
+                    el.appendChild(icon);
+                }
+                
+                // Create label
+                const label = document.createElement('a-entity');
+                label.setAttribute('text', {
+                    value: data.label,
                     align: 'center',
                     color: '#FFFFFF',
-                    width: 0.5
+                    width: 0.6,
+                    font: 'roboto',
+                    baseline: 'center'
                 });
-                text.setAttribute('position', '0 0.15 0');
-                el.appendChild(text);
+                label.setAttribute('position', '0 0.2 0');
+                label.setAttribute('visible', 'false');
+                label.setAttribute('class', 'hotspot-label');
+                el.appendChild(label);
                 
-                // Click/tap event
+                // HOVER EFFECTS
+                el.addEventListener('mouseenter', () => {
+                    // Highlight inner circle
+                    circle.setAttribute('opacity', '0.8');
+                    circle.setAttribute('animation', {
+                        property: 'scale',
+                        to: '1.3 1.3 1',
+                        dur: 200,
+                        easing: 'easeOutQuad'
+                    });
+                    
+                    // Show label
+                    label.setAttribute('visible', 'true');
+                    label.setAttribute('animation', {
+                        property: 'scale',
+                        from: '0.8 0.8 1',
+                        to: '1 1 1',
+                        dur: 300,
+                        easing: 'easeOutBack'
+                    });
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    // Remove highlight
+                    circle.setAttribute('opacity', '0');
+                    circle.setAttribute('scale', '1 1 1');
+                    circle.removeAttribute('animation');
+                    
+                    // Hide label
+                    label.setAttribute('visible', 'false');
+                });
+                
+                // CLICK/TAP EVENT
                 el.addEventListener('click', () => {
-                    // Find scene index
-                    const scenes = window.sceneList;
-                    const sceneIndex = scenes.findIndex(s => s.title === data.scene);
-                    if (sceneIndex !== -1) {
-                        window.changeScene(sceneIndex);
-                    }
+                    // Click feedback
+                    circle.setAttribute('color', '#4CAF50');
+                    circle.setAttribute('opacity', '0.9');
+                    
+                    setTimeout(() => {
+                        circle.setAttribute('color', '#FFFFFF');
+                        circle.setAttribute('opacity', '0');
+                        
+                        // Navigate to target scene
+                        const scenes = window.sceneList;
+                        const targetIndex = scenes.findIndex(s => s.id === data.target);
+                        if (targetIndex !== -1) {
+                            window.changeScene(targetIndex);
+                        }
+                    }, 300);
                 });
                 
-                // Add cursor interaction
-                el.classList.add('clickable');
+                // For mobile touch
+                el.addEventListener('touchstart', () => {
+                    circle.setAttribute('opacity', '0.8');
+                });
+                
+                el.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    el.components['nav-hotspot'].onClick();
+                });
+            },
+            
+            createIcon: function(iconType) {
+                const iconMap = {
+                    'arrow': 'M-0.5,-0.5 L0.5,0 L-0.5,0.5 Z',
+                    'door': 'M-0.4,-0.5 L0.4,-0.5 L0.4,0.5 L-0.4,0.5 Z M-0.2,-0.3 L0.2,-0.3 L0.2,0.3 L-0.2,0.3 Z',
+                    'stairs': 'M-0.4,0.5 L0.4,0.5 L0.4,0.3 L-0.4,0.3 L-0.4,0.1 L0.4,0.1 L0.4,-0.1 L-0.4,-0.1 L-0.4,-0.3 L0.4,-0.3 L0.4,-0.5 L-0.4,-0.5 Z',
+                    'up': 'M-0.3,0.3 L0,0 L0.3,0.3 M0,-0.5 L0,0',
+                    'down': 'M-0.3,-0.3 L0,0 L0.3,-0.3 M0,0.5 L0,0'
+                };
+                
+                if (iconMap[iconType]) {
+                    const path = document.createElement('a-entity');
+                    path.setAttribute('geometry', {
+                        primitive: 'path',
+                        path: iconMap[iconType]
+                    });
+                    path.setAttribute('material', 'color: #000000; shader: flat');
+                    path.setAttribute('rotation', '0 0 90');
+                    return path;
+                }
+                return null;
+            },
+            
+            onClick: function() {
+                const circle = this.el.querySelector('.hotspot-inner');
+                circle.setAttribute('color', '#4CAF50');
+                circle.setAttribute('opacity', '0.9');
+                
+                setTimeout(() => {
+                    circle.setAttribute('color', '#FFFFFF');
+                    circle.setAttribute('opacity', '0');
+                    
+                    const scenes = window.sceneList;
+                    const targetIndex = scenes.findIndex(s => s.id === this.data.target);
+                    if (targetIndex !== -1) {
+                        window.changeScene(targetIndex);
+                    }
+                }, 300);
+            }
+        });
+        
+        // Cursor interaction improvement
+        AFRAME.registerComponent('cursor-listener', {
+            init: function () {
+                this.el.addEventListener('click', function (evt) {
+                    console.log('Clicked:', evt.target);
+                });
             }
         });
     </script>
     
     <style>
-        /* RESET */
+        /* RESET & BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; overflow: hidden; background: #000; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden; 
+            background: #000;
+            -webkit-tap-highlight-color: transparent;
+        }
         
-        /* LOADING SCREEN - SIMPLIFIED */
+        /* LOADING */
         #loading {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: #000;
+            background: #1a1a2e;
             color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10000;
+            transition: opacity 0.5s;
         }
         
         .loader {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 215, 0, 0.3);
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 215, 0, 0.2);
+            border-top: 3px solid #FFD700;
             border-radius: 50%;
-            border-top-color: #FFD700;
-            animation: spin 1s ease-in-out infinite;
+            animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
         
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
-        /* SCENE TITLE - MINIMAL */
-        #scene-title {
+        .loading-text {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 10px;
+        }
+        
+        /* SCENE INFO */
+        #scene-info {
             position: fixed;
-            top: 15px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.85);
             color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
             font-size: 14px;
+            font-weight: 500;
             z-index: 1000;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+            justify-content: center;
         }
         
-        /* NAVIGATION BUTTONS - SIMPLE */
-        .nav-btn {
+        #scene-info i {
+            color: #FFD700;
+            font-size: 16px;
+        }
+        
+        /* NAVIGATION CONTROLS */
+        .controls {
             position: fixed;
             bottom: 20px;
-            background: rgba(0, 0, 0, 0.7);
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .controls button {
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.85);
             color: white;
             border: none;
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            font-size: 18px;
+            font-size: 20px;
             cursor: pointer;
-            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.3s;
+            transition: all 0.2s;
         }
         
-        .nav-btn:hover {
-            background: rgba(0, 0, 0, 0.9);
+        .controls button:hover:not(:disabled) {
+            background: rgba(26, 26, 46, 0.95);
+            transform: scale(1.1);
         }
         
-        #prev-btn { left: 20px; }
-        #next-btn { right: 20px; }
+        .controls button:active {
+            transform: scale(0.95);
+        }
         
-        /* THUMBNAILS - SIMPLE */
-        .thumbnails {
+        .controls button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* SCENE SELECTOR */
+        .scene-selector {
             position: fixed;
-            bottom: 80px;
+            bottom: 90px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             gap: 8px;
             z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
         }
         
-        .thumb {
-            width: 40px;
-            height: 30px;
-            border-radius: 3px;
-            overflow: hidden;
-            opacity: 0.5;
+        .scene-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
             cursor: pointer;
             transition: all 0.3s;
-            border: 2px solid transparent;
         }
         
-        .thumb.active {
-            opacity: 1;
-            border-color: #FFD700;
+        .scene-dot.active {
+            background: #FFD700;
+            transform: scale(1.3);
         }
         
-        .thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .scene-dot:hover {
+            background: rgba(255, 215, 0, 0.7);
+            transform: scale(1.2);
         }
         
-        /* MOBILE */
+        /* INSTRUCTIONS */
+        #instructions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            max-width: 200px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        #instructions h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .instructions-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* MOBILE OPTIMIZATION */
         @media (max-width: 768px) {
-            #scene-title {
-                top: 10px;
-                font-size: 12px;
-                padding: 6px 12px;
+            #scene-info {
+                top: 15px;
+                font-size: 13px;
+                padding: 8px 16px;
+                min-width: 160px;
             }
             
-            .nav-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
+            .controls {
                 bottom: 15px;
+                padding: 0 15px;
             }
             
-            .thumbnails {
-                bottom: 70px;
+            .controls button {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
             }
             
-            .thumb {
-                width: 35px;
-                height: 25px;
+            .scene-selector {
+                bottom: 80px;
             }
+            
+            .scene-dot {
+                width: 8px;
+                height: 8px;
+            }
+        }
+        
+        /* CURSOR STYLING */
+        a-cursor {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -197,14 +434,29 @@
     <!-- LOADING -->
     <div id="loading">
         <div class="loader"></div>
-        <p>Loading Virtual Tour...</p>
+        <div class="loading-text">Loading Museum Tour...</div>
     </div>
     
-    <!-- SCENE TITLE -->
-    <div id="scene-title">Entrance</div>
+    <!-- SCENE INFO -->
+    <div id="scene-info">
+        <i>📍</i>
+        <span id="scene-title">Entrance</span>
+    </div>
+    
+    <!-- INSTRUCTIONS BUTTON -->
+    <button class="instructions-btn" id="instructions-btn" title="Instructions">?</button>
+    
+    <!-- INSTRUCTIONS PANEL -->
+    <div id="instructions">
+        <h3>🗺️ Navigation Guide</h3>
+        <p>• <b>Look around:</b> Drag or move device</p>
+        <p>• <b>Navigate:</b> Click golden markers</p>
+        <p>• <b>Hover:</b> See destination names</p>
+        <p>• <b>Change scene:</b> Use buttons or dots</p>
+    </div>
     
     <!-- A-FRAME SCENE -->
-    <a-scene>
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
         <!-- ASSETS -->
         <a-assets timeout="30000">
             <img id="entrance" src="images/entrance.jpg" crossorigin="anonymous">
@@ -218,76 +470,151 @@
         <!-- SKY -->
         <a-sky id="scene-sky" src="#entrance"></a-sky>
         
-        <!-- CAMERA -->
-        <a-entity camera look-controls>
-            <a-cursor></a-cursor>
+        <!-- CAMERA WITH CURSOR -->
+        <a-entity camera look-controls="pointerLockEnabled: true">
+            <a-cursor 
+                id="cursor"
+                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                animation__mouseleave="property: scale; startEvents: mouseleave; from: 0.1 0.1 0.1; to: 1 1 1; dur: 500"
+                fuse="true"
+                fuse-timeout="500">
+            </a-cursor>
         </a-entity>
         
-        <!-- HOTSPOTS FOR EACH SCENE -->
+        <!-- NAVIGATION HOTSPOTS -->
+        
         <!-- Entrance Hotspots -->
         <a-entity id="entrance-hotspots">
-            <!-- To Main Hall -->
-            <a-entity hotspot="scene: Main Hall" position="0 0 -3" rotation="0 0 0"></a-entity>
+            <!-- To Main Hall (straight ahead) -->
+            <a-entity nav-hotspot="
+                target: mainhall;
+                label: Enter Museum;
+                icon: door;
+                position: 0 0 -4;
+                rotation: 0 0 0">
+            </a-entity>
         </a-entity>
         
         <!-- Main Hall Hotspots -->
         <a-entity id="mainhall-hotspots" visible="false">
-            <!-- To Left Wing -->
-            <a-entity hotspot="scene: Left Wing" position="-2 0 -2" rotation="0 30 0"></a-entity>
-            <!-- To Lower Right -->
-            <a-entity hotspot="scene: Lower Right" position="2 0 -2" rotation="0 -30 0"></a-entity>
+            <!-- To Left Wing Gallery -->
+            <a-entity nav-hotspot="
+                target: left;
+                label: Left Gallery;
+                icon: arrow;
+                position: -2.5 0 -3;
+                rotation: 0 25 0">
+            </a-entity>
+            
+            <!-- To Lower Right Exhibit -->
+            <a-entity nav-hotspot="
+                target: lower_right;
+                label: Right Exhibit;
+                icon: arrow;
+                position: 2.5 0 -3;
+                rotation: 0 -25 0">
+            </a-entity>
+            
+            <!-- Back to Entrance -->
+            <a-entity nav-hotspot="
+                target: entrance;
+                label: Exit;
+                icon: arrow;
+                position: 0 0 3;
+                rotation: 0 180 0">
+            </a-entity>
         </a-entity>
         
         <!-- Left Wing Hotspots -->
         <a-entity id="left-hotspots" visible="false">
-            <!-- To Mid Left -->
-            <a-entity hotspot="scene: Mid Left" position="0 0 -3" rotation="0 0 0"></a-entity>
+            <!-- To Mid Left Section -->
+            <a-entity nav-hotspot="
+                target: mid_left;
+                label: Continue;
+                icon: arrow;
+                position: 0 0 -3.5;
+                rotation: 0 0 0">
+            </a-entity>
+            
             <!-- Back to Main Hall -->
-            <a-entity hotspot="scene: Main Hall" position="0 0 3" rotation="0 180 0"></a-entity>
+            <a-entity nav-hotspot="
+                target: mainhall;
+                label: Back to Main Hall;
+                icon: arrow;
+                position: 0 0 3;
+                rotation: 0 180 0">
+            </a-entity>
         </a-entity>
         
         <!-- Lower Right Hotspots -->
         <a-entity id="lower_right-hotspots" visible="false">
-            <!-- To Upper Right -->
-            <a-entity hotspot="scene: Upper Right" position="0 1.5 -2" rotation="-30 0 0"></a-entity>
+            <!-- To Upper Right (upstairs) -->
+            <a-entity nav-hotspot="
+                target: upper_right;
+                label: Go Upstairs;
+                icon: stairs;
+                position: 0 1.8 -2.5;
+                rotation: -30 0 0">
+            </a-entity>
+            
             <!-- Back to Main Hall -->
-            <a-entity hotspot="scene: Main Hall" position="0 0 3" rotation="0 180 0"></a-entity>
+            <a-entity nav-hotspot="
+                target: mainhall;
+                label: Back to Main Hall;
+                icon: arrow;
+                position: 0 0 3;
+                rotation: 0 180 0">
+            </a-entity>
         </a-entity>
         
         <!-- Upper Right Hotspots -->
         <a-entity id="upper_right-hotspots" visible="false">
-            <!-- Back to Lower Right -->
-            <a-entity hotspot="scene: Lower Right" position="0 -1.5 -2" rotation="30 0 0"></a-entity>
+            <!-- Back to Lower Right (downstairs) -->
+            <a-entity nav-hotspot="
+                target: lower_right;
+                label: Go Downstairs;
+                icon: stairs;
+                position: 0 -1.5 -2.5;
+                rotation: 30 0 0">
+            </a-entity>
         </a-entity>
         
         <!-- Mid Left Hotspots -->
         <a-entity id="mid_left-hotspots" visible="false">
             <!-- Back to Left Wing -->
-            <a-entity hotspot="scene: Left Wing" position="0 0 3" rotation="0 180 0"></a-entity>
+            <a-entity nav-hotspot="
+                target: left;
+                label: Return to Gallery;
+                icon: arrow;
+                position: 0 0 3;
+                rotation: 0 180 0">
+            </a-entity>
         </a-entity>
     </a-scene>
     
-    <!-- THUMBNAILS -->
-    <div class="thumbnails" id="thumbnails"></div>
+    <!-- SCENE SELECTOR DOTS -->
+    <div class="scene-selector" id="scene-selector"></div>
     
-    <!-- NAVIGATION BUTTONS -->
-    <button id="prev-btn" class="nav-btn" title="Previous">←</button>
-    <button id="next-btn" class="nav-btn" title="Next">→</button>
+    <!-- NAVIGATION CONTROLS -->
+    <div class="controls">
+        <button id="prev-btn" title="Previous Scene">←</button>
+        <button id="next-btn" title="Next Scene">→</button>
+    </div>
     
     <script>
         // =====================
-        // SCENE CONFIGURATION
+        // CONFIGURATION
         // =====================
         const scenes = [
             { id: "entrance", title: "Entrance" },
             { id: "mainhall", title: "Main Hall" },
-            { id: "left", title: "Left Wing" },
-            { id: "lower_right", title: "Lower Right" },
-            { id: "upper_right", title: "Upper Right" },
-            { id: "mid_left", title: "Mid Left" }
+            { id: "left", title: "Left Gallery" },
+            { id: "lower_right", title: "Right Exhibit" },
+            { id: "upper_right", title: "Upper Floor" },
+            { id: "mid_left", title: "Gallery Extension" }
         ];
         
-        // Make scenes available globally for hotspots
         window.sceneList = scenes;
         
         // =====================
@@ -301,22 +628,19 @@
         // DOM ELEMENTS
         // =====================
         const sky = document.getElementById('scene-sky');
-        const title = document.getElementById('scene-title');
+        const sceneTitle = document.getElementById('scene-title');
         const loading = document.getElementById('loading');
-        const thumbnails = document.getElementById('thumbnails');
+        const sceneSelector = document.getElementById('scene-selector');
+        const instructions = document.getElementById('instructions');
         
         // =====================
         // INITIALIZATION
         // =====================
         document.addEventListener('DOMContentLoaded', function() {
             preloadImages();
-            createThumbnails();
+            createSceneDots();
             setupEventListeners();
-            
-            // A-Frame scene loaded
-            document.querySelector('a-scene').addEventListener('loaded', function() {
-                console.log('A-Frame loaded');
-            });
+            setupAframeEvents();
         });
         
         // =====================
@@ -329,29 +653,36 @@
                     imagesLoaded++;
                     if (imagesLoaded === totalImages) {
                         setTimeout(() => {
-                            loading.style.display = 'none';
+                            loading.style.opacity = '0';
+                            setTimeout(() => {
+                                loading.style.display = 'none';
+                            }, 500);
                         }, 500);
                     }
+                };
+                img.onerror = () => {
+                    console.error(`Failed to load: ${scene.id}`);
+                    imagesLoaded++;
                 };
                 img.src = `images/${scene.id}.jpg`;
             });
         }
         
         // =====================
-        // THUMBNAILS
+        // SCENE DOTS
         // =====================
-        function createThumbnails() {
+        function createSceneDots() {
             scenes.forEach((scene, index) => {
-                const thumb = document.createElement('div');
-                thumb.className = `thumb ${index === 0 ? 'active' : ''}`;
-                thumb.dataset.index = index;
-                thumb.innerHTML = `<img src="images/${scene.id}.jpg" alt="${scene.title}">`;
+                const dot = document.createElement('div');
+                dot.className = `scene-dot ${index === 0 ? 'active' : ''}`;
+                dot.dataset.index = index;
+                dot.title = scene.title;
                 
-                thumb.addEventListener('click', () => {
+                dot.addEventListener('click', () => {
                     changeScene(index);
                 });
                 
-                thumbnails.appendChild(thumb);
+                sceneSelector.appendChild(dot);
             });
         }
         
@@ -368,32 +699,35 @@
             sky.setAttribute('src', `#${scene.id}`);
             
             // Update title
-            title.textContent = scene.title;
+            sceneTitle.textContent = scene.title;
             
-            // Update thumbnails
-            document.querySelectorAll('.thumb').forEach((thumb, i) => {
-                thumb.classList.toggle('active', i === index);
+            // Update scene dots
+            document.querySelectorAll('.scene-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
             });
             
             // Show/hide hotspots
             updateHotspots(scene.id);
             
-            // Update nav buttons
+            // Update navigation buttons
             updateNavigation();
+            
+            // Log scene change
+            console.log(`Navigated to: ${scene.title}`);
         };
         
         function updateHotspots(sceneId) {
-            // Hide all hotspots
-            const allHotspots = [
+            // Hide all hotspot groups
+            const hotspotGroups = [
                 'entrance-hotspots',
-                'mainhall-hotspots', 
+                'mainhall-hotspots',
                 'left-hotspots',
                 'lower_right-hotspots',
                 'upper_right-hotspots',
                 'mid_left-hotspots'
             ];
             
-            allHotspots.forEach(id => {
+            hotspotGroups.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.setAttribute('visible', 'false');
             });
@@ -401,7 +735,9 @@
             // Show current scene hotspots
             const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
             if (currentHotspots) {
-                currentHotspots.setAttribute('visible', 'true');
+                setTimeout(() => {
+                    currentHotspots.setAttribute('visible', 'true');
+                }, 300);
             }
         }
         
@@ -423,13 +759,30 @@
                 changeScene(currentSceneIndex + 1);
             });
             
-            // Keyboard
+            // Keyboard navigation
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
                 if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
+                if (e.key === 'Escape') {
+                    instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
+                }
             });
             
-            // Touch/swipe for mobile
+            // Instructions toggle
+            document.getElementById('instructions-btn').addEventListener('click', () => {
+                instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
+            });
+            
+            // Close instructions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!instructions.contains(e.target) && 
+                    !document.getElementById('instructions-btn').contains(e.target) &&
+                    instructions.style.display === 'block') {
+                    instructions.style.display = 'none';
+                }
+            });
+            
+            // Mobile swipe
             let touchStartX = 0;
             document.addEventListener('touchstart', (e) => {
                 touchStartX = e.touches[0].clientX;
@@ -439,7 +792,7 @@
                 const touchEndX = e.changedTouches[0].clientX;
                 const diff = touchStartX - touchEndX;
                 
-                if (Math.abs(diff) > 50) {
+                if (Math.abs(diff) > 60) {
                     if (diff > 0) {
                         changeScene(currentSceneIndex + 1);
                     } else {
@@ -447,6 +800,31 @@
                     }
                 }
             });
+        }
+        
+        // =====================
+        // A-FRAME EVENTS
+        // =====================
+        function setupAframeEvents() {
+            const scene = document.querySelector('a-scene');
+            
+            scene.addEventListener('loaded', () => {
+                console.log('A-Frame scene fully loaded');
+            });
+            
+            // Improve cursor interaction
+            const cursor = document.getElementById('cursor');
+            if (cursor) {
+                cursor.addEventListener('mouseenter', (e) => {
+                    if (e.target.hasAttribute('data-hotspot')) {
+                        cursor.setAttribute('color', '#FFD700');
+                    }
+                });
+                
+                cursor.addEventListener('mouseleave', () => {
+                    cursor.setAttribute('color', '#FFF');
+                });
+            }
         }
         
         // Initial scene
