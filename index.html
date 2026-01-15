@@ -1,361 +1,211 @@
-<!-- rebuild -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hiyas ng Bulacan Museum - Virtual Tour</title>
-    <!-- A-Frame from CDN -->
+    
+    <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Hotspot Component -->
+    <script>
+        AFRAME.registerComponent('hotspot', {
+            schema: {
+                scene: { type: 'string' },
+                rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
+            },
+            init: function() {
+                const el = this.el;
+                const data = this.data;
+                
+                // Create hotspot visual
+                el.setAttribute('geometry', 'primitive: circle; radius: 0.1');
+                el.setAttribute('material', 'color: #FFD700; opacity: 0.7; transparent: true');
+                el.setAttribute('rotation', data.rotation);
+                
+                // Add animation for visibility
+                el.setAttribute('animation', {
+                    property: 'scale',
+                    to: '1.1 1.1 1.1',
+                    dir: 'alternate',
+                    loop: true,
+                    dur: 1000
+                });
+                
+                // Add text label
+                const text = document.createElement('a-entity');
+                text.setAttribute('text', {
+                    value: data.scene,
+                    align: 'center',
+                    color: '#FFFFFF',
+                    width: 0.5
+                });
+                text.setAttribute('position', '0 0.15 0');
+                el.appendChild(text);
+                
+                // Click/tap event
+                el.addEventListener('click', () => {
+                    // Find scene index
+                    const scenes = window.sceneList;
+                    const sceneIndex = scenes.findIndex(s => s.title === data.scene);
+                    if (sceneIndex !== -1) {
+                        window.changeScene(sceneIndex);
+                    }
+                });
+                
+                // Add cursor interaction
+                el.classList.add('clickable');
+            }
+        });
+    </script>
     
     <style>
-        /* RESET & BASE */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* RESET */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; overflow: hidden; background: #000; }
         
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            background: #000;
-        }
-        
-        /* LOADING SCREEN */
-        #loading-screen {
+        /* LOADING SCREEN - SIMPLIFIED */
+        #loading {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
             color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10000;
-            transition: opacity 0.5s ease;
         }
         
-        .loader-container {
-            text-align: center;
-            max-width: 500px;
-            padding: 30px;
-        }
-        
-        .logo {
-            font-size: 2.5rem;
-            color: #FFD700;
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: #FFD700;
+            animation: spin 1s ease-in-out infinite;
             margin-bottom: 20px;
         }
         
-        .logo i {
-            margin-right: 15px;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
-        .progress-container {
-            width: 100%;
-            max-width: 300px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            margin: 30px auto;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #FFD700, #FFA500);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        
-        .loading-text {
-            margin-top: 20px;
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-        
-        /* SCENE TITLE */
+        /* SCENE TITLE - MINIMAL */
         #scene-title {
             position: fixed;
-            top: 20px;
+            top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
             z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            backdrop-filter: blur(5px);
         }
         
-        #scene-title i {
-            color: #FFD700;
-        }
-        
-        /* NAVIGATION */
-        .nav-container {
-            position: fixed;
-            bottom: 25px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 25px;
-            z-index: 1000;
-        }
-        
+        /* NAVIGATION BUTTONS - SIMPLE */
         .nav-btn {
-            background: rgba(0, 0, 0, 0.85);
+            position: fixed;
+            bottom: 20px;
+            background: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
-            width: 55px;
-            height: 55px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            font-size: 1.2rem;
+            font-size: 18px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.3s;
         }
         
         .nav-btn:hover {
-            background: rgba(26, 26, 46, 0.95);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.9);
         }
         
-        .nav-btn:active {
-            transform: translateY(0);
-        }
+        #prev-btn { left: 20px; }
+        #next-btn { right: 20px; }
         
-        .nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        /* SCENE THUMBNAILS */
-        .scene-thumbnails {
+        /* THUMBNAILS - SIMPLE */
+        .thumbnails {
             position: fixed;
-            bottom: 100px;
+            bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            gap: 8px;
             z-index: 1000;
         }
         
-        .thumbnail {
-            width: 60px;
-            height: 40px;
-            border-radius: 5px;
+        .thumb {
+            width: 40px;
+            height: 30px;
+            border-radius: 3px;
             overflow: hidden;
             opacity: 0.5;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             border: 2px solid transparent;
         }
         
-        .thumbnail:hover {
-            opacity: 0.8;
-            transform: translateY(-5px);
-        }
-        
-        .thumbnail.active {
+        .thumb.active {
             opacity: 1;
             border-color: #FFD700;
-            transform: translateY(-5px);
         }
         
-        .thumbnail img {
+        .thumb img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
         
-        /* INSTRUCTIONS */
-        #instructions {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            max-width: 250px;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: none;
-        }
-        
-        #instructions h3 {
-            color: #FFD700;
-            margin-bottom: 10px;
-            font-size: 1rem;
-        }
-        
-        #instructions ul {
-            list-style: none;
-            margin-left: 5px;
-        }
-        
-        #instructions li {
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        #instructions i {
-            color: #FFD700;
-            width: 20px;
-        }
-        
-        .instructions-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* MOBILE RESPONSIVE */
+        /* MOBILE */
         @media (max-width: 768px) {
             #scene-title {
-                font-size: 0.9rem;
-                padding: 10px 20px;
-                top: 15px;
+                top: 10px;
+                font-size: 12px;
+                padding: 6px 12px;
             }
             
             .nav-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.1rem;
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+                bottom: 15px;
             }
             
-            .nav-container {
-                padding: 0 15px;
-                bottom: 20px;
+            .thumbnails {
+                bottom: 70px;
             }
             
-            .thumbnail {
-                width: 50px;
-                height: 35px;
+            .thumb {
+                width: 35px;
+                height: 25px;
             }
-            
-            .scene-thumbnails {
-                bottom: 90px;
-            }
-            
-            #instructions {
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-        }
-        
-        /* FULLSCREEN BUTTON */
-        #fullscreen-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
     </style>
 </head>
 <body>
-    <!-- LOADING SCREEN -->
-    <div id="loading-screen">
-        <div class="loader-container">
-            <div class="logo">
-                <i class="fas fa-landmark"></i>
-                Hiyas ng Bulacan Museum
-            </div>
-            <h2>Virtual Reality Tour</h2>
-            <div class="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
-            </div>
-            <p class="loading-text" id="loading-text">Loading experience...</p>
-        </div>
-    </div>
-    
-    <!-- FULLSCREEN BUTTON -->
-    <button id="fullscreen-btn" title="Toggle Fullscreen">
-        <i class="fas fa-expand"></i>
-    </button>
-    
-    <!-- INSTRUCTIONS BUTTON -->
-    <button class="instructions-btn" id="instructions-btn" title="Show Instructions">
-        <i class="fas fa-question-circle"></i>
-    </button>
-    
-    <!-- INSTRUCTIONS PANEL -->
-    <div id="instructions">
-        <h3><i class="fas fa-info-circle"></i> How to Navigate</h3>
-        <ul>
-            <li><i class="fas fa-mouse-pointer"></i> Drag to look around</li>
-            <li><i class="fas fa-arrow-left"></i> Previous scene</li>
-            <li><i class="fas fa-arrow-right"></i> Next scene</li>
-            <li><i class="fas fa-expand"></i> Toggle fullscreen</li>
-            <li><i class="fas fa-mobile-alt"></i> Use arrows on mobile</li>
-        </ul>
-        <p style="margin-top: 10px; font-size: 0.8rem; color: #aaa;">
-            <i class="fas fa-map-marker-alt"></i> Bulacan Museum, Philippines
-        </p>
+    <!-- LOADING -->
+    <div id="loading">
+        <div class="loader"></div>
+        <p>Loading Virtual Tour...</p>
     </div>
     
     <!-- SCENE TITLE -->
-    <div id="scene-title">
-        <i class="fas fa-map-marker-alt"></i>
-        <span id="scene-title-text">Entrance</span>
-    </div>
+    <div id="scene-title">Entrance</div>
     
     <!-- A-FRAME SCENE -->
     <a-scene>
-        <!-- ASSETS WITH LONG TIMEOUT -->
+        <!-- ASSETS -->
         <a-assets timeout="30000">
             <img id="entrance" src="images/entrance.jpg" crossorigin="anonymous">
             <img id="mainhall" src="images/mainhall.jpg" crossorigin="anonymous">
@@ -365,43 +215,83 @@
             <img id="mid_left" src="images/mid_left.jpg" crossorigin="anonymous">
         </a-assets>
         
-        <!-- SKY / 360 IMAGE -->
+        <!-- SKY -->
         <a-sky id="scene-sky" src="#entrance"></a-sky>
         
         <!-- CAMERA -->
-        <a-entity camera look-controls="pointerLockEnabled: true">
+        <a-entity camera look-controls>
             <a-cursor></a-cursor>
+        </a-entity>
+        
+        <!-- HOTSPOTS FOR EACH SCENE -->
+        <!-- Entrance Hotspots -->
+        <a-entity id="entrance-hotspots">
+            <!-- To Main Hall -->
+            <a-entity hotspot="scene: Main Hall" position="0 0 -3" rotation="0 0 0"></a-entity>
+        </a-entity>
+        
+        <!-- Main Hall Hotspots -->
+        <a-entity id="mainhall-hotspots" visible="false">
+            <!-- To Left Wing -->
+            <a-entity hotspot="scene: Left Wing" position="-2 0 -2" rotation="0 30 0"></a-entity>
+            <!-- To Lower Right -->
+            <a-entity hotspot="scene: Lower Right" position="2 0 -2" rotation="0 -30 0"></a-entity>
+        </a-entity>
+        
+        <!-- Left Wing Hotspots -->
+        <a-entity id="left-hotspots" visible="false">
+            <!-- To Mid Left -->
+            <a-entity hotspot="scene: Mid Left" position="0 0 -3" rotation="0 0 0"></a-entity>
+            <!-- Back to Main Hall -->
+            <a-entity hotspot="scene: Main Hall" position="0 0 3" rotation="0 180 0"></a-entity>
+        </a-entity>
+        
+        <!-- Lower Right Hotspots -->
+        <a-entity id="lower_right-hotspots" visible="false">
+            <!-- To Upper Right -->
+            <a-entity hotspot="scene: Upper Right" position="0 1.5 -2" rotation="-30 0 0"></a-entity>
+            <!-- Back to Main Hall -->
+            <a-entity hotspot="scene: Main Hall" position="0 0 3" rotation="0 180 0"></a-entity>
+        </a-entity>
+        
+        <!-- Upper Right Hotspots -->
+        <a-entity id="upper_right-hotspots" visible="false">
+            <!-- Back to Lower Right -->
+            <a-entity hotspot="scene: Lower Right" position="0 -1.5 -2" rotation="30 0 0"></a-entity>
+        </a-entity>
+        
+        <!-- Mid Left Hotspots -->
+        <a-entity id="mid_left-hotspots" visible="false">
+            <!-- Back to Left Wing -->
+            <a-entity hotspot="scene: Left Wing" position="0 0 3" rotation="0 180 0"></a-entity>
         </a-entity>
     </a-scene>
     
-    <!-- THUMBNAIL NAVIGATION -->
-    <div class="scene-thumbnails" id="scene-thumbnails"></div>
+    <!-- THUMBNAILS -->
+    <div class="thumbnails" id="thumbnails"></div>
     
     <!-- NAVIGATION BUTTONS -->
-    <div class="nav-container">
-        <button id="prev-btn" class="nav-btn" title="Previous Scene">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <button id="next-btn" class="nav-btn" title="Next Scene">
-            <i class="fas fa-arrow-right"></i>
-        </button>
-    </div>
+    <button id="prev-btn" class="nav-btn" title="Previous">←</button>
+    <button id="next-btn" class="nav-btn" title="Next">→</button>
     
     <script>
         // =====================
-        // CONFIGURATION
+        // SCENE CONFIGURATION
         // =====================
         const scenes = [
-            { id: "entrance", title: "Entrance", color: "#FF6B6B" },
-            { id: "mainhall", title: "Main Hall", color: "#4ECDC4" },
-            { id: "left", title: "Left Wing", color: "#FFD166" },
-            { id: "lower_right", title: "Lower Right", color: "#06D6A0" },
-            { id: "upper_right", title: "Upper Right", color: "#118AB2" },
-            { id: "mid_left", title: "Mid Left", color: "#EF476F" }
+            { id: "entrance", title: "Entrance" },
+            { id: "mainhall", title: "Main Hall" },
+            { id: "left", title: "Left Wing" },
+            { id: "lower_right", title: "Lower Right" },
+            { id: "upper_right", title: "Upper Right" },
+            { id: "mid_left", title: "Mid Left" }
         ];
         
+        // Make scenes available globally for hotspots
+        window.sceneList = scenes;
+        
         // =====================
-        // STATE MANAGEMENT
+        // STATE
         // =====================
         let currentSceneIndex = 0;
         let imagesLoaded = 0;
@@ -411,12 +301,9 @@
         // DOM ELEMENTS
         // =====================
         const sky = document.getElementById('scene-sky');
-        const titleText = document.getElementById('scene-title-text');
-        const loadingScreen = document.getElementById('loading-screen');
-        const progressBar = document.getElementById('progress-bar');
-        const loadingText = document.getElementById('loading-text');
-        const sceneThumbnails = document.getElementById('scene-thumbnails');
-        const instructions = document.getElementById('instructions');
+        const title = document.getElementById('scene-title');
+        const loading = document.getElementById('loading');
+        const thumbnails = document.getElementById('thumbnails');
         
         // =====================
         // INITIALIZATION
@@ -425,66 +312,53 @@
             preloadImages();
             createThumbnails();
             setupEventListeners();
-            updateNavigation();
+            
+            // A-Frame scene loaded
+            document.querySelector('a-scene').addEventListener('loaded', function() {
+                console.log('A-Frame loaded');
+            });
         });
         
         // =====================
         // IMAGE PRELOADING
         // =====================
         function preloadImages() {
-            scenes.forEach((scene, index) => {
+            scenes.forEach(scene => {
                 const img = new Image();
-                
                 img.onload = () => {
                     imagesLoaded++;
-                    const progress = Math.round((imagesLoaded / totalImages) * 100);
-                    progressBar.style.width = `${progress}%`;
-                    loadingText.textContent = `Loading ${scene.title} (${imagesLoaded}/${totalImages})`;
-                    
                     if (imagesLoaded === totalImages) {
                         setTimeout(() => {
-                            loadingScreen.style.opacity = '0';
-                            setTimeout(() => {
-                                loadingScreen.style.display = 'none';
-                            }, 500);
+                            loading.style.display = 'none';
                         }, 500);
                     }
                 };
-                
-                img.onerror = () => {
-                    console.error(`Failed to load: ${scene.id}`);
-                    imagesLoaded++; // Count as loaded to continue
-                    if (imagesLoaded === totalImages) {
-                        loadingScreen.style.display = 'none';
-                    }
-                };
-                
                 img.src = `images/${scene.id}.jpg`;
             });
         }
         
         // =====================
-        // THUMBNAIL CREATION
+        // THUMBNAILS
         // =====================
         function createThumbnails() {
             scenes.forEach((scene, index) => {
-                const thumbnail = document.createElement('div');
-                thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
-                thumbnail.dataset.index = index;
-                thumbnail.innerHTML = `<img src="images/${scene.id}.jpg" alt="${scene.title}">`;
+                const thumb = document.createElement('div');
+                thumb.className = `thumb ${index === 0 ? 'active' : ''}`;
+                thumb.dataset.index = index;
+                thumb.innerHTML = `<img src="images/${scene.id}.jpg" alt="${scene.title}">`;
                 
-                thumbnail.addEventListener('click', () => {
+                thumb.addEventListener('click', () => {
                     changeScene(index);
                 });
                 
-                sceneThumbnails.appendChild(thumbnail);
+                thumbnails.appendChild(thumb);
             });
         }
         
         // =====================
         // SCENE MANAGEMENT
         // =====================
-        function changeScene(index) {
+        window.changeScene = function(index) {
             if (index < 0 || index >= scenes.length) return;
             
             currentSceneIndex = index;
@@ -494,18 +368,41 @@
             sky.setAttribute('src', `#${scene.id}`);
             
             // Update title
-            titleText.textContent = scene.title;
+            title.textContent = scene.title;
             
             // Update thumbnails
-            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+            document.querySelectorAll('.thumb').forEach((thumb, i) => {
                 thumb.classList.toggle('active', i === index);
             });
             
-            // Update navigation buttons
-            updateNavigation();
+            // Show/hide hotspots
+            updateHotspots(scene.id);
             
-            // Log scene change
-            console.log(`Scene changed to: ${scene.title}`);
+            // Update nav buttons
+            updateNavigation();
+        };
+        
+        function updateHotspots(sceneId) {
+            // Hide all hotspots
+            const allHotspots = [
+                'entrance-hotspots',
+                'mainhall-hotspots', 
+                'left-hotspots',
+                'lower_right-hotspots',
+                'upper_right-hotspots',
+                'mid_left-hotspots'
+            ];
+            
+            allHotspots.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('visible', 'false');
+            });
+            
+            // Show current scene hotspots
+            const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
+            if (currentHotspots) {
+                currentHotspots.setAttribute('visible', 'true');
+            }
         }
         
         function updateNavigation() {
@@ -526,13 +423,10 @@
                 changeScene(currentSceneIndex + 1);
             });
             
-            // Keyboard navigation
+            // Keyboard
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
                 if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
-                if (e.key === 'Escape' && document.fullscreenElement) {
-                    document.exitFullscreen();
-                }
             });
             
             // Touch/swipe for mobile
@@ -545,79 +439,18 @@
                 const touchEndX = e.changedTouches[0].clientX;
                 const diff = touchStartX - touchEndX;
                 
-                if (Math.abs(diff) > 50) { // Minimum swipe distance
+                if (Math.abs(diff) > 50) {
                     if (diff > 0) {
-                        // Swipe left - next scene
                         changeScene(currentSceneIndex + 1);
                     } else {
-                        // Swipe right - previous scene
                         changeScene(currentSceneIndex - 1);
                     }
                 }
             });
-            
-            // Fullscreen toggle
-            document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
-            
-            // Instructions toggle
-            document.getElementById('instructions-btn').addEventListener('click', () => {
-                instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
-            });
-            
-            // Close instructions when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!instructions.contains(e.target) && 
-                    !document.getElementById('instructions-btn').contains(e.target) &&
-                    instructions.style.display === 'block') {
-                    instructions.style.display = 'none';
-                }
-            });
-            
-            // A-Frame scene loaded
-            document.querySelector('a-scene').addEventListener('loaded', () => {
-                console.log('A-Frame scene loaded successfully');
-            });
         }
         
-        // =====================
-        // FULLSCREEN FUNCTION
-        // =====================
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                });
-                document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-compress"></i>';
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                    document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-expand"></i>';
-                }
-            }
-        }
-        
-        // Handle fullscreen change
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-expand"></i>';
-            }
-        });
-        
-        // =====================
-        // AUTO-ROTATE (Optional)
-        // =====================
-        // Uncomment if you want auto-rotation
-        // setInterval(() => {
-        //     if (currentSceneIndex < scenes.length - 1) {
-        //         changeScene(currentSceneIndex + 1);
-        //     } else {
-        //         changeScene(0);
-        //     }
-        // }, 10000); // Change every 10 seconds
-        
-        // Initial scene update
+        // Initial scene
         changeScene(0);
     </script>
 </body>
-
 </html>
