@@ -1,1 +1,719 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Battle of Quinga - Virtual Tour</title>
+    <!-- A-Frame from CDN -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* RESET & BASE */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        /* LOADING SCREEN */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loader-container {
+            text-align: center;
+            max-width: 500px;
+            padding: 30px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            color: #FF6B6B;
+            margin-bottom: 20px;
+        }
+        
+        .logo i {
+            margin-right: 15px;
+        }
+        
+        .progress-container {
+            width: 100%;
+            max-width: 300px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 30px auto;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #FF6B6B, #FF8E53);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* SCENE TITLE */
+        #scene-title {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #scene-title i {
+            color: #FF6B6B;
+        }
+        
+        /* NAVIGATION */
+        .nav-container {
+            position: fixed;
+            bottom: 25px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 25px;
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(26, 26, 46, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* SCENE THUMBNAILS */
+        .scene-thumbnails {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+        
+        .thumbnail {
+            width: 90px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            opacity: 0.5;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .thumbnail:hover {
+            opacity: 0.8;
+            transform: translateY(-5px);
+        }
+        
+        .thumbnail.active {
+            opacity: 1;
+            border-color: #FF6B6B;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* INSTRUCTIONS */
+        #instructions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            max-width: 250px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        #instructions h3 {
+            color: #FF6B6B;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        #instructions ul {
+            list-style: none;
+            margin-left: 5px;
+        }
+        
+        #instructions li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #instructions i {
+            color: #FF6B6B;
+            width: 20px;
+        }
+        
+        .instructions-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            #scene-title {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+                top: 15px;
+            }
+            
+            .nav-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.1rem;
+            }
+            
+            .nav-container {
+                padding: 0 15px;
+                bottom: 20px;
+            }
+            
+            .thumbnail {
+                width: 75px;
+                height: 50px;
+            }
+            
+            .scene-thumbnails {
+                bottom: 90px;
+                gap: 10px;
+            }
+            
+            #instructions {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+        
+        /* FULLSCREEN BUTTON */
+        #fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* BATTLE THEME STYLES */
+        .historical-note {
+            position: fixed;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: #FFD700;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            text-align: center;
+            max-width: 90%;
+        }
+        
+        /* VIEW INDICATOR */
+        .view-indicator {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .view-indicator i {
+            color: #4ECDC4;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING SCREEN -->
+    <div id="loading-screen">
+        <div class="loader-container">
+            <div class="logo">
+                <i class="fas fa-fort"></i>
+                Battle of Quinga
+            </div>
+            <h2>360° Panorama Tour</h2>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <p class="loading-text" id="loading-text">Loading panoramic views...</p>
+        </div>
+    </div>
+    
+    <!-- FULLSCREEN BUTTON -->
+    <button id="fullscreen-btn" title="Toggle Fullscreen">
+        <i class="fas fa-expand"></i>
+    </button>
+    
+    <!-- INSTRUCTIONS BUTTON -->
+    <button class="instructions-btn" id="instructions-btn" title="Show Instructions">
+        <i class="fas fa-question-circle"></i>
+    </button>
+    
+    <!-- INSTRUCTIONS PANEL -->
+    <div id="instructions">
+        <h3><i class="fas fa-info-circle"></i> How to Navigate</h3>
+        <ul>
+            <li><i class="fas fa-mouse-pointer"></i> Drag to look around each view</li>
+            <li><i class="fas fa-arrow-left"></i> Previous view (rotate left)</li>
+            <li><i class="fas fa-arrow-right"></i> Next view (rotate right)</li>
+            <li><i class="fas fa-expand"></i> Toggle fullscreen</li>
+            <li><i class="fas fa-mobile-alt"></i> Swipe left/right to change views</li>
+        </ul>
+        <p style="margin-top: 10px; font-size: 0.8rem; color: #aaa;">
+            <i class="fas fa-history"></i> Battle of Quinga, 1899 - Philippine-American War
+        </p>
+    </div>
+    
+    <!-- SCENE TITLE -->
+    <div id="scene-title">
+        <i class="fas fa-map-marker-alt"></i>
+        <span id="scene-title-text">Front View</span>
+    </div>
+    
+    <!-- VIEW INDICATOR -->
+    <div class="view-indicator" id="view-indicator">
+        <i class="fas fa-arrow-right"></i>
+        <span>3 Panoramic Views Available</span>
+    </div>
+    
+    <!-- HISTORICAL NOTE -->
+    <div class="historical-note">
+        <i class="fas fa-book"></i> February 21, 1899 - Guagua, Pampanga
+    </div>
+    
+    <!-- A-FRAME SCENE -->
+    <a-scene>
+        <!-- ASSETS WITH LONG TIMEOUT -->
+        <a-assets timeout="30000">
+            <!-- UPDATED WITH FRONT, LEFT, RIGHT IMAGES -->
+            <img id="front" src="labanan_sa_quinga/front.jpg" crossorigin="anonymous">
+            <img id="left" src="labanan_sa_quinga/left.jpg" crossorigin="anonymous">
+            <img id="right" src="labanan_sa_quinga/right.jpg" crossorigin="anonymous">
+        </a-assets>
+        
+        <!-- SKY / 360 IMAGE -->
+        <a-sky id="scene-sky" src="#front"></a-sky>
+        
+        <!-- CAMERA -->
+        <a-entity camera look-controls="pointerLockEnabled: true">
+            <a-cursor></a-cursor>
+        </a-entity>
+    </a-scene>
+    
+    <!-- THUMBNAIL NAVIGATION -->
+    <div class="scene-thumbnails" id="scene-thumbnails"></div>
+    
+    <!-- NAVIGATION BUTTONS -->
+    <div class="nav-container">
+        <button id="prev-btn" class="nav-btn" title="Previous View (Left)">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <button id="next-btn" class="nav-btn" title="Next View (Right)">
+            <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+    
+    <script>
+        // =====================
+        // CONFIGURATION - 3 VIEWS: FRONT, LEFT, RIGHT
+        // =====================
+        const scenes = [
+            { 
+                id: "front", 
+                title: "Front View", 
+                description: "Main frontal view of the Battle of Quinga historical site",
+                icon: "fas fa-forward"
+            },
+            { 
+                id: "left", 
+                title: "Left View", 
+                description: "Panoramic view looking left from the central position",
+                icon: "fas fa-arrow-left"
+            },
+            { 
+                id: "right", 
+                title: "Right View", 
+                description: "Panoramic view looking right from the central position",
+                icon: "fas fa-arrow-right"
+            }
+        ];
+        
+        // =====================
+        // STATE MANAGEMENT
+        // =====================
+        let currentSceneIndex = 0;
+        let imagesLoaded = 0;
+        const totalImages = scenes.length; // 3 images
+        
+        // =====================
+        // DOM ELEMENTS
+        // =====================
+        const sky = document.getElementById('scene-sky');
+        const titleText = document.getElementById('scene-title-text');
+        const loadingScreen = document.getElementById('loading-screen');
+        const progressBar = document.getElementById('progress-bar');
+        const loadingText = document.getElementById('loading-text');
+        const sceneThumbnails = document.getElementById('scene-thumbnails');
+        const instructions = document.getElementById('instructions');
+        const viewIndicator = document.getElementById('view-indicator');
+        
+        // =====================
+        // INITIALIZATION
+        // =====================
+        document.addEventListener('DOMContentLoaded', function() {
+            preloadImages();
+            createThumbnails();
+            setupEventListeners();
+            updateNavigation();
+            updateViewIndicator();
+        });
+        
+        // =====================
+        // IMAGE PRELOADING
+        // =====================
+        function preloadImages() {
+            scenes.forEach((scene, index) => {
+                const img = new Image();
+                
+                img.onload = () => {
+                    imagesLoaded++;
+                    const progress = Math.round((imagesLoaded / totalImages) * 100);
+                    progressBar.style.width = `${progress}%`;
+                    loadingText.textContent = `Loading ${scene.title} (${imagesLoaded}/${totalImages})`;
+                    
+                    if (imagesLoaded === totalImages) {
+                        setTimeout(() => {
+                            loadingScreen.style.opacity = '0';
+                            setTimeout(() => {
+                                loadingScreen.style.display = 'none';
+                            }, 500);
+                        }, 500);
+                    }
+                };
+                
+                img.onerror = () => {
+                    console.error(`Failed to load: images/${scene.id}.jpg`);
+                    imagesLoaded++; // Count as loaded to continue
+                    if (imagesLoaded === totalImages) {
+                        loadingScreen.style.display = 'none';
+                    }
+                };
+                
+                // Load the images from the images folder
+                img.src = `images/${scene.id}.jpg`;
+            });
+        }
+        
+        // =====================
+        // THUMBNAIL CREATION
+        // =====================
+        function createThumbnails() {
+            scenes.forEach((scene, index) => {
+                const thumbnail = document.createElement('div');
+                thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
+                thumbnail.dataset.index = index;
+                thumbnail.title = scene.title;
+                
+                // Try to load thumbnail image
+                const thumbImg = new Image();
+                thumbImg.src = `images/${scene.id}.jpg`;
+                thumbImg.alt = scene.title;
+                
+                thumbnail.appendChild(thumbImg);
+                
+                thumbnail.addEventListener('click', () => {
+                    changeScene(index);
+                });
+                
+                sceneThumbnails.appendChild(thumbnail);
+            });
+        }
+        
+        // =====================
+        // SCENE MANAGEMENT
+        // =====================
+        function changeScene(index) {
+            if (index < 0 || index >= scenes.length) return;
+            
+            currentSceneIndex = index;
+            const scene = scenes[index];
+            
+            // Update sky/background image
+            sky.setAttribute('src', `#${scene.id}`);
+            
+            // Update title
+            titleText.textContent = scene.title;
+            
+            // Update thumbnails
+            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+            
+            // Update navigation buttons
+            updateNavigation();
+            
+            // Update view indicator
+            updateViewIndicator();
+            
+            // Log scene change
+            console.log(`View changed to: ${scene.title}`);
+        }
+        
+        function updateNavigation() {
+            document.getElementById('prev-btn').disabled = currentSceneIndex === 0;
+            document.getElementById('next-btn').disabled = currentSceneIndex === scenes.length - 1;
+        }
+        
+        function updateViewIndicator() {
+            const scene = scenes[currentSceneIndex];
+            const icon = document.querySelector('#view-indicator i');
+            icon.className = scene.icon;
+            document.querySelector('#view-indicator span').textContent = 
+                `${currentSceneIndex + 1}/3: ${scene.title}`;
+        }
+        
+        // =====================
+        // EVENT LISTENERS
+        // =====================
+        function setupEventListeners() {
+            // Navigation buttons
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                changeScene(currentSceneIndex - 1);
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', () => {
+                changeScene(currentSceneIndex + 1);
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
+                if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
+                if (e.key === 'Escape' && document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            });
+            
+            // Touch/swipe for mobile
+            let touchStartX = 0;
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > 50) { // Minimum swipe distance
+                    if (diff > 0) {
+                        // Swipe left - go to right view
+                        changeScene(currentSceneIndex + 1);
+                    } else {
+                        // Swipe right - go to left view
+                        changeScene(currentSceneIndex - 1);
+                    }
+                }
+            });
+            
+            // Fullscreen toggle
+            document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
+            
+            // Instructions toggle
+            document.getElementById('instructions-btn').addEventListener('click', () => {
+                instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
+            });
+            
+            // Close instructions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!instructions.contains(e.target) && 
+                    !document.getElementById('instructions-btn').contains(e.target) &&
+                    instructions.style.display === 'block') {
+                    instructions.style.display = 'none';
+                }
+            });
+            
+            // A-Frame scene loaded
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                console.log('A-Frame scene loaded successfully');
+            });
+        }
+        
+        // =====================
+        // FULLSCREEN FUNCTION
+        // =====================
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+                document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-compress"></i>';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-expand"></i>';
+                }
+            }
+        }
+        
+        // Handle fullscreen change
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-expand"></i>';
+            }
+        });
+        
+        // =====================
+        // AUTO-ROTATE (Optional - for presentations)
+        // =====================
+        // Uncomment if you want auto-rotation between the 3 views
+        /*
+        let autoRotateInterval;
+        
+        function startAutoRotate() {
+            autoRotateInterval = setInterval(() => {
+                if (currentSceneIndex < scenes.length - 1) {
+                    changeScene(currentSceneIndex + 1);
+                } else {
+                    changeScene(0);
+                }
+            }, 10000); // Change view every 10 seconds
+        }
+        
+        function stopAutoRotate() {
+            if (autoRotateInterval) {
+                clearInterval(autoRotateInterval);
+            }
+        }
+        
+        // Start auto-rotate after 30 seconds
+        setTimeout(startAutoRotate, 30000);
+        */
+        
+        // Initial scene update
+        changeScene(0);
+    </script>
+</body>
+</html>
