@@ -2,890 +2,709 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- Cache Prevention -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
-    <title>Hiyas ng Bulacan Museum - Virtual Tour</title>
-    
-    <!-- A-Frame -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebVR Projects Hub</title>
+    <!-- A-Frame for VR -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    
-    <!-- Enhanced Hotspot Component -->
-    <script>
-        AFRAME.registerComponent('nav-hotspot', {
-            schema: {
-                target: { type: 'string' },      // Target scene ID
-                label: { type: 'string' },       // Display label
-                icon: { type: 'string', default: 'arrow' }, // arrow, door, stairs, etc.
-                position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
-                rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
-            },
-            
-            init: function() {
-                const el = this.el;
-                const data = this.data;
-                
-                // Create container
-                el.setAttribute('position', data.position);
-                el.setAttribute('rotation', data.rotation);
-                el.classList.add('clickable');
-                el.setAttribute('data-hotspot', 'true');
-                
-                // Create outer ring (pulsing)
-                const ring = document.createElement('a-ring');
-                ring.setAttribute('radius-inner', '0.08');
-                ring.setAttribute('radius-outer', '0.12');
-                ring.setAttribute('color', '#FFD700');
-                ring.setAttribute('opacity', '0.6');
-                ring.setAttribute('shader', 'flat');
-                ring.setAttribute('animation', {
-                    property: 'scale',
-                    to: '1.2 1.2 1',
-                    dir: 'alternate',
-                    loop: true,
-                    dur: 1200,
-                    easing: 'easeInOutSine'
-                });
-                el.appendChild(ring);
-                
-                // Create inner circle (hover effect)
-                const circle = document.createElement('a-circle');
-                circle.setAttribute('radius', '0.06');
-                circle.setAttribute('color', '#FFFFFF');
-                circle.setAttribute('opacity', '0');
-                circle.setAttribute('shader', 'flat');
-                circle.setAttribute('class', 'hotspot-inner');
-                el.appendChild(circle);
-                
-                // Create icon based on type
-                const icon = this.createIcon(data.icon);
-                if (icon) {
-                    icon.setAttribute('position', '0 0 0.001');
-                    icon.setAttribute('scale', '0.04 0.04 1');
-                    el.appendChild(icon);
-                }
-                
-                // Create label
-                const label = document.createElement('a-entity');
-                label.setAttribute('text', {
-                    value: data.label,
-                    align: 'center',
-                    color: '#FFFFFF',
-                    width: 0.6,
-                    font: 'roboto',
-                    baseline: 'center'
-                });
-                label.setAttribute('position', '0 0.2 0');
-                label.setAttribute('visible', 'false');
-                label.setAttribute('class', 'hotspot-label');
-                el.appendChild(label);
-                
-                // HOVER EFFECTS
-                el.addEventListener('mouseenter', () => {
-                    // Highlight inner circle
-                    circle.setAttribute('opacity', '0.8');
-                    circle.setAttribute('animation', {
-                        property: 'scale',
-                        to: '1.3 1.3 1',
-                        dur: 200,
-                        easing: 'easeOutQuad'
-                    });
-                    
-                    // Show label
-                    label.setAttribute('visible', 'true');
-                    label.setAttribute('animation', {
-                        property: 'scale',
-                        from: '0.8 0.8 1',
-                        to: '1 1 1',
-                        dur: 300,
-                        easing: 'easeOutBack'
-                    });
-                });
-                
-                el.addEventListener('mouseleave', () => {
-                    // Remove highlight
-                    circle.setAttribute('opacity', '0');
-                    circle.setAttribute('scale', '1 1 1');
-                    circle.removeAttribute('animation');
-                    
-                    // Hide label
-                    label.setAttribute('visible', 'false');
-                });
-                
-                // CLICK/TAP EVENT
-                el.addEventListener('click', () => {
-                    // Click feedback
-                    circle.setAttribute('color', '#4CAF50');
-                    circle.setAttribute('opacity', '0.9');
-                    
-                    setTimeout(() => {
-                        circle.setAttribute('color', '#FFFFFF');
-                        circle.setAttribute('opacity', '0');
-                        
-                        // Navigate to target scene
-                        const scenes = window.sceneList;
-                        const targetIndex = scenes.findIndex(s => s.id === data.target);
-                        if (targetIndex !== -1) {
-                            window.changeScene(targetIndex);
-                        }
-                    }, 300);
-                });
-            },
-            
-            createIcon: function(iconType) {
-                const iconMap = {
-                    'arrow': 'M-0.5,-0.5 L0.5,0 L-0.5,0.5 Z',
-                    'door': 'M-0.4,-0.5 L0.4,-0.5 L0.4,0.5 L-0.4,0.5 Z M-0.2,-0.3 L0.2,-0.3 L0.2,0.3 L-0.2,0.3 Z',
-                    'stairs': 'M-0.4,0.5 L0.4,0.5 L0.4,0.3 L-0.4,0.3 L-0.4,0.1 L0.4,0.1 L0.4,-0.1 L-0.4,-0.1 L-0.4,-0.3 L0.4,-0.3 L0.4,-0.5 L-0.4,-0.5 Z',
-                    'up': 'M-0.3,0.3 L0,0 L0.3,0.3 M0,-0.5 L0,0',
-                    'down': 'M-0.3,-0.3 L0,0 L0.3,-0.3 M0,0.5 L0,0',
-                    'left': 'M0.3,-0.5 L0,0 L0.3,0.5 M-0.3,0 L0,0',
-                    'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0'
-                };
-                
-                if (iconMap[iconType]) {
-                    const path = document.createElement('a-entity');
-                    path.setAttribute('geometry', {
-                        primitive: 'path',
-                        path: iconMap[iconType]
-                    });
-                    path.setAttribute('material', 'color: #000000; shader: flat');
-                    path.setAttribute('rotation', iconType === 'up' || iconType === 'down' ? '0 0 0' : '0 0 90');
-                    return path;
-                }
-                return null;
-            }
-        });
-    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* RESET & BASE */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden; 
-            background: #000;
-            -webkit-tap-highlight-color: transparent;
+        /* 2D Styles for non-VR users */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        /* LOADING */
-        #loading {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #1a1a2e;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: white;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s;
+            justify-content: center;
+            padding: 20px;
         }
         
-        .loader {
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(255, 215, 0, 0.2);
-            border-top: 3px solid #FFD700;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            font-size: 14px;
-            color: #aaa;
-            margin-top: 10px;
-        }
-        
-        /* SCENE INFO */
-        #scene-info {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 500;
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            text-align: center;
             z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
+            position: relative;
+        }
+        
+        .header {
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #FF6B6B, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+        
+        .vr-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: inline-flex;
             align-items: center;
             gap: 10px;
-            min-width: 180px;
-            justify-content: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
         
-        #scene-info i {
-            color: #FFD700;
-            font-size: 16px;
+        .vr-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
         
-        /* NAVIGATION CONTROLS */
-        .controls {
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 107, 107, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .project-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        
+        .battle-icon {
+            color: #FF6B6B;
+        }
+        
+        .museum-icon {
+            color: #4ECDC4;
+        }
+        
+        .project-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .project-card p {
+            color: #ccc;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(90deg, #FF6B6B, #FF8E53);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .btn-museum {
+            background: linear-gradient(90deg, #4ECDC4, #06D6A0);
+        }
+        
+        .btn-museum:hover {
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 4px solid #FF6B6B;
+        }
+        
+        .instructions h4 {
+            margin-bottom: 10px;
+            color: #FF6B6B;
+        }
+        
+        .instructions p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        /* VR Scene Container */
+        #vr-scene-container {
             position: fixed;
-            bottom: 20px;
+            top: 0;
             left: 0;
             width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
-            pointer-events: none;
-        }
-        
-        .controls button {
-            pointer-events: auto;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .controls button:hover:not(:disabled) {
-            background: rgba(26, 26, 46, 0.95);
-            transform: scale(1.1);
-        }
-        
-        .controls button:active {
-            transform: scale(0.95);
-        }
-        
-        .controls button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        /* SCENE SELECTOR */
-        .scene-selector {
-            position: fixed;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 12px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .scene-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .scene-dot.active {
-            background: #FFD700;
-            transform: scale(1.3);
-        }
-        
-        .scene-dot:hover {
-            background: rgba(255, 215, 0, 0.7);
-            transform: scale(1.2);
-        }
-        
-        /* INSTRUCTIONS */
-        #instructions {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 12px;
-            max-width: 200px;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: 100%;
+            z-index: 999;
             display: none;
         }
         
-        #instructions h3 {
-            color: #FFD700;
-            margin-bottom: 10px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .instructions-btn {
+        /* Loading Screen for VR */
+        .vr-loading {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 2000;
+            display: none;
         }
         
-        /* MOBILE OPTIMIZATION */
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            #scene-info {
-                top: 15px;
-                font-size: 13px;
-                padding: 8px 16px;
-                min-width: 160px;
+            .header h1 {
+                font-size: 2rem;
             }
             
-            .controls {
-                bottom: 15px;
-                padding: 0 15px;
+            .projects-grid {
+                grid-template-columns: 1fr;
             }
             
-            .controls button {
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
-            }
-            
-            .scene-selector {
-                bottom: 80px;
-            }
-            
-            .scene-dot {
-                width: 8px;
-                height: 8px;
+            .project-card {
+                padding: 20px;
             }
         }
         
-        /* CURSOR STYLING */
-        a-cursor {
+        /* Stats for VR */
+        #vr-stats {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            z-index: 1001;
+            display: none;
+        }
+        
+        /* Exit VR Button */
+        .exit-vr-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
             cursor: pointer;
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
         }
     </style>
 </head>
 <body>
-    <!-- LOADING -->
-    <div id="loading">
-        <div class="loader"></div>
-        <div class="loading-text">Loading Museum Tour...</div>
+    <!-- 2D Interface -->
+    <div class="container" id="2d-interface">
+        <div class="header">
+            <h1><i class="fas fa-vr-cardboard"></i> WebVR Projects Hub</h1>
+            <p>Immersive Virtual Reality Experiences</p>
+            
+            <button class="vr-toggle" id="enter-vr-btn">
+                <i class="fas fa-vr-cardboard"></i>
+                Enter VR Mode
+            </button>
+            
+            <p style="color: #888; font-size: 0.9rem; margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> VR mode works best with VR headsets or on mobile devices
+            </p>
+        </div>
+        
+        <div class="projects-grid">
+            <!-- Battle of Quinga Card -->
+            <div class="project-card">
+                <div class="project-icon battle-icon">
+                    <i class="fas fa-fort"></i>
+                </div>
+                <h3>⚔️ Battle of Quinga</h3>
+                <p>Immerse yourself in the historical Battle of Quinga site with 360° panoramic views. Experience Philippine history in virtual reality.</p>
+                <button class="btn" onclick="enterProject('battle-of-quinga')">
+                    <i class="fas fa-play"></i> Launch in VR
+                </button>
+                <p style="margin-top: 15px; font-size: 0.9rem; color: #888;">
+                    <i class="fas fa-clock"></i> 3 Panoramic Views
+                </p>
+            </div>
+            
+            <!-- Bulacan Museum Card -->
+            <div class="project-card">
+                <div class="project-icon museum-icon">
+                    <i class="fas fa-landmark"></i>
+                </div>
+                <h3>🏛️ Hiyas ng Bulacan Museum</h3>
+                <p>Explore the virtual museum tour with 7 exhibition rooms. Navigate through cultural artifacts and historical displays.</p>
+                <button class="btn btn-museum" onclick="enterProject('bulacan-museum')">
+                    <i class="fas fa-play"></i> Launch in VR
+                </button>
+                <p style="margin-top: 15px; font-size: 0.9rem; color: #888;">
+                    <i class="fas fa-clock"></i> 7 Exhibition Rooms
+                </p>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h4><i class="fas fa-info-circle"></i> How to Use</h4>
+            <p>
+                • <strong>Desktop:</strong> Click "Enter VR Mode" for immersive view, or click project buttons directly<br>
+                • <strong>Mobile:</strong> Tap project buttons, or use VR mode for gyroscopic controls<br>
+                • <strong>VR Headsets:</strong> Connect your headset and enter VR mode
+            </p>
+        </div>
     </div>
     
-    <!-- SCENE INFO -->
-    <div id="scene-info">
-        <i>📍</i>
-        <span id="scene-title">Entrance</span>
+    <!-- VR Loading Screen -->
+    <div class="vr-loading" id="vr-loading">
+        <div style="text-align: center;">
+            <div style="font-size: 3rem; color: #FF6B6B; margin-bottom: 20px;">
+                <i class="fas fa-spinner fa-spin"></i>
+            </div>
+            <h2 style="color: white; margin-bottom: 10px;">Loading VR Experience</h2>
+            <p style="color: #aaa;" id="vr-loading-text">Preparing immersive environment...</p>
+        </div>
     </div>
     
-    <!-- INSTRUCTIONS BUTTON -->
-    <button class="instructions-btn" id="instructions-btn" title="Instructions">?</button>
-    
-    <!-- INSTRUCTIONS PANEL -->
-    <div id="instructions">
-        <h3>🗺️ Navigation Guide</h3>
-        <p>• <b>Look around:</b> Drag or move device</p>
-        <p>• <b>Navigate:</b> Click golden markers</p>
-        <p>• <b>Hover:</b> See destination names</p>
-        <p>• <b>Change scene:</b> Use buttons or dots</p>
+    <!-- VR Scene Container -->
+    <div id="vr-scene-container">
+        <a-scene embedded>
+            <!-- Assets -->
+            <a-assets>
+                <!-- Menu background (space scene) -->
+                <img id="space-bg" src="https://cdn.aframe.io/link-traversal/imgs/space.jpg" crossorigin="anonymous">
+                
+                <!-- Project icons -->
+                <a-asset-item id="fort-obj" src="https://cdn.aframe.io/test-models/models/glTF-2.0/virtualcity/VC.gltf"></a-asset-item>
+            </a-assets>
+            
+            <!-- Sky -->
+            <a-sky src="#space-bg" rotation="0 -90 0"></a-sky>
+            
+            <!-- Center platform -->
+            <a-cylinder position="0 -1.5 0" radius="5" height="0.1" color="#333" metalness="0.5" roughness="0.5"></a-cylinder>
+            
+            <!-- Title -->
+            <a-text value="WebVR Projects Hub" 
+                   position="0 3 -4" 
+                   align="center" 
+                   color="#FF6B6B" 
+                   width="10"
+                   font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"></a-text>
+            
+            <!-- Project Selection Buttons -->
+            
+            <!-- Battle of Quinga Button -->
+            <a-entity class="vr-menu-button" id="battle-btn" position="-2 0.5 -3" data-project="battle-of-quinga">
+                <!-- Button base -->
+                <a-cylinder radius="0.8" height="0.1" color="#FF6B6B" metalness="0.3" roughness="0.7"></a-cylinder>
+                
+                <!-- Icon -->
+                <a-entity position="0 0.3 0">
+                    <a-text value="⚔️" 
+                           align="center" 
+                           width="2" 
+                           position="0 0 0.1"
+                           scale="2 2 2"></a-text>
+                </a-entity>
+                
+                <!-- Label -->
+                <a-text value="Battle of Quinga" 
+                       position="0 -0.8 0" 
+                       align="center" 
+                       color="white" 
+                       width="3"></a-text>
+                
+                <!-- Hover effect -->
+                <a-animation attribute="position"
+                            from="-2 0.5 -3"
+                            to="-2 0.8 -3"
+                            dur="1000"
+                            direction="alternate"
+                            repeat="indefinite"></a-animation>
+            </a-entity>
+            
+            <!-- Bulacan Museum Button -->
+            <a-entity class="vr-menu-button" id="museum-btn" position="2 0.5 -3" data-project="bulacan-museum">
+                <!-- Button base -->
+                <a-cylinder radius="0.8" height="0.1" color="#4ECDC4" metalness="0.3" roughness="0.7"></a-cylinder>
+                
+                <!-- Icon -->
+                <a-entity position="0 0.3 0">
+                    <a-text value="🏛️" 
+                           align="center" 
+                           width="2" 
+                           position="0 0 0.1"
+                           scale="2 2 2"></a-text>
+                </a-entity>
+                
+                <!-- Label -->
+                <a-text value="Bulacan Museum" 
+                       position="0 -0.8 0" 
+                       align="center" 
+                       color="white" 
+                       width="3"></a-text>
+                
+                <!-- Hover effect -->
+                <a-animation attribute="position"
+                            from="2 0.5 -3"
+                            to="2 0.8 -3"
+                            dur="1000"
+                            direction="alternate"
+                            repeat="indefinite"></a-animation>
+            </a-entity>
+            
+            <!-- Instructions -->
+            <a-text value="Look at a project and click to select" 
+                   position="0 -2 -4" 
+                   align="center" 
+                   color="#aaa" 
+                   width="6"></a-text>
+            
+            <!-- Camera -->
+            <a-entity camera look-controls="pointerLockEnabled: true" position="0 1.6 0">
+                <a-cursor></a-cursor>
+            </a-entity>
+            
+            <!-- Lights -->
+            <a-light type="ambient" color="#445"></a-light>
+            <a-light type="point" intensity="0.8" position="5 5 5"></a-light>
+            <a-light type="point" intensity="0.5" position="-5 3 -5"></a-light>
+        </a-scene>
     </div>
     
-    <!-- A-FRAME SCENE -->
-    <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
-        <!-- ASSETS -->
-        <a-assets timeout="30000">
-            <img id="entrance" src="images/entrance.jpg" crossorigin="anonymous">
-            <img id="mainhall" src="images/mainhall.jpg" crossorigin="anonymous">
-            <img id="left" src="images/left.jpg" crossorigin="anonymous">
-            <img id="lower_right" src="images/lower_right.jpg" crossorigin="anonymous">
-            <img id="upper_right" src="images/upper_right.jpg" crossorigin="anonymous">
-            <img id="mid_left" src="images/mid_left.jpg" crossorigin="anonymous">
-            <!-- Note: We need lower_left and upper_left images if they exist -->
-            <img id="lower_left" src="images/lower_left.jpg" crossorigin="anonymous">
-            <img id="upper_left" src="images/upper_left.jpg" crossorigin="anonymous">
-        </a-assets>
-        
-        <!-- SKY -->
-        <a-sky id="scene-sky" src="#entrance"></a-sky>
-        
-        <!-- CAMERA WITH CURSOR -->
-        <a-entity camera look-controls="pointerLockEnabled: true">
-            <a-cursor 
-                id="cursor"
-                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
-                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
-                animation__mouseleave="property: scale; startEvents: mouseleave; from: 0.1 0.1 0.1; to: 1 1 1; dur: 500"
-                fuse="true"
-                fuse-timeout="500">
-            </a-cursor>
-        </a-entity>
-        
-        <!-- ======================= -->
-        <!-- CORRECTED NAVIGATION MAP -->
-        <!-- ======================= -->
-        
-        <!-- ENTRANCE (connects to: mainhall, lower_right, lower_left) -->
-        <a-entity id="entrance-hotspots">
-            <!-- To Main Hall (straight ahead) -->
-            <a-entity nav-hotspot="
-                target: mainhall;
-                label: Main Hall;
-                icon: door;
-                position: 0 0 -4;
-                rotation: 0 0 0">
-            </a-entity>
-            
-            <!-- To Lower Right (right side) -->
-            <a-entity nav-hotspot="
-                target: lower_right;
-                label: Lower Right Wing;
-                icon: right;
-                position: 2 0 -3;
-                rotation: 0 -30 0">
-            </a-entity>
-            
-            <!-- To Lower Left (left side) -->
-            <a-entity nav-hotspot="
-                target: left;
-                label: Lower Left Wing;
-                icon: left;
-                position: -2 0 -3;
-                rotation: 0 30 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- MAIN HALL (connects to: entrance only) -->
-        <a-entity id="mainhall-hotspots" visible="false">
-            <!-- Back to Entrance -->
-            <a-entity nav-hotspot="
-                target: entrance;
-                label: Back to Entrance;
-                icon: arrow;
-                position: 0 0 3;
-                rotation: 0 180 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- LEFT / LOWER LEFT (connects to: mid_left, entrance) -->
-        <a-entity id="left-hotspots" visible="false">
-            <!-- To Mid Left (forward) -->
-            <a-entity nav-hotspot="
-                target: mid_left;
-                label: Continue Forward;
-                icon: arrow;
-                position: 0 0 -3.5;
-                rotation: 0 0 0">
-            </a-entity>
-            
-            <!-- Back to Entrance -->
-            <a-entity nav-hotspot="
-                target: entrance;
-                label: Back to Entrance;
-                icon: arrow;
-                position: 0 0 3;
-                rotation: 0 180 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- MID LEFT (connects to: left, upper_left) -->
-        <a-entity id="mid_left-hotspots" visible="false">
-            <!-- Back to Left -->
-            <a-entity nav-hotspot="
-                target: left;
-                label: Back to Left Wing;
-                icon: arrow;
-                position: 0 0 3;
-                rotation: 0 180 0">
-            </a-entity>
-            
-            <!-- To Upper Left (upstairs) -->
-            <a-entity nav-hotspot="
-                target: upper_left;
-                label: Go Upstairs;
-                icon: stairs;
-                position: 0 1.8 -2.5;
-                rotation: -25 0 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- UPPER LEFT (connects to: mid_left, upper_right) -->
-        <a-entity id="upper_left-hotspots" visible="false">
-            <!-- Back to Mid Left (downstairs) -->
-            <a-entity nav-hotspot="
-                target: mid_left;
-                label: Go Downstairs;
-                icon: stairs;
-                position: 0 -1.5 -2.5;
-                rotation: 25 0 0">
-            </a-entity>
-            
-            <!-- To Upper Right (right side) -->
-            <a-entity nav-hotspot="
-                target: upper_right;
-                label: Upper Right Wing;
-                icon: right;
-                position: 2 0 -3;
-                rotation: 0 -30 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- UPPER RIGHT (connects to: upper_left, lower_right) -->
-        <a-entity id="upper_right-hotspots" visible="false">
-            <!-- Back to Upper Left (left side) -->
-            <a-entity nav-hotspot="
-                target: upper_left;
-                label: Upper Left Wing;
-                icon: left;
-                position: -2 0 -3;
-                rotation: 0 30 0">
-            </a-entity>
-            
-            <!-- To Lower Right (downstairs) -->
-            <a-entity nav-hotspot="
-                target: lower_right;
-                label: Go Downstairs;
-                icon: stairs;
-                position: 0 -1.5 -2.5;
-                rotation: 25 0 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- LOWER RIGHT (connects to: entrance, upper_right) -->
-        <a-entity id="lower_right-hotspots" visible="false">
-            <!-- Back to Entrance -->
-            <a-entity nav-hotspot="
-                target: entrance;
-                label: Back to Entrance;
-                icon: arrow;
-                position: 0 0 3;
-                rotation: 0 180 0">
-            </a-entity>
-            
-            <!-- To Upper Right (upstairs) -->
-            <a-entity nav-hotspot="
-                target: upper_right;
-                label: Go Upstairs;
-                icon: stairs;
-                position: 0 1.8 -2.5;
-                rotation: -25 0 0">
-            </a-entity>
-        </a-entity>
-    </a-scene>
+    <!-- Exit VR Button -->
+    <button class="exit-vr-btn" id="exit-vr-btn" onclick="exitVRMode()">
+        <i class="fas fa-times"></i> Exit VR Mode
+    </button>
     
-    <!-- SCENE SELECTOR DOTS -->
-    <div class="scene-selector" id="scene-selector"></div>
-    
-    <!-- NAVIGATION CONTROLS -->
-    <div class="controls">
-        <button id="prev-btn" title="Previous Scene">←</button>
-        <button id="next-btn" title="Next Scene">→</button>
+    <!-- VR Stats -->
+    <div id="vr-stats">
+        <div>VR Mode Active</div>
+        <div id="vr-fps">FPS: --</div>
     </div>
-    
+
     <script>
         // =====================
-        // CORRECTED SCENE CONFIGURATION
+        // STATE MANAGEMENT
         // =====================
-        const scenes = [
-            { id: "entrance", title: "Entrance" },
-            { id: "mainhall", title: "Main Hall" },
-            { id: "left", title: "Lower Left Wing" }, // This is lower_left
-            { id: "lower_right", title: "Lower Right Wing" },
-            { id: "mid_left", title: "Mid Left Section" },
-            { id: "upper_left", title: "Upper Left Wing" },
-            { id: "upper_right", title: "Upper Right Wing" }
-        ];
-        
-        window.sceneList = scenes;
-        
-        // =====================
-        // NAVIGATION MAP
-        // =====================
-        const navigationMap = {
-            // From Entrance: mainhall, lower_right, lower_left
-            "entrance": ["mainhall", "lower_right", "left"],
-            
-            // From Main Hall: entrance only
-            "mainhall": ["entrance"],
-            
-            // From Left (lower_left): mid_left, entrance
-            "left": ["mid_left", "entrance"],
-            
-            // From Mid Left: left, upper_left
-            "mid_left": ["left", "upper_left"],
-            
-            // From Upper Left: mid_left, upper_right
-            "upper_left": ["mid_left", "upper_right"],
-            
-            // From Upper Right: upper_left, lower_right
-            "upper_right": ["upper_left", "lower_right"],
-            
-            // From Lower Right: entrance, upper_right
-            "lower_right": ["entrance", "upper_right"]
-        };
-        
-        // =====================
-        // STATE
-        // =====================
-        let currentSceneIndex = 0;
-        let imagesLoaded = 0;
-        const totalImages = scenes.length;
+        let isVRModeActive = false;
+        let currentProject = null;
         
         // =====================
         // DOM ELEMENTS
         // =====================
-        const sky = document.getElementById('scene-sky');
-        const sceneTitle = document.getElementById('scene-title');
-        const loading = document.getElementById('loading');
-        const sceneSelector = document.getElementById('scene-selector');
-        const instructions = document.getElementById('instructions');
-        
-        // =====================
-        // INITIALIZATION
-        // =====================
-        document.addEventListener('DOMContentLoaded', function() {
-            preloadImages();
-            createSceneDots();
-            setupEventListeners();
-            setupAframeEvents();
-        });
-        
-        // =====================
-        // IMAGE PRELOADING
-        // =====================
-        function preloadImages() {
-            scenes.forEach(scene => {
-                const img = new Image();
-                img.onload = () => {
-                    imagesLoaded++;
-                    if (imagesLoaded === totalImages) {
-                        setTimeout(() => {
-                            loading.style.opacity = '0';
-                            setTimeout(() => {
-                                loading.style.display = 'none';
-                            }, 500);
-                        }, 500);
-                    }
-                };
-                img.onerror = (e) => {
-                    console.warn(`Image not found: ${scene.id}.jpg, using fallback`);
-                    imagesLoaded++; // Count anyway
-                    
-                    // If this is lower_left or upper_left, they might not exist
-                    // Use left.jpg as fallback for lower_left
-                    if (scene.id === "lower_left" || scene.id === "upper_left") {
-                        console.log(`Using 'left.jpg' as fallback for ${scene.id}`);
-                    }
-                };
-                img.src = `images/${scene.id}.jpg`;
-            });
-        }
-        
-        // =====================
-        // SCENE DOTS
-        // =====================
-        function createSceneDots() {
-            scenes.forEach((scene, index) => {
-                const dot = document.createElement('div');
-                dot.className = `scene-dot ${index === 0 ? 'active' : ''}`;
-                dot.dataset.index = index;
-                dot.title = scene.title;
-                
-                dot.addEventListener('click', () => {
-                    changeScene(index);
-                });
-                
-                sceneSelector.appendChild(dot);
-            });
-        }
-        
-        // =====================
-        // SCENE MANAGEMENT
-        // =====================
-        window.changeScene = function(index) {
-            if (index < 0 || index >= scenes.length) return;
-            
-            currentSceneIndex = index;
-            const scene = scenes[index];
-            
-            // Try to load scene image, fallback if needed
-            const sceneId = scene.id;
-            let imageSrc = `#${sceneId}`;
-            
-            // Check if image exists, if not use fallback
-            const imgElement = document.getElementById(sceneId);
-            if (!imgElement || imgElement.naturalWidth === 0) {
-                // For lower_left or upper_left, use left.jpg as fallback
-                if (sceneId === "lower_left" || sceneId === "upper_left") {
-                    imageSrc = "#left";
-                    console.log(`Using fallback image for ${sceneId}`);
-                }
-            }
-            
-            // Update sky
-            sky.setAttribute('src', imageSrc);
-            
-            // Update title
-            sceneTitle.textContent = scene.title;
-            
-            // Update scene dots
-            document.querySelectorAll('.scene-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-            
-            // Show/hide hotspots based on navigation map
-            updateHotspots(scene.id);
-            
-            // Update navigation buttons
-            updateNavigation();
-            
-            console.log(`Navigated to: ${scene.title}`);
-        };
-        
-        function updateHotspots(sceneId) {
-            // Hide all hotspot groups
-            const hotspotGroups = [
-                'entrance-hotspots',
-                'mainhall-hotspots',
-                'left-hotspots',
-                'lower_right-hotspots',
-                'mid_left-hotspots',
-                'upper_left-hotspots',
-                'upper_right-hotspots'
-            ];
-            
-            hotspotGroups.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.setAttribute('visible', 'false');
-            });
-            
-            // Show current scene hotspots
-            const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
-            if (currentHotspots) {
-                setTimeout(() => {
-                    currentHotspots.setAttribute('visible', 'true');
-                }, 300);
-            }
-        }
-        
-        function updateNavigation() {
-            document.getElementById('prev-btn').disabled = currentSceneIndex === 0;
-            document.getElementById('next-btn').disabled = currentSceneIndex === scenes.length - 1;
-        }
+        const vrSceneContainer = document.getElementById('vr-scene-container');
+        const vrLoading = document.getElementById('vr-loading');
+        const vrLoadingText = document.getElementById('vr-loading-text');
+        const enterVRBtn = document.getElementById('enter-vr-btn');
+        const exitVRBtn = document.getElementById('exit-vr-btn');
+        const vrStats = document.getElementById('vr-stats');
+        const interface2D = document.getElementById('2d-interface');
+        const fpsDisplay = document.getElementById('vr-fps');
         
         // =====================
         // EVENT LISTENERS
         // =====================
-        function setupEventListeners() {
-            // Navigation buttons
-            document.getElementById('prev-btn').addEventListener('click', () => {
-                changeScene(currentSceneIndex - 1);
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enter VR Mode button
+            enterVRBtn.addEventListener('click', enterVRMode);
             
-            document.getElementById('next-btn').addEventListener('click', () => {
-                changeScene(currentSceneIndex + 1);
-            });
+            // VR Project selection in 3D scene
+            setupVRSceneInteractions();
             
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
-                if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
-                if (e.key === 'Escape') {
-                    instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
-                }
-            });
+            // Check for VR capabilities
+            checkVRSupport();
+        });
+        
+        // =====================
+        // VR SUPPORT CHECK
+        // =====================
+        function checkVRSupport() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const hasWebVR = navigator.getVRDisplays || navigator.xr;
             
-            // Instructions toggle
-            document.getElementById('instructions-btn').addEventListener('click', () => {
-                instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
-            });
+            let supportMessage = "";
             
-            // Close instructions when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!instructions.contains(e.target) && 
-                    !document.getElementById('instructions-btn').contains(e.target) &&
-                    instructions.style.display === 'block') {
-                    instructions.style.display = 'none';
-                }
-            });
+            if (hasWebVR) {
+                supportMessage = "✓ Full VR support detected";
+                enterVRBtn.innerHTML = '<i class="fas fa-vr-cardboard"></i> Enter VR Mode (Headset Ready)';
+            } else if (isMobile) {
+                supportMessage = "✓ Mobile VR ready (gyroscopic controls)";
+                enterVRBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Enter VR Mode (Mobile)';
+            } else {
+                supportMessage = "⚠ Desktop VR mode (mouse controls only)";
+                enterVRBtn.innerHTML = '<i class="fas fa-desktop"></i> Enter VR Mode (Desktop)';
+            }
             
-            // Mobile swipe
-            let touchStartX = 0;
-            document.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-            });
+            console.log("VR Support:", supportMessage);
+        }
+        
+        // =====================
+        // VR MODE FUNCTIONS
+        // =====================
+        function enterVRMode() {
+            console.log("Entering VR Mode...");
             
-            document.addEventListener('touchend', (e) => {
-                const touchEndX = e.changedTouches[0].clientX;
-                const diff = touchStartX - touchEndX;
+            // Show loading screen
+            vrLoading.style.display = 'flex';
+            vrLoadingText.textContent = 'Loading VR environment...';
+            
+            // Hide 2D interface
+            interface2D.style.display = 'none';
+            
+            // Show VR scene after a short delay
+            setTimeout(() => {
+                vrLoading.style.display = 'none';
+                vrSceneContainer.style.display = 'block';
+                exitVRBtn.style.display = 'flex';
+                vrStats.style.display = 'block';
                 
-                if (Math.abs(diff) > 60) {
-                    if (diff > 0) {
-                        changeScene(currentSceneIndex + 1);
-                    } else {
-                        changeScene(currentSceneIndex - 1);
-                    }
+                isVRModeActive = true;
+                
+                // Start FPS monitoring
+                startFPSMonitoring();
+                
+                console.log("VR Mode activated");
+            }, 1500);
+        }
+        
+        function exitVRMode() {
+            console.log("Exiting VR Mode...");
+            
+            // Hide VR scene
+            vrSceneContainer.style.display = 'none';
+            exitVRBtn.style.display = 'none';
+            vrStats.style.display = 'none';
+            
+            // Show 2D interface
+            interface2D.style.display = 'block';
+            
+            isVRModeActive = false;
+            
+            console.log("VR Mode deactivated");
+        }
+        
+        // =====================
+        // PROJECT NAVIGATION
+        // =====================
+        function enterProject(projectName) {
+            console.log(`Launching project: ${projectName}`);
+            
+            // Show loading
+            vrLoading.style.display = 'flex';
+            vrLoadingText.textContent = `Loading ${projectName}...`;
+            
+            // Simulate loading time
+            setTimeout(() => {
+                // Redirect to the actual project
+                if (projectName === 'battle-of-quinga') {
+                    window.location.href = 'battle-of-quinga/index.html';
+                } else if (projectName === 'bulacan-museum') {
+                    window.location.href = 'hiyas-ng-bulacan-museum/index.html';
+                }
+            }, 2000);
+        }
+        
+        // =====================
+        // VR SCENE INTERACTIONS
+        // =====================
+        function setupVRSceneInteractions() {
+            // This will be called when A-Frame scene is loaded
+            document.querySelector('a-scene').addEventListener('loaded', function() {
+                console.log("VR scene loaded");
+                
+                // Get all VR menu buttons
+                const vrButtons = document.querySelectorAll('.vr-menu-button');
+                
+                vrButtons.forEach(button => {
+                    // Add click event
+                    button.addEventListener('click', function() {
+                        const project = this.getAttribute('data-project');
+                        
+                        // Visual feedback
+                        this.setAttribute('animation', {
+                            property: 'scale',
+                            to: '1.2 1.2 1.2',
+                            dur: 200,
+                            easing: 'easeOutElastic'
+                        });
+                        
+                        // Launch project after animation
+                        setTimeout(() => {
+                            enterProject(project);
+                        }, 300);
+                    });
+                    
+                    // Add hover effect
+                    button.addEventListener('mouseenter', function() {
+                        this.setAttribute('animation', {
+                            property: 'scale',
+                            to: '1.1 1.1 1.1',
+                            dur: 300
+                        });
+                    });
+                    
+                    button.addEventListener('mouseleave', function() {
+                        this.setAttribute('animation', {
+                            property: 'scale',
+                            to: '1 1 1',
+                            dur: 300
+                        });
+                    });
+                });
+                
+                // Add gaze controls for VR headsets
+                const cursor = document.querySelector('a-cursor');
+                if (cursor) {
+                    cursor.addEventListener('click', function(evt) {
+                        const target = evt.detail.intersectedEl;
+                        if (target && target.classList.contains('vr-menu-button')) {
+                            const project = target.getAttribute('data-project');
+                            enterProject(project);
+                        }
+                    });
                 }
             });
         }
         
         // =====================
-        // A-FRAME EVENTS
+        // PERFORMANCE MONITORING
         // =====================
-        function setupAframeEvents() {
-            const scene = document.querySelector('a-scene');
+        function startFPSMonitoring() {
+            let frameCount = 0;
+            let lastTime = performance.now();
             
-            scene.addEventListener('loaded', () => {
-                console.log('A-Frame scene fully loaded');
-            });
-            
-            // Improve cursor interaction
-            const cursor = document.getElementById('cursor');
-            if (cursor) {
-                cursor.addEventListener('mouseenter', (e) => {
-                    if (e.target.hasAttribute('data-hotspot')) {
-                        cursor.setAttribute('color', '#FFD700');
-                    }
-                });
+            function updateFPS() {
+                frameCount++;
+                const currentTime = performance.now();
                 
-                cursor.addEventListener('mouseleave', () => {
-                    cursor.setAttribute('color', '#FFF');
-                });
+                if (currentTime >= lastTime + 1000) {
+                    const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                    fpsDisplay.textContent = `FPS: ${fps}`;
+                    
+                    frameCount = 0;
+                    lastTime = currentTime;
+                }
+                
+                if (isVRModeActive) {
+                    requestAnimationFrame(updateFPS);
+                }
+            }
+            
+            updateFPS();
+        }
+        
+        // =====================
+        // KEYBOARD SHORTCUTS
+        // =====================
+        document.addEventListener('keydown', function(e) {
+            // Escape to exit VR
+            if (e.key === 'Escape' && isVRModeActive) {
+                exitVRMode();
+            }
+            
+            // V to toggle VR mode
+            if (e.key === 'v' || e.key === 'V') {
+                if (!isVRModeActive) {
+                    enterVRMode();
+                } else {
+                    exitVRMode();
+                }
+            }
+            
+            // 1 for Battle of Quinga
+            if (e.key === '1') {
+                enterProject('battle-of-quinga');
+            }
+            
+            // 2 for Bulacan Museum
+            if (e.key === '2') {
+                enterProject('bulacan-museum');
+            }
+        });
+        
+        // =====================
+        // MOBILE ORIENTATION
+        // =====================
+        if (window.DeviceOrientationEvent) {
+            window.addEventListener('deviceorientation', function(event) {
+                // Could use this for mobile-specific VR enhancements
+            });
+        }
+        
+        // =====================
+        // FULLSCREEN SUPPORT
+        // =====================
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
             }
         }
         
-        // Initial scene
-        changeScene(0);
+        // Auto-detect and suggest VR if on mobile
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            setTimeout(() => {
+                if (!isVRModeActive) {
+                    console.log("Mobile device detected - suggesting VR mode");
+                    // Optional: Show a popup suggesting VR mode
+                }
+            }, 3000);
+        }
     </script>
 </body>
 </html>
