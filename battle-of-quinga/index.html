@@ -6,8 +6,6 @@
     <title>Battle of Quinga - VR Tour</title>
     <!-- A-Frame from CDN -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- A-Frame Extras for Animation -->
-    <script src="https://cdn.jsdelivr.net/npm/aframe-animation-component@5.1.2/dist/aframe-animation-component.min.js"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -306,7 +304,7 @@
             }
         }
         
-        /* HOTSPOT COUNTER (removed date/location) */
+        /* HOTSPOT COUNTER */
         .hotspot-counter {
             position: fixed;
             bottom: 180px;
@@ -343,6 +341,11 @@
         
         .view-indicator i {
             color: #4ECDC4;
+        }
+        
+        /* CURSOR STYLING */
+        a-cursor {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -404,105 +407,77 @@
     </div>
     
     <!-- A-FRAME SCENE -->
-    <a-scene>
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
         <!-- ASSETS -->
         <a-assets timeout="30000">
             <!-- 3 Panoramic Images -->
             <img id="front" src="labanan_sa_quinga/front.jpg" crossorigin="anonymous">
             <img id="left" src="labanan_sa_quinga/left.jpg" crossorigin="anonymous">
             <img id="right" src="labanan_sa_quinga/right.jpg" crossorigin="anonymous">
-            
-            <!-- Hotspot Textures -->
-            <img id="arrow-right" src="https://cdn.jsdelivr.net/gh/aframevr/assets@master/components/hand-tracking/arrow-right.png">
-            <img id="arrow-left" src="https://cdn.jsdelivr.net/gh/aframevr/assets@master/components/hand-tracking/arrow-left.png">
         </a-assets>
         
         <!-- SKY / 360 IMAGE -->
         <a-sky id="scene-sky" src="#front"></a-sky>
         
-        <!-- INTERACTIVE HOTSPOTS -->
-        
-        <!-- HOTSPOT: Front View - Right Arrow (to Right View) -->
-        <a-entity class="hotspot" id="front-to-right"
-                 position="2 0 -4"
-                 geometry="primitive: circle; radius: 0.3"
-                 material="color: #FF6B6B; opacity: 0.7; shader: flat"
-                 animation="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dur: 1000; easing: easeInOutSine; dir: alternate; loop: true"
-                 data-target="right">
-            <a-plane position="0 0 0.1"
-                    width="0.5"
-                    height="0.5"
-                    material="src: #arrow-right; transparent: true">
-            </a-plane>
-            <a-text value="Right View"
-                   position="0 -0.5 0"
-                   align="center"
-                   color="white"
-                   width="2"></a-text>
+        <!-- CAMERA WITH CURSOR -->
+        <a-entity camera look-controls="pointerLockEnabled: true">
+            <a-cursor 
+                id="cursor"
+                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                animation__mouseleave="property: scale; startEvents: mouseleave; from: 0.1 0.1 0.1; to: 1 1 1; dur: 500"
+                fuse="true"
+                fuse-timeout="500">
+            </a-cursor>
         </a-entity>
         
-        <!-- HOTSPOT: Front View - Left Arrow (to Left View) -->
-        <a-entity class="hotspot" id="front-to-left"
-                 position="-2 0 -4"
-                 geometry="primitive: circle; radius: 0.3"
-                 material="color: #FF6B6B; opacity: 0.7; shader: flat"
-                 animation="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dur: 1000; easing: easeInOutSine; dir: alternate; loop: true"
-                 data-target="left">
-            <a-plane position="0 0 0.1"
-                    width="0.5"
-                    height="0.5"
-                    material="src: #arrow-left; transparent: true">
-            </a-plane>
-            <a-text value="Left View"
-                   position="0 -0.5 0"
-                   align="center"
-                   color="white"
-                   width="2"></a-text>
+        <!-- ======================= -->
+        <!-- ENHANCED HOTSPOTS -->
+        <!-- ======================= -->
+        
+        <!-- FRONT VIEW HOTSPOTS -->
+        <a-entity id="front-hotspots">
+            <!-- To Right View -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: right;
+                label: Right View;
+                icon: right;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+            
+            <!-- To Left View -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: left;
+                label: Left View;
+                icon: left;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
         </a-entity>
         
-        <!-- HOTSPOT: Left View - Right Arrow (to Front View) -->
-        <a-entity class="hotspot" id="left-to-front"
-                 visible="false"
-                 position="2 0 -4"
-                 geometry="primitive: circle; radius: 0.3"
-                 material="color: #4ECDC4; opacity: 0.7; shader: flat"
-                 animation="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dur: 1000; easing: easeInOutSine; dir: alternate; loop: true"
-                 data-target="front">
-            <a-plane position="0 0 0.1"
-                    width="0.5"
-                    height="0.5"
-                    material="src: #arrow-right; transparent: true">
-            </a-plane>
-            <a-text value="Front View"
-                   position="0 -0.5 0"
-                   align="center"
-                   color="white"
-                   width="2"></a-text>
+        <!-- LEFT VIEW HOTSPOTS -->
+        <a-entity id="left-hotspots" visible="false">
+            <!-- Back to Front View -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: front;
+                label: Front View;
+                icon: arrow;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
         </a-entity>
         
-        <!-- HOTSPOT: Right View - Left Arrow (to Front View) -->
-        <a-entity class="hotspot" id="right-to-front"
-                 visible="false"
-                 position="-2 0 -4"
-                 geometry="primitive: circle; radius: 0.3"
-                 material="color: #4ECDC4; opacity: 0.7; shader: flat"
-                 animation="property: scale; from: 1 1 1; to: 1.2 1.2 1.2; dur: 1000; easing: easeInOutSine; dir: alternate; loop: true"
-                 data-target="front">
-            <a-plane position="0 0 0.1"
-                    width="0.5"
-                    height="0.5"
-                    material="src: #arrow-left; transparent: true">
-            </a-plane>
-            <a-text value="Front View"
-                   position="0 -0.5 0"
-                   align="center"
-                   color="white"
-                   width="2"></a-text>
-        </a-entity>
-        
-        <!-- Camera -->
-        <a-entity camera="fov: 80" look-controls="pointerLockEnabled: true">
-            <a-cursor fuse="true" fuse-timeout="1000"></a-cursor>
+        <!-- RIGHT VIEW HOTSPOTS -->
+        <a-entity id="right-hotspots" visible="false">
+            <!-- Back to Front View -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: front;
+                label: Front View;
+                icon: arrow;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
         </a-entity>
         
         <!-- Ambient Light -->
@@ -524,32 +499,175 @@
     
     <script>
         // =====================
+        // ENHANCED HOTSPOT COMPONENT
+        // =====================
+        AFRAME.registerComponent('nav-hotspot', {
+            schema: {
+                target: { type: 'string' },      // Target scene ID
+                label: { type: 'string' },       // Display label
+                icon: { type: 'string', default: 'arrow' }, // arrow, left, right
+                position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
+                rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
+            },
+            
+            init: function() {
+                const el = this.el;
+                const data = this.data;
+                
+                // Create container
+                el.setAttribute('position', data.position);
+                el.setAttribute('rotation', data.rotation);
+                el.classList.add('clickable');
+                el.setAttribute('data-hotspot', 'true');
+                
+                // Create outer ring (pulsing)
+                const ring = document.createElement('a-ring');
+                ring.setAttribute('radius-inner', '0.08');
+                ring.setAttribute('radius-outer', '0.12');
+                ring.setAttribute('color', '#FF6B6B'); // Changed to red for Battle of Quinga
+                ring.setAttribute('opacity', '0.6');
+                ring.setAttribute('shader', 'flat');
+                ring.setAttribute('animation', {
+                    property: 'scale',
+                    to: '1.2 1.2 1',
+                    dir: 'alternate',
+                    loop: true,
+                    dur: 1200,
+                    easing: 'easeInOutSine'
+                });
+                el.appendChild(ring);
+                
+                // Create inner circle (hover effect)
+                const circle = document.createElement('a-circle');
+                circle.setAttribute('radius', '0.06');
+                circle.setAttribute('color', '#FFFFFF');
+                circle.setAttribute('opacity', '0');
+                circle.setAttribute('shader', 'flat');
+                circle.setAttribute('class', 'hotspot-inner');
+                el.appendChild(circle);
+                
+                // Create icon based on type
+                const icon = this.createIcon(data.icon);
+                if (icon) {
+                    icon.setAttribute('position', '0 0 0.001');
+                    icon.setAttribute('scale', '0.04 0.04 1');
+                    el.appendChild(icon);
+                }
+                
+                // Create label
+                const label = document.createElement('a-entity');
+                label.setAttribute('text', {
+                    value: data.label,
+                    align: 'center',
+                    color: '#FFFFFF',
+                    width: 0.6,
+                    font: 'roboto',
+                    baseline: 'center'
+                });
+                label.setAttribute('position', '0 0.2 0');
+                label.setAttribute('visible', 'false');
+                label.setAttribute('class', 'hotspot-label');
+                el.appendChild(label);
+                
+                // HOVER EFFECTS
+                el.addEventListener('mouseenter', () => {
+                    // Highlight inner circle
+                    circle.setAttribute('opacity', '0.8');
+                    circle.setAttribute('animation', {
+                        property: 'scale',
+                        to: '1.3 1.3 1',
+                        dur: 200,
+                        easing: 'easeOutQuad'
+                    });
+                    
+                    // Show label
+                    label.setAttribute('visible', 'true');
+                    label.setAttribute('animation', {
+                        property: 'scale',
+                        from: '0.8 0.8 1',
+                        to: '1 1 1',
+                        dur: 300,
+                        easing: 'easeOutBack'
+                    });
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    // Remove highlight
+                    circle.setAttribute('opacity', '0');
+                    circle.setAttribute('scale', '1 1 1');
+                    circle.removeAttribute('animation');
+                    
+                    // Hide label
+                    label.setAttribute('visible', 'false');
+                });
+                
+                // CLICK/TAP EVENT
+                el.addEventListener('click', () => {
+                    // Click feedback
+                    circle.setAttribute('color', '#4CAF50');
+                    circle.setAttribute('opacity', '0.9');
+                    
+                    setTimeout(() => {
+                        circle.setAttribute('color', '#FFFFFF');
+                        circle.setAttribute('opacity', '0');
+                        
+                        // Navigate to target scene
+                        const scenes = window.sceneList;
+                        const targetIndex = scenes.findIndex(s => s.id === data.target);
+                        if (targetIndex !== -1) {
+                            window.changeScene(targetIndex);
+                        }
+                    }, 300);
+                });
+            },
+            
+            createIcon: function(iconType) {
+                const iconMap = {
+                    'arrow': 'M-0.5,-0.5 L0.5,0 L-0.5,0.5 Z',
+                    'left': 'M0.3,-0.5 L0,0 L0.3,0.5 M-0.3,0 L0,0',
+                    'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0'
+                };
+                
+                if (iconMap[iconType]) {
+                    const path = document.createElement('a-entity');
+                    path.setAttribute('geometry', {
+                        primitive: 'path',
+                        path: iconMap[iconType]
+                    });
+                    path.setAttribute('material', 'color: #000000; shader: flat');
+                    path.setAttribute('rotation', iconType === 'arrow' ? '0 0 90' : '0 0 0');
+                    return path;
+                }
+                return null;
+            }
+        });
+        
+        // =====================
         // CONFIGURATION
         // =====================
         const scenes = [
             { 
                 id: "front", 
-                title: "Front View",
-                hotspots: {
-                    left: { x: -2, y: 0, z: -4, target: "left" },
-                    right: { x: 2, y: 0, z: -4, target: "right" }
-                }
+                title: "Front View"
             },
             { 
                 id: "left", 
-                title: "Left View",
-                hotspots: {
-                    front: { x: 2, y: 0, z: -4, target: "front" }
-                }
+                title: "Left View"
             },
             { 
                 id: "right", 
-                title: "Right View",
-                hotspots: {
-                    front: { x: -2, y: 0, z: -4, target: "front" }
-                }
+                title: "Right View"
             }
         ];
+        
+        window.sceneList = scenes;
+        
+        // Navigation map for hotspots
+        const navigationMap = {
+            "front": ["left", "right"],
+            "left": ["front"],
+            "right": ["front"]
+        };
         
         // =====================
         // STATE MANAGEMENT
@@ -578,6 +696,7 @@
             preloadImages();
             createThumbnails();
             setupEventListeners();
+            setupAframeEvents();
             updateNavigation();
             updateViewIndicator();
         });
@@ -600,115 +719,21 @@
                             loadingScreen.style.opacity = '0';
                             setTimeout(() => {
                                 loadingScreen.style.display = 'none';
-                                // Initialize hotspots after loading
-                                initHotspots();
                             }, 500);
                         }, 500);
                     }
                 };
                 
                 img.onerror = () => {
-                    console.error(`Failed to load: images/${scene.id}.jpg`);
+                    console.error(`Failed to load: labanan_sa_quinga/${scene.id}.jpg`);
                     imagesLoaded++;
                     if (imagesLoaded === totalImages) {
                         loadingScreen.style.display = 'none';
-                        initHotspots();
                     }
                 };
                 
-                img.src = `images/${scene.id}.jpg`;
+                img.src = `labanan_sa_quinga/${scene.id}.jpg`;
             });
-        }
-        
-        // =====================
-        // HOTSPOT MANAGEMENT
-        // =====================
-        function initHotspots() {
-            // Get all hotspot elements
-            const hotspots = document.querySelectorAll('.hotspot');
-            
-            // Add click event to each hotspot
-            hotspots.forEach(hotspot => {
-                // Click event
-                hotspot.addEventListener('click', function() {
-                    const targetScene = this.getAttribute('data-target');
-                    const sceneIndex = scenes.findIndex(s => s.id === targetScene);
-                    
-                    if (sceneIndex !== -1) {
-                        // Visual feedback
-                        this.setAttribute('animation', {
-                            property: 'scale',
-                            to: '1.5 1.5 1.5',
-                            dur: 300,
-                            easing: 'easeOutElastic'
-                        });
-                        
-                        // Change scene after animation
-                        setTimeout(() => {
-                            changeScene(sceneIndex);
-                        }, 300);
-                    }
-                });
-                
-                // Hover effects
-                hotspot.addEventListener('mouseenter', function() {
-                    this.setAttribute('material', 'opacity', 0.9);
-                });
-                
-                hotspot.addEventListener('mouseleave', function() {
-                    this.setAttribute('material', 'opacity', 0.7);
-                });
-            });
-            
-            // Initialize cursor fuse events
-            const cursor = document.querySelector('a-cursor');
-            if (cursor) {
-                cursor.addEventListener('fusing', function(evt) {
-                    const hotspot = evt.detail.el;
-                    if (hotspot.classList.contains('hotspot')) {
-                        const targetScene = hotspot.getAttribute('data-target');
-                        const sceneIndex = scenes.findIndex(s => s.id === targetScene);
-                        
-                        if (sceneIndex !== -1) {
-                            hotspot.setAttribute('animation', {
-                                property: 'scale',
-                                to: '1.3 1.3 1.3',
-                                dur: 200
-                            });
-                            
-                            setTimeout(() => {
-                                changeScene(sceneIndex);
-                            }, 100);
-                        }
-                    }
-                });
-            }
-        }
-        
-        function updateHotspots(sceneId) {
-            // Hide all hotspots first
-            document.querySelectorAll('.hotspot').forEach(hotspot => {
-                hotspot.setAttribute('visible', 'false');
-            });
-            
-            // Show hotspots for current scene
-            const scene = scenes.find(s => s.id === sceneId);
-            if (scene && scene.hotspots) {
-                Object.keys(scene.hotspots).forEach(hotspotKey => {
-                    const hotspot = scene.hotspots[hotspotKey];
-                    const hotspotId = `${sceneId}-to-${hotspot.target}`;
-                    const hotspotEl = document.getElementById(hotspotId);
-                    
-                    if (hotspotEl) {
-                        hotspotEl.setAttribute('visible', 'true');
-                        hotspotEl.setAttribute('position', `${hotspot.x} ${hotspot.y} ${hotspot.z}`);
-                    }
-                });
-            }
-            
-            // Update hotspot counter
-            const visibleHotspots = document.querySelectorAll('.hotspot[visible="true"]').length;
-            hotspotCounter.innerHTML = `<i class="fas fa-bullseye"></i> ${visibleHotspots} navigation point${visibleHotspots !== 1 ? 's' : ''} available`;
         }
         
         // =====================
@@ -722,7 +747,7 @@
                 thumbnail.title = scene.title;
                 
                 const thumbImg = new Image();
-                thumbImg.src = `images/${scene.id}.jpg`;
+                thumbImg.src = `labanan_sa_quinga/${scene.id}.jpg`;
                 thumbImg.alt = scene.title;
                 
                 thumbnail.appendChild(thumbImg);
@@ -738,7 +763,7 @@
         // =====================
         // SCENE MANAGEMENT
         // =====================
-        function changeScene(index) {
+        window.changeScene = function(index) {
             if (index < 0 || index >= scenes.length) return;
             
             currentSceneIndex = index;
@@ -755,7 +780,7 @@
                 thumb.classList.toggle('active', i === index);
             });
             
-            // Update hotspots
+            // Update hotspots visibility
             updateHotspots(scene.id);
             
             // Update navigation buttons
@@ -764,7 +789,33 @@
             // Update view indicator
             updateViewIndicator();
             
+            // Update hotspot counter
+            const visibleHotspots = navigationMap[scene.id] ? navigationMap[scene.id].length : 0;
+            hotspotCounter.innerHTML = `<i class="fas fa-bullseye"></i> ${visibleHotspots} navigation point${visibleHotspots !== 1 ? 's' : ''} available`;
+            
             console.log(`Changed to: ${scene.title}`);
+        };
+        
+        function updateHotspots(sceneId) {
+            // Hide all hotspot groups
+            const hotspotGroups = [
+                'front-hotspots',
+                'left-hotspots',
+                'right-hotspots'
+            ];
+            
+            hotspotGroups.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('visible', 'false');
+            });
+            
+            // Show current scene hotspots
+            const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
+            if (currentHotspots) {
+                setTimeout(() => {
+                    currentHotspots.setAttribute('visible', 'true');
+                }, 300);
+            }
         }
         
         function updateNavigation() {
@@ -773,7 +824,6 @@
         }
         
         function updateViewIndicator() {
-            const scene = scenes[currentSceneIndex];
             document.querySelector('#view-indicator span').textContent = 
                 `View ${currentSceneIndex + 1}/${scenes.length}`;
         }
@@ -840,11 +890,31 @@
                     instructions.style.display = 'none';
                 }
             });
+        }
+        
+        // =====================
+        // A-FRAME EVENTS
+        // =====================
+        function setupAframeEvents() {
+            const scene = document.querySelector('a-scene');
             
-            // A-Frame scene loaded
-            document.querySelector('a-scene').addEventListener('loaded', () => {
-                console.log('A-Frame scene loaded');
+            scene.addEventListener('loaded', () => {
+                console.log('A-Frame scene fully loaded');
             });
+            
+            // Improve cursor interaction
+            const cursor = document.getElementById('cursor');
+            if (cursor) {
+                cursor.addEventListener('mouseenter', (e) => {
+                    if (e.target.hasAttribute('data-hotspot')) {
+                        cursor.setAttribute('color', '#FF6B6B');
+                    }
+                });
+                
+                cursor.addEventListener('mouseleave', () => {
+                    cursor.setAttribute('color', '#FFF');
+                });
+            }
         }
         
         // =====================
@@ -871,10 +941,8 @@
             }
         });
         
-        // Initial scene update
-        setTimeout(() => {
-            changeScene(0);
-        }, 100);
+        // Initial scene
+        changeScene(0);
     </script>
 </body>
 </html>
