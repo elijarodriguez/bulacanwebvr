@@ -432,51 +432,69 @@
         </a-entity>
         
         <!-- ======================= -->
-        <!-- ENHANCED HOTSPOTS -->
+        <!-- ENHANCED HOTSPOTS - ALL ON LEFT SIDE -->
         <!-- ======================= -->
         
         <!-- FRONT VIEW HOTSPOTS -->
         <a-entity id="front-hotspots">
-            <!-- To Right View -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: right;
-                label: Right View;
-                icon: right;
-                position: 2 0 -4;
-                rotation: 0 -30 0">
-            </a-entity>
-            
-            <!-- To Left View -->
+            <!-- To Left View - Moved further left -->
             <a-entity class="hotspot" nav-hotspot="
                 target: left;
                 label: Left View;
                 icon: left;
+                position: -3 0 -3.5;
+                rotation: 0 45 0">
+            </a-entity>
+            
+            <!-- To Right View - Also on left side but pointing right -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: right;
+                label: Right View;
+                icon: right;
                 position: -2 0 -4;
-                rotation: 0 30 0">
+                rotation: 0 15 0">
             </a-entity>
         </a-entity>
         
         <!-- LEFT VIEW HOTSPOTS -->
         <a-entity id="left-hotspots" visible="false">
-            <!-- Back to Front View -->
+            <!-- Back to Front View - On left side -->
             <a-entity class="hotspot" nav-hotspot="
                 target: front;
                 label: Front View;
                 icon: arrow;
-                position: 2 0 -4;
-                rotation: 0 -30 0">
+                position: -3 0 -3.5;
+                rotation: 0 45 0">
+            </a-entity>
+            
+            <!-- To Right View from Left View - On left side -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: right;
+                label: Right View;
+                icon: right;
+                position: -2.5 0 -3.8;
+                rotation: 0 20 0">
             </a-entity>
         </a-entity>
         
         <!-- RIGHT VIEW HOTSPOTS -->
         <a-entity id="right-hotspots" visible="false">
-            <!-- Back to Front View -->
+            <!-- Back to Front View - On left side -->
             <a-entity class="hotspot" nav-hotspot="
                 target: front;
                 label: Front View;
                 icon: arrow;
-                position: -2 0 -4;
-                rotation: 0 30 0">
+                position: -3 0 -3.5;
+                rotation: 0 45 0">
+            </a-entity>
+            
+            <!-- To Left View from Right View - On left side -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: left;
+                label: Left View;
+                icon: left;
+                position: -2.8 0 -3.6;
+                rotation: 0 50 0">
             </a-entity>
         </a-entity>
         
@@ -503,9 +521,9 @@
         // =====================
         AFRAME.registerComponent('nav-hotspot', {
             schema: {
-                target: { type: 'string' },      // Target scene ID
-                label: { type: 'string' },       // Display label
-                icon: { type: 'string', default: 'arrow' }, // arrow, left, right
+                target: { type: 'string' },
+                label: { type: 'string' },
+                icon: { type: 'string', default: 'arrow' },
                 position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
                 rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
             },
@@ -517,19 +535,19 @@
                 // Create container
                 el.setAttribute('position', data.position);
                 el.setAttribute('rotation', data.rotation);
-                el.classList.add('clickable');
                 el.setAttribute('data-hotspot', 'true');
+                el.setAttribute('class', 'clickable');
                 
                 // Create outer ring (pulsing)
                 const ring = document.createElement('a-ring');
                 ring.setAttribute('radius-inner', '0.08');
                 ring.setAttribute('radius-outer', '0.12');
-                ring.setAttribute('color', '#FF6B6B'); // Changed to red for Battle of Quinga
-                ring.setAttribute('opacity', '0.6');
+                ring.setAttribute('color', '#FF6B6B');
+                ring.setAttribute('opacity', '0.7');
                 ring.setAttribute('shader', 'flat');
                 ring.setAttribute('animation', {
                     property: 'scale',
-                    to: '1.2 1.2 1',
+                    to: '1.3 1.3 1',
                     dir: 'alternate',
                     loop: true,
                     dur: 1200,
@@ -539,7 +557,7 @@
                 
                 // Create inner circle (hover effect)
                 const circle = document.createElement('a-circle');
-                circle.setAttribute('radius', '0.06');
+                circle.setAttribute('radius', '0.07');
                 circle.setAttribute('color', '#FFFFFF');
                 circle.setAttribute('opacity', '0');
                 circle.setAttribute('shader', 'flat');
@@ -550,7 +568,7 @@
                 const icon = this.createIcon(data.icon);
                 if (icon) {
                     icon.setAttribute('position', '0 0 0.001');
-                    icon.setAttribute('scale', '0.04 0.04 1');
+                    icon.setAttribute('scale', '0.045 0.045 1');
                     el.appendChild(icon);
                 }
                 
@@ -560,22 +578,24 @@
                     value: data.label,
                     align: 'center',
                     color: '#FFFFFF',
-                    width: 0.6,
+                    width: 0.8,
                     font: 'roboto',
-                    baseline: 'center'
+                    baseline: 'center',
+                    wrapCount: 15
                 });
-                label.setAttribute('position', '0 0.2 0');
+                label.setAttribute('position', '0 0.25 0');
                 label.setAttribute('visible', 'false');
                 label.setAttribute('class', 'hotspot-label');
+                label.setAttribute('scale', '0.8 0.8 1');
                 el.appendChild(label);
                 
                 // HOVER EFFECTS
                 el.addEventListener('mouseenter', () => {
                     // Highlight inner circle
-                    circle.setAttribute('opacity', '0.8');
+                    circle.setAttribute('opacity', '0.9');
                     circle.setAttribute('animation', {
                         property: 'scale',
-                        to: '1.3 1.3 1',
+                        to: '1.4 1.4 1',
                         dur: 200,
                         easing: 'easeOutQuad'
                     });
@@ -606,10 +626,12 @@
                     // Click feedback
                     circle.setAttribute('color', '#4CAF50');
                     circle.setAttribute('opacity', '0.9');
+                    circle.setAttribute('scale', '1.5 1.5 1');
                     
                     setTimeout(() => {
                         circle.setAttribute('color', '#FFFFFF');
                         circle.setAttribute('opacity', '0');
+                        circle.setAttribute('scale', '1 1 1');
                         
                         // Navigate to target scene
                         const scenes = window.sceneList;
@@ -648,26 +670,22 @@
         const scenes = [
             { 
                 id: "front", 
-                title: "Front View"
+                title: "Front View",
+                description: "Main battlefield overview"
             },
             { 
                 id: "left", 
-                title: "Left View"
+                title: "Left View",
+                description: "Left flank perspective"
             },
             { 
                 id: "right", 
-                title: "Right View"
+                title: "Right View",
+                description: "Right flank perspective"
             }
         ];
         
         window.sceneList = scenes;
-        
-        // Navigation map for hotspots
-        const navigationMap = {
-            "front": ["left", "right"],
-            "left": ["front"],
-            "right": ["front"]
-        };
         
         // =====================
         // STATE MANAGEMENT
@@ -719,6 +737,8 @@
                             loadingScreen.style.opacity = '0';
                             setTimeout(() => {
                                 loadingScreen.style.display = 'none';
+                                // Initialize after loading
+                                initHotspotNavigation();
                             }, 500);
                         }, 500);
                     }
@@ -729,11 +749,23 @@
                     imagesLoaded++;
                     if (imagesLoaded === totalImages) {
                         loadingScreen.style.display = 'none';
+                        initHotspotNavigation();
                     }
                 };
                 
                 img.src = `labanan_sa_quinga/${scene.id}.jpg`;
             });
+        }
+        
+        // =====================
+        // HOTSPOT NAVIGATION INIT
+        // =====================
+        function initHotspotNavigation() {
+            console.log('Hotspot navigation initialized');
+            // Force initial update to ensure hotspots are visible
+            setTimeout(() => {
+                updateHotspots(scenes[currentSceneIndex].id);
+            }, 100);
         }
         
         // =====================
@@ -769,6 +801,8 @@
             currentSceneIndex = index;
             const scene = scenes[index];
             
+            console.log(`Changing to scene: ${scene.id}`);
+            
             // Update sky
             sky.setAttribute('src', `#${scene.id}`);
             
@@ -780,8 +814,10 @@
                 thumb.classList.toggle('active', i === index);
             });
             
-            // Update hotspots visibility
-            updateHotspots(scene.id);
+            // Update hotspots visibility with delay
+            setTimeout(() => {
+                updateHotspots(scene.id);
+            }, 100);
             
             // Update navigation buttons
             updateNavigation();
@@ -790,14 +826,13 @@
             updateViewIndicator();
             
             // Update hotspot counter
-            const visibleHotspots = navigationMap[scene.id] ? navigationMap[scene.id].length : 0;
-            hotspotCounter.innerHTML = `<i class="fas fa-bullseye"></i> ${visibleHotspots} navigation point${visibleHotspots !== 1 ? 's' : ''} available`;
-            
-            console.log(`Changed to: ${scene.title}`);
+            updateHotspotCounter();
         };
         
         function updateHotspots(sceneId) {
-            // Hide all hotspot groups
+            console.log(`Updating hotspots for: ${sceneId}`);
+            
+            // Hide all hotspot groups first
             const hotspotGroups = [
                 'front-hotspots',
                 'left-hotspots',
@@ -806,16 +841,40 @@
             
             hotspotGroups.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.setAttribute('visible', 'false');
+                if (el) {
+                    el.setAttribute('visible', 'false');
+                }
             });
             
             // Show current scene hotspots
             const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
             if (currentHotspots) {
-                setTimeout(() => {
-                    currentHotspots.setAttribute('visible', 'true');
-                }, 300);
+                console.log(`Found hotspot group: ${sceneId}-hotspots`);
+                currentHotspots.setAttribute('visible', 'true');
+                
+                // Log all hotspots in this group
+                const hotspots = currentHotspots.querySelectorAll('[nav-hotspot]');
+                console.log(`Found ${hotspots.length} hotspots in group`);
+                
+                // Ensure each hotspot is interactive
+                hotspots.forEach((hotspot, i) => {
+                    console.log(`Hotspot ${i}:`, hotspot.getAttribute('nav-hotspot'));
+                });
+            } else {
+                console.warn(`No hotspot group found for: ${sceneId}`);
             }
+        }
+        
+        function updateHotspotCounter() {
+            const sceneId = scenes[currentSceneIndex].id;
+            const hotspotGroup = document.getElementById(`${sceneId}-hotspots`);
+            let hotspotCount = 0;
+            
+            if (hotspotGroup && hotspotGroup.getAttribute('visible') === 'true') {
+                hotspotCount = hotspotGroup.querySelectorAll('[nav-hotspot]').length;
+            }
+            
+            hotspotCounter.innerHTML = `<i class="fas fa-bullseye"></i> ${hotspotCount} navigation point${hotspotCount !== 1 ? 's' : ''} available`;
         }
         
         function updateNavigation() {
@@ -848,9 +907,12 @@
                 if (e.key === 'Escape' && document.fullscreenElement) {
                     document.exitFullscreen();
                 }
-                if (e.key === '1') changeScene(0); // Front view
-                if (e.key === '2') changeScene(1); // Left view
-                if (e.key === '3') changeScene(2); // Right view
+                if (e.key === '1') changeScene(0);
+                if (e.key === '2') changeScene(1);
+                if (e.key === '3') changeScene(2);
+                if (e.key === 'i' || e.key === 'I') {
+                    instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
+                }
             });
             
             // Touch/swipe for mobile
@@ -865,10 +927,8 @@
                 
                 if (Math.abs(diff) > 50) {
                     if (diff > 0) {
-                        // Swipe left - next view
                         changeScene(currentSceneIndex + 1);
                     } else {
-                        // Swipe right - previous view
                         changeScene(currentSceneIndex - 1);
                     }
                 }
@@ -908,13 +968,22 @@
                 cursor.addEventListener('mouseenter', (e) => {
                     if (e.target.hasAttribute('data-hotspot')) {
                         cursor.setAttribute('color', '#FF6B6B');
+                        cursor.setAttribute('scale', '1.2 1.2 1');
                     }
                 });
                 
                 cursor.addEventListener('mouseleave', () => {
                     cursor.setAttribute('color', '#FFF');
+                    cursor.setAttribute('scale', '1 1 1');
                 });
             }
+            
+            // Debug: Log when hotspots are clicked
+            document.addEventListener('click', (e) => {
+                if (e.target.hasAttribute('data-hotspot')) {
+                    console.log('Hotspot clicked:', e.target.getAttribute('nav-hotspot'));
+                }
+            });
         }
         
         // =====================
@@ -941,8 +1010,10 @@
             }
         });
         
-        // Initial scene
-        changeScene(0);
+        // Initial scene with delay to ensure everything loads
+        setTimeout(() => {
+            changeScene(0);
+        }, 500);
     </script>
 </body>
 </html>
