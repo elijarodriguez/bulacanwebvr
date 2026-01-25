@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcelo H. Del Pilar Shrine - VR Tour</title>
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; overflow: hidden; background: #000; }
+        
+        #loading {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        #scene-title {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            z-index: 100;
+        }
+        
+        .nav-buttons {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .nav-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+        
+        .thumbnail-container {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .thumbnail {
+            width: 60px;
+            height: 40px;
+            border-radius: 5px;
+            overflow: hidden;
+            opacity: 0.5;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .thumbnail.active {
+            opacity: 1;
+            border-color: white;
+        }
+        
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        Loading Marcelo H. Del Pilar Shrine Tour...
+    </div>
+    
+    <!-- Scene Title -->
+    <div id="scene-title">Front View</div>
+    
+    <!-- A-Frame Scene -->
+    <a-scene>
+        <!-- Assets -->
+        <a-assets>
+            <img id="front" src="mhdelpilar_shrine/front.jpg">
+            <img id="left" src="mhdelpilar_shrine/left.jpg">
+            <img id="right" src="mhdelpilar_shrine/right.jpg">
+            <img id="rear" src="mhdelpilar_shrine/rear.jpg">
+            <img id="arrow" src="https://cdn.jsdelivr.net/gh/aframevr/assets@master/components/hand-tracking/arrow-right.png">
+        </a-assets>
+        
+        <!-- Sky / 360 Image -->
+        <a-sky id="scene-sky" src="#front"></a-sky>
+        
+        <!-- Hotspots -->
+        <!-- Front View -> Left -->
+        <a-entity class="hotspot" id="front-to-left" position="-2 0 -4"
+                  geometry="primitive: circle; radius: 0.3"
+                  material="color: #FF6B6B; opacity: 0.7"
+                  data-target="left"
+                  animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+            <a-plane position="0 0 0.1" width="0.5" height="0.5" rotation="0 90 0"
+                    material="src: #arrow; transparent: true"></a-plane>
+        </a-entity>
+        
+        <!-- Front View -> Right -->
+        <a-entity class="hotspot" id="front-to-right" position="2 0 -4"
+                  geometry="primitive: circle; radius: 0.3"
+                  material="color: #FF6B6B; opacity: 0.7"
+                  data-target="right"
+                  animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+            <a-plane position="0 0 0.1" width="0.5" height="0.5" rotation="0 -90 0"
+                    material="src: #arrow; transparent: true"></a-plane>
+        </a-entity>
+        
+        <!-- Left View -> Front -->
+        <a-entity class="hotspot" id="left-to-front" position="2 0 -4" visible="false"
+                  geometry="primitive: circle; radius: 0.3"
+                  material="color: #4ECDC4; opacity: 0.7"
+                  data-target="front"
+                  animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+            <a-plane position="0 0 0.1" width="0.5" height="0.5" rotation="0 -90 0"
+                    material="src: #arrow; transparent: true"></a-plane>
+        </a-entity>
+        
+        <!-- Left View -> Rear -->
+        <a-entity class="hotspot" id="left-to-rear" position="-2 0 -4" visible="false"
+                  geometry="primitive: circle; radius: 0.3"
+                  material="color: #4ECDC4; opacity: 0.7"
+                  data-target="rear"
+                  animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+            <a-plane position="0 0 0.1" width="0.5" height="0.5" rotation="0 90 0"
+                    material="src: #arrow; transparent: true"></a-plane>
+        </a-entity>
+        
+        <!-- Right View -> Front -->
+        <a-entity class="hotspot" id="right-to-front" position="-2 0 -4" visible="false"
+                  geometry="primitive: circle; radius: 0.3"
+                  material="color: #4ECDC4; opacity: 0.7"
+                  data-target="front"
+                  animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+            <a-plane position="0 0 0.1" width="0.5" height="0.5" rotation="0 90 0"
+                    material="src: #arrow; transparent: true"></a-plane>
+        </a-entity>
+        
+        <!-- Right View -> Rear -->
+        <a-entity class="hotspot" id="right-to-rear" position="2 0 -4" visible="false"
+                  geometry="primitive: circle; radius: 0.3"
+                  material="color: #4ECDC4; opacity: 0.7"
+                  data-target="rear"
+                  animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+            <a-plane position="0 0 0.1" width="0.5" height="0.5" rotation="0 -90 0"
+                    material="src: #arrow; transparent: true"></a-plane>
+        </a-entity>
+        
+        <!-- Rear View -> Left -->
+        <a-entity class="hotspot" id="rear-to-left" position="2 0 -4" visible="false"
+                  geometry="primitive: circle; radius: 0.3"
+                  material="color: #FF8E53; opacity: 0.7"
+                  data-target="left"
+                  animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+            <a-plane position="0 0 0.1" width="0.5" height="0.5" rotation="0 -90 0"
+                    material="src: #arrow; transparent: true"></a-plane>
+        </a-entity>
+        
+        <!-- Rear View -> Right -->
+        <a-entity class="hotspot" id="rear-to-right" position="-2 0 -4" visible="false"
+                  geometry="primitive: circle; radius: 0.3"
+                  material="color: #FF8E53; opacity: 0.7"
+                  data-target="right"
+                  animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+            <a-plane position="0 0 0.1" width="0.5" height="0.5" rotation="0 90 0"
+                    material="src: #arrow; transparent: true"></a-plane>
+        </a-entity>
+        
+        <!-- Camera -->
+        <a-entity camera look-controls>
+            <a-cursor></a-cursor>
+        </a-entity>
+    </a-scene>
+    
+    <!-- Thumbnails -->
+    <div class="thumbnail-container" id="thumbnails"></div>
+    
+    <!-- Navigation Buttons -->
+    <div class="nav-buttons">
+        <button class="nav-btn" id="prev-btn">←</button>
+        <button class="nav-btn" id="next-btn">→</button>
+    </div>
+    
+    <script>
+        // Scenes configuration
+        const scenes = [
+            { id: "front", title: "Front View" },
+            { id: "left", title: "Left View" },
+            { id: "right", title: "Right View" },
+            { id: "rear", title: "Rear View" }
+        ];
+        
+        // Scene connections
+        const connections = {
+            "front": ["left", "right"],
+            "left": ["front", "rear"],
+            "right": ["front", "rear"],
+            "rear": ["left", "right"]
+        };
+        
+        let currentScene = "front";
+        
+        // DOM elements
+        const loadingScreen = document.getElementById('loading');
+        const sceneTitle = document.getElementById('scene-title');
+        const sky = document.getElementById('scene-sky');
+        const thumbnailsContainer = document.getElementById('thumbnails');
+        
+        // Initialize
+        window.onload = function() {
+            // Preload images
+            let loaded = 0;
+            scenes.forEach(scene => {
+                const img = new Image();
+                img.onload = () => {
+                    loaded++;
+                    if (loaded === scenes.length) {
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            initHotspots();
+                            createThumbnails();
+                        }, 500);
+                    }
+                };
+                img.src = `mhdelpilar_shrine/${scene.id}.jpg`;
+            });
+            
+            // Set up event listeners
+            document.getElementById('prev-btn').addEventListener('click', prevScene);
+            document.getElementById('next-btn').addEventListener('click', nextScene);
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') prevScene();
+                if (e.key === 'ArrowRight') nextScene();
+            });
+        };
+        
+        // Hotspot management
+        function initHotspots() {
+            document.querySelectorAll('.hotspot').forEach(hotspot => {
+                hotspot.addEventListener('click', function() {
+                    const target = this.getAttribute('data-target');
+                    changeScene(target);
+                });
+            });
+            
+            updateHotspots();
+        }
+        
+        function updateHotspots() {
+            // Hide all hotspots
+            document.querySelectorAll('.hotspot').forEach(h => {
+                h.setAttribute('visible', 'false');
+            });
+            
+            // Show only relevant hotspots
+            const availableConnections = connections[currentScene];
+            availableConnections.forEach(target => {
+                const hotspot = document.getElementById(`${currentScene}-to-${target}`);
+                if (hotspot) {
+                    hotspot.setAttribute('visible', 'true');
+                }
+            });
+        }
+        
+        // Scene management
+        function changeScene(sceneId) {
+            currentScene = sceneId;
+            
+            // Update sky
+            sky.setAttribute('src', `#${sceneId}`);
+            
+            // Update title
+            const scene = scenes.find(s => s.id === sceneId);
+            sceneTitle.textContent = scene.title;
+            
+            // Update thumbnails
+            document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
+                thumb.classList.toggle('active', scenes[index].id === sceneId);
+            });
+            
+            // Update hotspots
+            updateHotspots();
+            
+            // Update navigation buttons
+            updateNavButtons();
+        }
+        
+        function prevScene() {
+            const currentIndex = scenes.findIndex(s => s.id === currentScene);
+            if (currentIndex > 0) {
+                changeScene(scenes[currentIndex - 1].id);
+            }
+        }
+        
+        function nextScene() {
+            const currentIndex = scenes.findIndex(s => s.id === currentScene);
+            if (currentIndex < scenes.length - 1) {
+                changeScene(scenes[currentIndex + 1].id);
+            }
+        }
+        
+        function updateNavButtons() {
+            const currentIndex = scenes.findIndex(s => s.id === currentScene);
+            document.getElementById('prev-btn').disabled = currentIndex === 0;
+            document.getElementById('next-btn').disabled = currentIndex === scenes.length - 1;
+        }
+        
+        // Thumbnail creation
+        function createThumbnails() {
+            scenes.forEach((scene, index) => {
+                const thumbnail = document.createElement('div');
+                thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
+                thumbnail.dataset.sceneId = scene.id;
+                
+                const img = document.createElement('img');
+                img.src = `mhdelpilar_shrine/${scene.id}.jpg`;
+                img.alt = scene.title;
+                
+                thumbnail.appendChild(img);
+                
+                thumbnail.addEventListener('click', () => {
+                    changeScene(scene.id);
+                });
+                
+                thumbnailsContainer.appendChild(thumbnail);
+            });
+        }
+        
+        // Start with front view
+        setTimeout(() => {
+            if (loadingScreen.style.display !== 'none') {
+                loadingScreen.style.display = 'none';
+                initHotspots();
+                createThumbnails();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
