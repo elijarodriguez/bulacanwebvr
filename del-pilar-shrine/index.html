@@ -3,895 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marcelo H. Del Pilar Shrine - VR Tour</title>
+    <title>Del Pilar Shrine VR</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- A-Frame Extras for Animation -->
-    <script src="https://cdn.jsdelivr.net/npm/aframe-animation-component@5.1.2/dist/aframe-animation-component.min.js"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
-        
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            overflow: hidden; 
-            background: #000; 
-        }
-        
-        /* Loading Screen */
-        #loading {
-            position: fixed;
-            top: 0; 
-            left: 0;
-            width: 100%; 
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #0d1b2a 100%);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s ease;
-        }
-        
-        .loading-content {
-            text-align: center;
-            padding: 30px;
-        }
-        
-        .loading-icon {
-            font-size: 3rem;
-            color: #D4AF37;
-            margin-bottom: 20px;
-        }
-        
-        .progress-container {
-            width: 300px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            margin: 20px auto;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #D4AF37, #FFD700);
-            transition: width 0.3s ease;
-        }
-        
-        /* Scene Title */
+        body { margin: 0; font-family: sans-serif; background: #000; }
         #scene-title {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 1rem;
-            font-weight: 500;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 200px;
-            text-align: center;
-            justify-content: center;
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white; padding: 12px 24px;
+            border-radius: 30px; z-index: 100; font-weight: bold; letter-spacing: 1px;
         }
-        
-        #scene-title i {
-            color: #D4AF37;
-        }
-        
-        /* Navigation */
-        .nav-container {
-            position: fixed;
-            bottom: 25px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 25px;
-            z-index: 1000;
-        }
-        
-        .nav-btn {
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            border: none;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .nav-btn:hover {
-            background: rgba(26, 26, 46, 0.9);
-            transform: translateY(-2px);
-            border-color: rgba(212, 175, 55, 0.5);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-        
-        .nav-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        /* Thumbnails */
-        .thumbnail-container {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 12px;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px 15px;
-            border-radius: 15px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-        }
-        
-        .thumbnail {
-            width: 70px;
-            height: 45px;
-            border-radius: 8px;
-            overflow: hidden;
-            opacity: 0.6;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            position: relative;
-        }
-        
-        .thumbnail:hover {
-            opacity: 0.9;
-            transform: translateY(-5px);
-        }
-        
-        .thumbnail.active {
-            opacity: 1;
-            border-color: #D4AF37;
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
-        }
-        
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .thumbnail-label {
-            position: absolute;
-            bottom: -25px;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            color: #D4AF37;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-        
-        /* Instructions */
-        #instructions {
-            position: fixed;
-            top: 70px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            max-width: 250px;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            display: none;
-        }
-        
-        #instructions h4 {
-            color: #D4AF37;
-            margin-bottom: 10px;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        #instructions ul {
-            list-style: none;
-        }
-        
-        #instructions li {
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #ccc;
-        }
-        
-        .instructions-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* View Indicator */
-        .view-indicator {
-            position: fixed;
-            top: 70px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-        }
-        
-        .view-indicator i {
-            color: #D4AF37;
-        }
-        
-        /* Fullscreen Button */
-        .fullscreen-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            #scene-title {
-                font-size: 0.9rem;
-                padding: 10px 20px;
-                top: 15px;
-                min-width: 180px;
-            }
-            
-            .nav-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.1rem;
-            }
-            
-            .nav-container {
-                padding: 0 15px;
-                bottom: 20px;
-            }
-            
-            .thumbnail {
-                width: 60px;
-                height: 40px;
-            }
-            
-            .thumbnail-container {
-                bottom: 85px;
-                padding: 8px 12px;
-                gap: 10px;
-            }
-            
-            .view-indicator, .instructions-btn, .fullscreen-btn {
-                top: 15px;
-            }
-            
-            .view-indicator {
-                left: 15px;
-                font-size: 0.8rem;
-            }
+        #loading {
+            position: fixed; inset: 0; background: #1a1a1a; color: white;
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading">
-        <div class="loading-content">
-            <div class="loading-icon">
-                <i class="fas fa-spinner fa-spin"></i>
-            </div>
-            <h2>Marcelo H. Del Pilar Shrine</h2>
-            <p>Loading virtual tour...</p>
-            <div class="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
-            </div>
-            <p style="color: #aaa; margin-top: 10px; font-size: 0.9rem;">
-                <i class="fas fa-info-circle"></i> Please wait while we load the panoramic views
-            </p>
-        </div>
-    </div>
-    
-    <!-- Fullscreen Button -->
-    <button class="fullscreen-btn" id="fullscreen-btn" title="Toggle Fullscreen">
-        <i class="fas fa-expand"></i>
-    </button>
-    
-    <!-- Instructions Button -->
-    <button class="instructions-btn" id="instructions-btn" title="Show Instructions">
-        <i class="fas fa-question-circle"></i>
-    </button>
-    
-    <!-- Instructions Panel -->
-    <div id="instructions">
-        <h4><i class="fas fa-info-circle"></i> Navigation Guide</h4>
-        <ul>
-            <li><i class="fas fa-mouse-pointer"></i> Drag to look around</li>
-            <li><i class="fas fa-bullseye"></i> Click golden circles to navigate</li>
-            <li><i class="fas fa-arrows-alt-h"></i> Use ← → buttons or arrow keys</li>
-            <li><i class="fas fa-expand"></i> Toggle fullscreen mode</li>
-            <li><i class="fas fa-mobile-alt"></i> Swipe on mobile devices</li>
-            <li><i class="fas fa-image"></i> Click thumbnails below</li>
-        </ul>
-    </div>
-    
-    <!-- Scene Title -->
-    <div id="scene-title">
-        <i class="fas fa-camera"></i>
-        <span id="scene-title-text">Front View</span>
-    </div>
-    
-    <!-- View Indicator -->
-    <div class="view-indicator" id="view-indicator">
-        <i class="fas fa-eye"></i>
-        <span>View 1/4</span>
-    </div>
-    
-    <!-- A-Frame Scene -->
-    <a-scene cursor="rayOrigin: mouse">
-        <!-- Assets -->
-        <a-assets timeout="30000">
-            <!-- Panoramic Images -->
-            <img id="front" src="mhdelpilar_shrine/front.jpg" crossorigin="anonymous">
-            <img id="left" src="mhdelpilar_shrine/left.jpg" crossorigin="anonymous">
-            <img id="right" src="mhdelpilar_shrine/right.jpg" crossorigin="anonymous">
-            <img id="rear" src="mhdelpilar_shrine/rear.jpg" crossorigin="anonymous">
+    <div id="loading">Loading Virtual Tour...</div>
+    <div id="scene-title">Front View</div>
+
+    <a-scene>
+        <a-assets>
+            <img id="front" src="mhdelpilar_shrine/front.jpg">
+            <img id="left" src="mhdelpilar_shrine/left.jpg">
+            <img id="right" src="mhdelpilar_shrine/right.jpg">
+            <img id="rear" src="mhdelpilar_shrine/rear.jpg">
+            <img id="arrow-img" src="https://cdn.jsdelivr.net/gh/aframevr/assets@master/components/hand-tracking/arrow-right.png">
         </a-assets>
-        
-        <!-- Sky / 360 Image -->
-        <a-sky id="scene-sky" src="#front"></a-sky>
-        
-        <!-- SIMPLE HOTSPOTS WITH CLICK HANDLERS -->
-        
-        <!-- Front View Hotspots -->
-        <a-entity id="front-to-left" 
-                 position="-1.8 0 -3"
-                 geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.35"
-                 material="color: #D4AF37; shader: standard; metalness: 0.8; roughness: 0.2"
-                 animation__rotate="property: rotation; to: 0 360 0; dur: 4000; loop: true; easing: linear"
-                 class="hotspot clickable"
-                 data-target="left"
-                 visible="true">
-            <a-circle position="0 0 0.05" radius="0.2" color="#000" opacity="0.3"></a-circle>
-            <a-text value="⬅ Left" position="0 0 0.1" align="center" color="#FFF" width="1.5"></a-text>
-            <a-text value="Left View" position="0 -0.5 0" align="center" color="#D4AF37" width="2"></a-text>
-        </a-entity>
-        
-        <a-entity id="front-to-right"
-                 position="1.8 0 -3"
-                 geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.35"
-                 material="color: #D4AF37; shader: standard; metalness: 0.8; roughness: 0.2"
-                 animation__rotate="property: rotation; to: 0 -360 0; dur: 4000; loop: true; easing: linear"
-                 class="hotspot clickable"
-                 data-target="right"
-                 visible="true">
-            <a-circle position="0 0 0.05" radius="0.2" color="#000" opacity="0.3"></a-circle>
-            <a-text value="Right ➡" position="0 0 0.1" align="center" color="#FFF" width="1.5"></a-text>
-            <a-text value="Right View" position="0 -0.5 0" align="center" color="#D4AF37" width="2"></a-text>
-        </a-entity>
-        
-        <!-- Left View Hotspots -->
-        <a-entity id="left-to-front"
-                 position="1.8 0 -3"
-                 geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.35"
-                 material="color: #D4AF37; shader: standard; metalness: 0.8; roughness: 0.2"
-                 animation__rotate="property: rotation; to: 0 -360 0; dur: 4000; loop: true; easing: linear"
-                 class="hotspot clickable"
-                 data-target="front"
-                 visible="false">
-            <a-circle position="0 0 0.05" radius="0.2" color="#000" opacity="0.3"></a-circle>
-            <a-text value="Front ➡" position="0 0 0.1" align="center" color="#FFF" width="1.5"></a-text>
-            <a-text value="Front View" position="0 -0.5 0" align="center" color="#D4AF37" width="2"></a-text>
-        </a-entity>
-        
-        <a-entity id="left-to-rear"
-                 position="-1.8 0 -3"
-                 geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.35"
-                 material="color: #D4AF37; shader: standard; metalness: 0.8; roughness: 0.2"
-                 animation__rotate="property: rotation; to: 0 360 0; dur: 4000; loop: true; easing: linear"
-                 class="hotspot clickable"
-                 data-target="rear"
-                 visible="false">
-            <a-circle position="0 0 0.05" radius="0.2" color="#000" opacity="0.3"></a-circle>
-            <a-text value="⬅ Rear" position="0 0 0.1" align="center" color="#FFF" width="1.5"></a-text>
-            <a-text value="Rear View" position="0 -0.5 0" align="center" color="#D4AF37" width="2"></a-text>
-        </a-entity>
-        
-        <!-- Right View Hotspots -->
-        <a-entity id="right-to-front"
-                 position="-1.8 0 -3"
-                 geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.35"
-                 material="color: #D4AF37; shader: standard; metalness: 0.8; roughness: 0.2"
-                 animation__rotate="property: rotation; to: 0 360 0; dur: 4000; loop: true; easing: linear"
-                 class="hotspot clickable"
-                 data-target="front"
-                 visible="false">
-            <a-circle position="0 0 0.05" radius="0.2" color="#000" opacity="0.3"></a-circle>
-            <a-text value="⬅ Front" position="0 0 0.1" align="center" color="#FFF" width="1.5"></a-text>
-            <a-text value="Front View" position="0 -0.5 0" align="center" color="#D4AF37" width="2"></a-text>
-        </a-entity>
-        
-        <a-entity id="right-to-rear"
-                 position="1.8 0 -3"
-                 geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.35"
-                 material="color: #D4AF37; shader: standard; metalness: 0.8; roughness: 0.2"
-                 animation__rotate="property: rotation; to: 0 -360 0; dur: 4000; loop: true; easing: linear"
-                 class="hotspot clickable"
-                 data-target="rear"
-                 visible="false">
-            <a-circle position="0 0 0.05" radius="0.2" color="#000" opacity="0.3"></a-circle>
-            <a-text value="Rear ➡" position="0 0 0.1" align="center" color="#FFF" width="1.5"></a-text>
-            <a-text value="Rear View" position="0 -0.5 0" align="center" color="#D4AF37" width="2"></a-text>
-        </a-entity>
-        
-        <!-- Rear View Hotspots -->
-        <a-entity id="rear-to-left"
-                 position="1.8 0 -3"
-                 geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.35"
-                 material="color: #D4AF37; shader: standard; metalness: 0.8; roughness: 0.2"
-                 animation__rotate="property: rotation; to: 0 -360 0; dur: 4000; loop: true; easing: linear"
-                 class="hotspot clickable"
-                 data-target="left"
-                 visible="false">
-            <a-circle position="0 0 0.05" radius="0.2" color="#000" opacity="0.3"></a-circle>
-            <a-text value="Left ➡" position="0 0 0.1" align="center" color="#FFF" width="1.5"></a-text>
-            <a-text value="Left View" position="0 -0.5 0" align="center" color="#D4AF37" width="2"></a-text>
-        </a-entity>
-        
-        <a-entity id="rear-to-right"
-                 position="-1.8 0 -3"
-                 geometry="primitive: ring; radiusInner: 0.25; radiusOuter: 0.35"
-                 material="color: #D4AF37; shader: standard; metalness: 0.8; roughness: 0.2"
-                 animation__rotate="property: rotation; to: 0 360 0; dur: 4000; loop: true; easing: linear"
-                 class="hotspot clickable"
-                 data-target="right"
-                 visible="false">
-            <a-circle position="0 0 0.05" radius="0.2" color="#000" opacity="0.3"></a-circle>
-            <a-text value="⬅ Right" position="0 0 0.1" align="center" color="#FFF" width="1.5"></a-text>
-            <a-text value="Right View" position="0 -0.5 0" align="center" color="#D4AF37" width="2"></a-text>
-        </a-entity>
-        
-        <!-- Camera with Look Controls -->
+
+        <a-sky id="sky" src="#front" rotation="0 -90 0"></a-sky>
+
+        <a-entity id="hotspot-group">
+            </a-entity>
+
         <a-entity camera look-controls>
             <a-cursor 
-                fuse="true" 
-                fuse-timeout="1000"
-                material="color: #D4AF37; shader: flat"
-                position="0 0 -1"
-                geometry="primitive: ring; radiusInner: 0.008; radiusOuter: 0.012"
-                animation__click="property: scale; startEvents: click; from: 0.8 0.8 0.8; to: 1 1 1; dur: 150">
+                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                animation__fusing="property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                event-set__mouseenter="_event: mouseenter; color: springgreen"
+                event-set__mouseleave="_event: mouseleave; color: black"
+                raycaster="objects: .clickable">
             </a-cursor>
         </a-entity>
-        
-        <!-- Lights -->
-        <a-light type="ambient" color="#FFF" intensity="0.7"></a-light>
-        <a-light type="directional" color="#FFF" intensity="0.5" position="-1 2 1"></a-light>
     </a-scene>
-    
-    <!-- Thumbnails -->
-    <div class="thumbnail-container" id="thumbnails">
-        <!-- Thumbnails will be generated here -->
-    </div>
-    
-    <!-- Navigation Buttons -->
-    <div class="nav-container">
-        <button class="nav-btn" id="prev-btn" title="Previous View">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <button class="nav-btn" id="next-btn" title="Next View">
-            <i class="fas fa-arrow-right"></i>
-        </button>
-    </div>
-    
+
     <script>
-        // =====================
-        // CONFIGURATION
-        // =====================
-        const scenes = [
-            { id: "front", title: "Front View", thumbnail: "Front" },
-            { id: "left", title: "Left View", thumbnail: "Left" },
-            { id: "right", title: "Right View", thumbnail: "Right" },
-            { id: "rear", title: "Rear View", thumbnail: "Rear" }
-        ];
-        
-        // Scene connections
-        const connections = {
-            "front": ["left", "right"],
-            "left": ["front", "rear"],
-            "right": ["front", "rear"],
-            "rear": ["left", "right"]
+        const scenes = {
+            front: { 
+                title: "Front View", 
+                links: [
+                    { target: "left", pos: "-5 0 -2", rot: "0 90 0" },
+                    { target: "right", pos: "5 0 -2", rot: "0 -90 0" }
+                ]
+            },
+            left: { 
+                title: "Left Side View", 
+                links: [
+                    { target: "front", pos: "5 0 2", rot: "0 -90 0" },
+                    { target: "rear", pos: "-2 0 -5", rot: "0 0 0" }
+                ]
+            },
+            right: { 
+                title: "Right Side View", 
+                links: [
+                    { target: "front", pos: "-5 0 2", rot: "0 90 0" },
+                    { target: "rear", pos: "2 0 -5", rot: "0 0 0" }
+                ]
+            },
+            rear: { 
+                title: "Rear View", 
+                links: [
+                    { target: "left", pos: "5 0 2", rot: "0 -90 0" },
+                    { target: "right", pos: "-5 0 2", rot: "0 90 0" }
+                ]
+            }
         };
-        
-        // =====================
-        // STATE MANAGEMENT
-        // =====================
-        let currentSceneId = "front";
-        let imagesLoaded = 0;
-        const totalImages = scenes.length;
-        
-        // =====================
-        // DOM ELEMENTS
-        // =====================
-        const loadingScreen = document.getElementById('loading');
-        const progressBar = document.getElementById('progress-bar');
-        const sky = document.getElementById('scene-sky');
-        const sceneTitle = document.getElementById('scene-title-text');
-        const viewIndicator = document.getElementById('view-indicator');
-        const thumbnailsContainer = document.getElementById('thumbnails');
-        const instructionsPanel = document.getElementById('instructions');
-        
-        // =====================
-        // INITIALIZATION
-        // =====================
-        document.addEventListener('DOMContentLoaded', function() {
-            preloadImages();
-        });
-        
-        // Wait for A-Frame scene to load
-        document.querySelector('a-scene').addEventListener('loaded', function() {
-            console.log('A-Frame scene loaded');
-            initHotspots();
-            createThumbnails();
-            setupEventListeners();
-        });
-        
-        // =====================
-        // IMAGE PRELOADING
-        // =====================
-        function preloadImages() {
-            scenes.forEach((scene, index) => {
-                const img = new Image();
-                
-                img.onload = () => {
-                    imagesLoaded++;
-                    const progress = Math.round((imagesLoaded / totalImages) * 100);
-                    progressBar.style.width = `${progress}%`;
-                    
-                    if (imagesLoaded === totalImages) {
-                        setTimeout(() => {
-                            loadingScreen.style.opacity = '0';
-                            setTimeout(() => {
-                                loadingScreen.style.display = 'none';
-                            }, 500);
-                        }, 500);
-                    }
-                };
-                
-                img.onerror = () => {
-                    console.error(`Failed to load: mhdelpilar_shrine/${scene.id}.jpg`);
-                    imagesLoaded++;
-                    if (imagesLoaded === totalImages) {
-                        loadingScreen.style.display = 'none';
-                    }
-                };
-                
-                img.src = `mhdelpilar_shrine/${scene.id}.jpg`;
-            });
-        }
-        
-        // =====================
-        // HOTSPOT MANAGEMENT - SIMPLE AND WORKING
-        // =====================
-        function initHotspots() {
-            // Get all hotspot elements
-            const hotspots = document.querySelectorAll('.hotspot.clickable');
+
+        const sky = document.querySelector('#sky');
+        const title = document.querySelector('#scene-title');
+        const hotspotGroup = document.querySelector('#hotspot-group');
+        const loading = document.querySelector('#loading');
+
+        function renderHotspots(sceneKey) {
+            hotspotGroup.innerHTML = ''; // Clear existing
+            const config = scenes[sceneKey];
             
-            hotspots.forEach(hotspot => {
-                // Add click event listener
-                hotspot.addEventListener('click', function(e) {
-                    console.log('Hotspot clicked:', this.id);
-                    const targetScene = this.getAttribute('data-target');
-                    if (targetScene) {
-                        changeScene(targetScene);
-                        
-                        // Visual feedback
-                        this.setAttribute('animation__click', {
-                            property: 'scale',
-                            from: '1 1 1',
-                            to: '1.2 1.2 1.2',
-                            dur: 300,
-                            easing: 'easeOutElastic',
-                            startEvents: 'click'
-                        });
-                        
-                        setTimeout(() => {
-                            this.removeAttribute('animation__click');
-                        }, 300);
-                    }
+            config.links.forEach(link => {
+                const entity = document.createElement('a-entity');
+                entity.setAttribute('class', 'clickable');
+                entity.setAttribute('position', link.pos);
+                entity.setAttribute('rotation', link.rot);
+                
+                // The visual circle/ring
+                entity.innerHTML = `
+                    <a-ring color="#FFF" radius-inner="0.15" radius-outer="0.2" opacity="0.8"
+                            animation="property: scale; to: 1.2 1.2 1.2; dur: 1000; dir: alternate; loop: true">
+                    </a-ring>
+                    <a-image src="#arrow-img" width="0.3" height="0.3"></a-image>
+                `;
+
+                entity.addEventListener('click', () => {
+                    changeScene(link.target);
                 });
-                
-                // Hover effects
-                hotspot.addEventListener('mouseenter', function() {
-                    this.setAttribute('material', 'color', '#FFD700');
-                });
-                
-                hotspot.addEventListener('mouseleave', function() {
-                    this.setAttribute('material', 'color', '#D4AF37');
-                });
-            });
-            
-            // Initialize cursor fuse events
-            const cursor = document.querySelector('a-cursor');
-            if (cursor) {
-                cursor.addEventListener('fusing', function(evt) {
-                    const intersected = evt.detail.intersectedEl;
-                    if (intersected && intersected.classList.contains('clickable')) {
-                        const targetScene = intersected.getAttribute('data-target');
-                        if (targetScene) {
-                            changeScene(targetScene);
-                        }
-                    }
-                });
-            }
-        }
-        
-        function updateHotspots() {
-            // Hide all hotspots first
-            document.querySelectorAll('.hotspot.clickable').forEach(hotspot => {
-                hotspot.setAttribute('visible', 'false');
-            });
-            
-            // Show only hotspots for current scene
-            const availableConnections = connections[currentSceneId];
-            if (availableConnections) {
-                availableConnections.forEach(target => {
-                    const hotspotId = `${currentSceneId}-to-${target}`;
-                    const hotspot = document.getElementById(hotspotId);
-                    if (hotspot) {
-                        hotspot.setAttribute('visible', 'true');
-                    }
-                });
-            }
-        }
-        
-        // =====================
-        // SCENE MANAGEMENT
-        // =====================
-        function changeScene(sceneId) {
-            if (!sceneId || !scenes.find(s => s.id === sceneId)) return;
-            
-            currentSceneId = sceneId;
-            const scene = scenes.find(s => s.id === sceneId);
-            
-            console.log('Changing to scene:', scene.title);
-            
-            // Update sky image
-            sky.setAttribute('src', `#${sceneId}`);
-            
-            // Update title
-            sceneTitle.textContent = scene.title;
-            
-            // Update thumbnails
-            document.querySelectorAll('.thumbnail').forEach((thumb, index) => {
-                thumb.classList.toggle('active', scenes[index].id === sceneId);
-            });
-            
-            // Update hotspots
-            updateHotspots();
-            
-            // Update navigation buttons
-            updateNavigationButtons();
-            
-            // Update view indicator
-            updateViewIndicator();
-        }
-        
-        function updateNavigationButtons() {
-            const currentIndex = scenes.findIndex(s => s.id === currentSceneId);
-            document.getElementById('prev-btn').disabled = currentIndex === 0;
-            document.getElementById('next-btn').disabled = currentIndex === scenes.length - 1;
-        }
-        
-        function updateViewIndicator() {
-            const currentIndex = scenes.findIndex(s => s.id === currentSceneId);
-            document.querySelector('#view-indicator span').textContent = 
-                `View ${currentIndex + 1}/${scenes.length}`;
-        }
-        
-        // =====================
-        // THUMBNAIL CREATION
-        // =====================
-        function createThumbnails() {
-            scenes.forEach((scene, index) => {
-                const thumbnail = document.createElement('div');
-                thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
-                thumbnail.dataset.sceneId = scene.id;
-                thumbnail.title = scene.title;
-                
-                const img = document.createElement('img');
-                img.src = `mhdelpilar_shrine/${scene.id}.jpg`;
-                img.alt = scene.title;
-                
-                thumbnail.appendChild(img);
-                
-                // Add label
-                const label = document.createElement('div');
-                label.className = 'thumbnail-label';
-                label.textContent = scene.thumbnail;
-                thumbnail.appendChild(label);
-                
-                // Click event
-                thumbnail.addEventListener('click', () => {
-                    changeScene(scene.id);
-                });
-                
-                thumbnailsContainer.appendChild(thumbnail);
+
+                hotspotGroup.appendChild(entity);
             });
         }
-        
-        // =====================
-        // EVENT LISTENERS
-        // =====================
-        function setupEventListeners() {
-            // Navigation buttons
-            document.getElementById('prev-btn').addEventListener('click', () => {
-                const currentIndex = scenes.findIndex(s => s.id === currentSceneId);
-                if (currentIndex > 0) {
-                    changeScene(scenes[currentIndex - 1].id);
-                }
-            });
-            
-            document.getElementById('next-btn').addEventListener('click', () => {
-                const currentIndex = scenes.findIndex(s => s.id === currentSceneId);
-                if (currentIndex < scenes.length - 1) {
-                    changeScene(scenes[currentIndex + 1].id);
-                }
-            });
-            
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                const currentIndex = scenes.findIndex(s => s.id === currentSceneId);
-                
-                if (e.key === 'ArrowLeft' && currentIndex > 0) {
-                    changeScene(scenes[currentIndex - 1].id);
-                }
-                if (e.key === 'ArrowRight' && currentIndex < scenes.length - 1) {
-                    changeScene(scenes[currentIndex + 1].id);
-                }
-                if (e.key === '1') changeScene('front');
-                if (e.key === '2') changeScene('left');
-                if (e.key === '3') changeScene('right');
-                if (e.key === '4') changeScene('rear');
-                if (e.key === 'Escape') {
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    }
-                }
-            });
-            
-            // Touch/swipe for mobile
-            let touchStartX = 0;
-            document.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-            });
-            
-            document.addEventListener('touchend', (e) => {
-                if (!e.changedTouches[0]) return;
-                const touchEndX = e.changedTouches[0].clientX;
-                const diff = touchStartX - touchEndX;
-                const currentIndex = scenes.findIndex(s => s.id === currentSceneId);
-                
-                if (Math.abs(diff) > 50) {
-                    if (diff > 0 && currentIndex < scenes.length - 1) {
-                        // Swipe left - next view
-                        changeScene(scenes[currentIndex + 1].id);
-                    } else if (diff < 0 && currentIndex > 0) {
-                        // Swipe right - previous view
-                        changeScene(scenes[currentIndex - 1].id);
-                    }
-                }
-            });
-            
-            // Fullscreen toggle
-            document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
-            
-            // Instructions toggle
-            document.getElementById('instructions-btn').addEventListener('click', () => {
-                instructionsPanel.style.display = 
-                    instructionsPanel.style.display === 'block' ? 'none' : 'block';
-            });
-            
-            // Close instructions when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!instructionsPanel.contains(e.target) && 
-                    !document.getElementById('instructions-btn').contains(e.target) &&
-                    instructionsPanel.style.display === 'block') {
-                    instructionsPanel.style.display = 'none';
-                }
-            });
+
+        function changeScene(id) {
+            // Fade effect simulation
+            title.textContent = scenes[id].title;
+            sky.setAttribute('src', `#${id}`);
+            renderHotspots(id);
         }
-        
-        // =====================
-        // FULLSCREEN FUNCTION
-        // =====================
-        function toggleFullscreen() {
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
-            
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Fullscreen error: ${err.message}`);
-                });
-                fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
-            } else {
-                document.exitFullscreen();
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-            }
-        }
-        
-        // Handle fullscreen change
-        document.addEventListener('fullscreenchange', () => {
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
-            if (!document.fullscreenElement) {
-                fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
-            }
-        });
-        
-        // Initialize first scene
-        setTimeout(() => {
-            changeScene('front');
-        }, 100);
+
+        // Initialize
+        window.onload = () => {
+            setTimeout(() => {
+                loading.style.display = 'none';
+                renderHotspots('front');
+            }, 1000);
+        };
     </script>
 </body>
 </html>
