@@ -422,13 +422,13 @@
     <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
         <!-- ASSETS - 7 SCENES WITH SIMPLE NAMES -->
         <a-assets timeout="30000">
-            <img id="scene1" src="barasoain_museum/1st scene.jpg" crossorigin="anonymous">
-            <img id="scene2" src="barasoain_museum/2nd scene.jpg" crossorigin="anonymous">
-            <img id="scene3" src="barasoain_museum/3rd scene.jpg" crossorigin="anonymous">
-            <img id="scene4" src="barasoain_museum/4th scene.jpg" crossorigin="anonymous">
-            <img id="scene5" src="barasoain_museum/5th scene.jpg" crossorigin="anonymous">
-            <img id="scene6" src="barasoain_museum/6th scene.jpg" crossorigin="anonymous">
-            <img id="scene7" src="barasoain_museum/7th scene.jpg" crossorigin="anonymous">
+            <img id="scene1" src="images/1st scene.jpg" crossorigin="anonymous">
+            <img id="scene2" src="images/2nd scene.jpg" crossorigin="anonymous">
+            <img id="scene3" src="images/3rd scene.jpg" crossorigin="anonymous">
+            <img id="scene4" src="images/4th scene.jpg" crossorigin="anonymous">
+            <img id="scene5" src="images/5th scene.jpg" crossorigin="anonymous">
+            <img id="scene6" src="images/6th scene.jpg" crossorigin="anonymous">
+            <img id="scene7" src="images/7th scene.jpg" crossorigin="anonymous">
         </a-assets>
         
         <!-- SKY -->
@@ -641,11 +641,21 @@
         // IMAGE PRELOADING
         // =====================
         function preloadImages() {
+            console.log("Starting to preload images...");
+            
             scenes.forEach((scene, index) => {
                 const img = new Image();
+                const imageName = getImageName(index + 1);
+                const imagePath = `barasoain_museum/${imageName}`;
+                
+                console.log(`Attempting to load: ${imagePath}`);
+                
                 img.onload = () => {
                     imagesLoaded++;
+                    console.log(`Successfully loaded: ${imagePath}`);
+                    
                     if (imagesLoaded === totalImages) {
+                        console.log("All images loaded successfully!");
                         setTimeout(() => {
                             loading.style.opacity = '0';
                             setTimeout(() => {
@@ -654,19 +664,24 @@
                         }, 500);
                     }
                 };
+                
                 img.onerror = () => {
-                    console.warn(`Image not found: barasoain_museum/${getImageName(index + 1)}`);
+                    console.error(`FAILED to load image: ${imagePath}`);
+                    console.error(`Full URL would be: ${window.location.origin}/${imagePath}`);
                     imagesLoaded++;
                     if (imagesLoaded === totalImages) {
+                        console.log("All images attempted, some may have failed.");
                         setTimeout(() => {
                             loading.style.opacity = '0';
                             setTimeout(() => {
                                 loading.style.display = 'none';
+                                // Try to continue anyway
                             }, 500);
                         }, 500);
                     }
                 };
-                img.src = `images/${getImageName(index + 1)}`;
+                
+                img.src = imagePath;
             });
         }
         
@@ -746,6 +761,7 @@
             const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
             if (currentHotspots) {
                 currentHotspots.setAttribute('visible', 'true');
+                console.log(`Showing hotspots for: ${sceneId}`);
             }
         }
         
