@@ -14,7 +14,7 @@
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     
-    <!-- Enhanced Hotspot Component (same as Hiyas Museum) -->
+    <!-- Enhanced Hotspot Component with VR-optimized labels -->
     <script>
         AFRAME.registerComponent('nav-hotspot', {
             schema: {
@@ -69,20 +69,50 @@
                     el.appendChild(icon);
                 }
                 
-                // Create label
+                // Create VR-optimized label with billboard effect (always faces camera)
+                const labelContainer = document.createElement('a-entity');
+                labelContainer.setAttribute('class', 'hotspot-label-container');
+                labelContainer.setAttribute('position', '0 0.25 0'); // Position above hotspot
+                
+                // Add billboard component to make label face camera
+                labelContainer.setAttribute('look-at', '[camera]');
+                labelContainer.setAttribute('billboard', ''); // Custom billboard component
+                
+                // Create background panel for better readability
+                const labelBackground = document.createElement('a-plane');
+                labelBackground.setAttribute('width', '0.7');
+                labelBackground.setAttribute('height', '0.15');
+                labelBackground.setAttribute('color', 'rgba(0, 0, 0, 0.85)');
+                labelBackground.setAttribute('opacity', '0.9');
+                labelBackground.setAttribute('position', '0 0 0.001');
+                labelBackground.setAttribute('shader', 'flat');
+                labelBackground.setAttribute('side', 'double');
+                labelContainer.appendChild(labelBackground);
+                
+                // Create text with improved VR readability
                 const label = document.createElement('a-entity');
                 label.setAttribute('text', {
                     value: data.label,
                     align: 'center',
-                    color: '#FFFFFF',
-                    width: 0.6,
+                    color: '#FFD700', // Gold color for better contrast
+                    width: 0.65,
                     font: 'roboto',
-                    baseline: 'center'
+                    baseline: 'center',
+                    wrapCount: 20, // Character wrap limit
+                    letterSpacing: 1, // Slightly spaced for readability
+                    lineHeight: 40
                 });
-                label.setAttribute('position', '0 0.2 0');
+                label.setAttribute('position', '0 0 0.002');
+                label.setAttribute('scale', '1 1 1');
                 label.setAttribute('visible', 'false');
                 label.setAttribute('class', 'hotspot-label');
-                el.appendChild(label);
+                labelContainer.appendChild(label);
+                
+                el.appendChild(labelContainer);
+                
+                // Store references for easy access
+                this.label = label;
+                this.labelContainer = labelContainer;
                 
                 // HOVER EFFECTS
                 el.addEventListener('mouseenter', () => {
@@ -95,15 +125,19 @@
                         easing: 'easeOutQuad'
                     });
                     
-                    // Show label
+                    // Show label with animation
                     label.setAttribute('visible', 'true');
-                    label.setAttribute('animation', {
+                    labelContainer.setAttribute('animation', {
                         property: 'scale',
                         from: '0.8 0.8 1',
                         to: '1 1 1',
                         dur: 300,
                         easing: 'easeOutBack'
                     });
+                    
+                    // Make label more prominent in VR
+                    labelBackground.setAttribute('color', 'rgba(0, 0, 0, 0.95)');
+                    labelBackground.setAttribute('opacity', '1');
                 });
                 
                 el.addEventListener('mouseleave', () => {
@@ -114,17 +148,30 @@
                     
                     // Hide label
                     label.setAttribute('visible', 'false');
+                    labelContainer.removeAttribute('animation');
+                    
+                    // Reset label background
+                    labelBackground.setAttribute('color', 'rgba(0, 0, 0, 0.85)');
+                    labelBackground.setAttribute('opacity', '0.9');
                 });
                 
                 // CLICK/TAP EVENT
                 el.addEventListener('click', () => {
-                    // Click feedback
+                    // Click feedback with enhanced visuals
                     circle.setAttribute('color', '#4CAF50');
                     circle.setAttribute('opacity', '0.9');
+                    
+                    // Make label stand out more on click
+                    labelBackground.setAttribute('color', 'rgba(76, 175, 80, 0.9)');
+                    label.setAttribute('text', 'color', '#FFFFFF');
                     
                     setTimeout(() => {
                         circle.setAttribute('color', '#FFFFFF');
                         circle.setAttribute('opacity', '0');
+                        
+                        // Reset label appearance
+                        labelBackground.setAttribute('color', 'rgba(0, 0, 0, 0.85)');
+                        label.setAttribute('text', 'color', '#FFD700');
                         
                         // Navigate to target scene
                         const scenes = window.sceneList;
@@ -158,6 +205,85 @@
                     return path;
                 }
                 return null;
+            }
+        });
+        
+        // Billboard component to make labels always face camera
+        AFRAME.registerComponent('billboard', {
+            tick: function () {
+                const camera = document.querySelector('[camera]');
+                if (camera) {
+                    const cameraPosition = camera.getAttribute('position');
+                    this.el.object3D.lookAt(
+                        cameraPosition.x,
+                        cameraPosition.y,
+                        cameraPosition.z
+                    );
+                }
+            }
+        });
+        
+        // VR Exit Button Component
+        AFRAME.registerComponent('vr-exit-button', {
+            init: function() {
+                const el = this.el;
+                
+                // Create exit button background
+                const background = document.createElement('a-plane');
+                background.setAttribute('width', '0.6');
+                background.setAttribute('height', '0.3');
+                background.setAttribute('color', '#DC3545');
+                background.setAttribute('opacity', '0.9');
+                background.setAttribute('shader', 'flat');
+                background.setAttribute('side', 'double');
+                background.setAttribute('class', 'vr-exit-bg');
+                el.appendChild(background);
+                
+                // Create exit icon
+                const icon = document.createElement('a-text');
+                icon.setAttribute('value', '🚪');
+                icon.setAttribute('align', 'center');
+                icon.setAttribute('color', '#FFFFFF');
+                icon.setAttribute('width', '0.8');
+                icon.setAttribute('position', '0 0.05 0.001');
+                icon.setAttribute('scale', '0.8 0.8 1');
+                el.appendChild(icon);
+                
+                // Create exit text
+                const text = document.createElement('a-text');
+                text.setAttribute('value', 'EXIT');
+                text.setAttribute('align', 'center');
+                text.setAttribute('color', '#FFFFFF');
+                text.setAttribute('width', '0.8');
+                text.setAttribute('position', '0 -0.08 0.001');
+                text.setAttribute('scale', '0.5 0.5 1');
+                el.appendChild(text);
+                
+                // Hover effects
+                el.addEventListener('mouseenter', () => {
+                    background.setAttribute('color', '#C82333');
+                    background.setAttribute('animation', {
+                        property: 'scale',
+                        to: '1.1 1.1 1',
+                        dur: 200,
+                        easing: 'easeOutQuad'
+                    });
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    background.setAttribute('color', '#DC3545');
+                    background.setAttribute('scale', '1 1 1');
+                    background.removeAttribute('animation');
+                });
+                
+                // Click event
+                el.addEventListener('click', () => {
+                    background.setAttribute('color', '#28A745');
+                    setTimeout(() => {
+                        background.setAttribute('color', '#DC3545');
+                        showExitModal();
+                    }, 300);
+                });
             }
         });
     </script>
@@ -360,7 +486,7 @@
             justify-content: center;
         }
         
-        /* EXIT BUTTON */
+        /* EXIT BUTTON (Desktop/Non-VR) */
         #exit-btn {
             position: fixed;
             top: 20px;
@@ -395,6 +521,20 @@
         
         #exit-btn i {
             font-size: 16px;
+        }
+        
+        /* Hide desktop exit button in VR mode */
+        .a-enter-vr #exit-btn,
+        .a-enter-ar #exit-btn {
+            display: none !important;
+        }
+        
+        /* Hide desktop controls in VR mode */
+        .a-enter-vr .controls,
+        .a-enter-vr .scene-selector,
+        .a-enter-vr .instructions-btn,
+        .a-enter-vr #instructions {
+            display: none !important;
         }
         
         /* EXIT CONFIRMATION MODAL */
@@ -476,6 +616,24 @@
             background: rgba(200, 35, 51, 0.95);
         }
         
+        /* HOTSPOT STYLES FOR VR READABILITY */
+        .hotspot-label-container {
+            pointer-events: none; /* Don't interfere with hotspot clicks */
+        }
+        
+        /* VR-specific optimizations */
+        .a-enter-vr .hotspot-label {
+            /* Increase font size in VR mode */
+            text-size: 0.2 !important;
+            letterSpacing: 2px !important;
+        }
+        
+        .a-enter-vr .hotspot-label-container a-plane {
+            /* Make background more opaque in VR */
+            opacity: 0.95 !important;
+            color: rgba(0, 0, 0, 0.95) !important;
+        }
+        
         /* MOBILE OPTIMIZATION */
         @media (max-width: 768px) {
             #scene-info {
@@ -528,6 +686,14 @@
             }
         }
         
+        /* VR MODE DETECTION AND ENHANCEMENTS */
+        @media (max-width: 768px) and (orientation: landscape) {
+            /* VR/immersive mode optimizations */
+            .hotspot-label {
+                text-size: 0.25 !important;
+            }
+        }
+        
         /* CURSOR STYLING */
         a-cursor {
             cursor: pointer;
@@ -574,7 +740,7 @@
         <div class="loading-text">Loading Del Pilar Shrine Tour...</div>
     </div>
     
-    <!-- EXIT BUTTON -->
+    <!-- EXIT BUTTON (Desktop/Non-VR) -->
     <button id="exit-btn" title="Exit to Main Menu">
         <i>🚪</i>
         <span>Exit Tour</span>
@@ -594,9 +760,10 @@
         <h3>🗺️ Navigation Guide</h3>
         <p>• <b>Look around:</b> Drag or move device</p>
         <p>• <b>Navigate:</b> Click golden markers</p>
-        <p>• <b>Hover:</b> See destination names</p>
+        <p>• <b>Hotspot labels:</b> Hover to see destination</p>
+        <p>• <b>VR Exit:</b> Look down to see exit button</p>
         <p>• <b>Change scene:</b> Use buttons or dots</p>
-        <p>• <b>Exit:</b> Click Exit button (top-left)</p>
+        <p>• <b>Exit:</b> Click Exit button (top-left in desktop)</p>
     </div>
     
     <!-- EXIT CONFIRMATION MODAL -->
@@ -640,24 +807,36 @@
         </a-entity>
         
         <!-- ======================= -->
-        <!-- DEL PILAR SHRINE HOTSPOTS -->
+        <!-- VR EXIT BUTTON (Appears in VR mode) -->
+        <!-- ======================= -->
+        <a-entity id="vr-exit-button" 
+                  vr-exit-button
+                  position="0 -1.5 -2"
+                  scale="1 1 1"
+                  class="clickable"
+                  data-hotspot="true"
+                  visible="false">
+        </a-entity>
+        
+        <!-- ======================= -->
+        <!-- DEL PILAR SHRINE HOTSPOTS WITH VR-OPTIMIZED LABELS -->
         <!-- ======================= -->
         
         <!-- FRONT VIEW (connects to: left, right) -->
         <a-entity id="front-hotspots">
-            <!-- To Left View -->
+            <!-- To Left View - Enhanced for VR -->
             <a-entity nav-hotspot="
                 target: left;
-                label: Left View;
+                label: LEFT VIEW;
                 icon: left;
                 position: -2 0 -4;
                 rotation: 0 30 0">
             </a-entity>
             
-            <!-- To Right View -->
+            <!-- To Right View - Enhanced for VR -->
             <a-entity nav-hotspot="
                 target: right;
-                label: Right View;
+                label: RIGHT VIEW;
                 icon: right;
                 position: 2 0 -4;
                 rotation: 0 -30 0">
@@ -666,19 +845,19 @@
         
         <!-- LEFT VIEW (connects to: front, rear) -->
         <a-entity id="left-hotspots" visible="false">
-            <!-- To Front View -->
+            <!-- To Front View - Enhanced for VR -->
             <a-entity nav-hotspot="
                 target: front;
-                label: Front View;
+                label: FRONT VIEW;
                 icon: arrow;
                 position: 0 0 3;
                 rotation: 0 180 0">
             </a-entity>
             
-            <!-- To Rear View -->
+            <!-- To Rear View - Enhanced for VR -->
             <a-entity nav-hotspot="
                 target: rear;
-                label: Rear View;
+                label: REAR VIEW;
                 icon: arrow;
                 position: 0 0 -3;
                 rotation: 0 0 0">
@@ -687,19 +866,19 @@
         
         <!-- RIGHT VIEW (connects to: front, rear) -->
         <a-entity id="right-hotspots" visible="false">
-            <!-- To Front View -->
+            <!-- To Front View - Enhanced for VR -->
             <a-entity nav-hotspot="
                 target: front;
-                label: Front View;
+                label: FRONT VIEW;
                 icon: arrow;
                 position: 0 0 3;
                 rotation: 0 180 0">
             </a-entity>
             
-            <!-- To Rear View -->
+            <!-- To Rear View - Enhanced for VR -->
             <a-entity nav-hotspot="
                 target: rear;
-                label: Rear View;
+                label: REAR VIEW;
                 icon: arrow;
                 position: 0 0 -3;
                 rotation: 0 0 0">
@@ -708,19 +887,19 @@
         
         <!-- REAR VIEW (connects to: left, right) -->
         <a-entity id="rear-hotspots" visible="false">
-            <!-- To Left View -->
+            <!-- To Left View - Enhanced for VR -->
             <a-entity nav-hotspot="
                 target: left;
-                label: Left View;
+                label: LEFT VIEW;
                 icon: left;
                 position: -2 0 -4;
                 rotation: 0 30 0">
             </a-entity>
             
-            <!-- To Right View -->
+            <!-- To Right View - Enhanced for VR -->
             <a-entity nav-hotspot="
                 target: right;
-                label: Right View;
+                label: RIGHT VIEW;
                 icon: right;
                 position: 2 0 -4;
                 rotation: 0 -30 0">
@@ -769,6 +948,7 @@
         let currentSceneIndex = 0;
         let imagesLoaded = 0;
         const totalImages = scenes.length;
+        let isVRMode = false;
         
         // =====================
         // DOM ELEMENTS
@@ -783,6 +963,7 @@
         const exitModal = document.getElementById('exit-modal');
         const cancelExitBtn = document.getElementById('cancel-exit');
         const confirmExitBtn = document.getElementById('confirm-exit');
+        const vrExitButton = document.getElementById('vr-exit-button');
         
         // =====================
         // INITIALIZATION
@@ -792,6 +973,7 @@
             createSceneDots();
             setupEventListeners();
             setupAframeEvents();
+            setupVROptimizations();
             // createThumbnails(); // Optional: enable if you want thumbnails
         });
         
@@ -901,8 +1083,131 @@
         }
         
         // =====================
+        // VR EXIT BUTTON MANAGEMENT
+        // =====================
+        function toggleVRExitButton(show) {
+            if (vrExitButton) {
+                if (show) {
+                    vrExitButton.setAttribute('visible', 'true');
+                    // Make exit button billboard (always face camera)
+                    vrExitButton.setAttribute('look-at', '[camera]');
+                    
+                    // Add subtle pulsing animation in VR
+                    vrExitButton.setAttribute('animation', {
+                        property: 'position.y',
+                        to: '-1.4',
+                        dir: 'alternate',
+                        loop: true,
+                        dur: 2000,
+                        easing: 'easeInOutSine'
+                    });
+                } else {
+                    vrExitButton.setAttribute('visible', 'false');
+                    vrExitButton.removeAttribute('animation');
+                }
+            }
+        }
+        
+        // =====================
+        // VR OPTIMIZATIONS
+        // =====================
+        function setupVROptimizations() {
+            // Detect VR mode
+            const scene = document.querySelector('a-scene');
+            
+            scene.addEventListener('enter-vr', () => {
+                console.log('VR mode entered - showing VR exit button');
+                isVRMode = true;
+                enhanceHotspotLabelsForVR(true);
+                toggleVRExitButton(true);
+                
+                // Update instructions for VR
+                instructions.querySelector('p:nth-child(4)').innerHTML = 
+                    '• <b>VR Exit:</b> Look down to see exit button';
+            });
+            
+            scene.addEventListener('exit-vr', () => {
+                console.log('VR mode exited - hiding VR exit button');
+                isVRMode = false;
+                enhanceHotspotLabelsForVR(false);
+                toggleVRExitButton(false);
+                
+                // Restore instructions
+                instructions.querySelector('p:nth-child(4)').innerHTML = 
+                    '• <b>VR Exit:</b> Look down to see exit button';
+            });
+            
+            // Also detect mobile fullscreen/immersive mode
+            document.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    console.log('Fullscreen mode entered');
+                    toggleVRExitButton(true);
+                } else {
+                    console.log('Fullscreen mode exited');
+                    toggleVRExitButton(false);
+                }
+            });
+            
+            // Mobile immersive detection
+            window.addEventListener('resize', () => {
+                if (window.innerHeight === screen.height || window.innerWidth === screen.width) {
+                    console.log('Possible immersive mode');
+                    toggleVRExitButton(true);
+                }
+            });
+        }
+        
+        function enhanceHotspotLabelsForVR(isVRMode) {
+            const hotspots = document.querySelectorAll('[nav-hotspot]');
+            
+            hotspots.forEach(hotspot => {
+                const labelContainer = hotspot.querySelector('.hotspot-label-container');
+                const label = hotspot.querySelector('.hotspot-label');
+                const background = labelContainer ? labelContainer.querySelector('a-plane') : null;
+                
+                if (label && background) {
+                    if (isVRMode) {
+                        // Enhance for VR
+                        label.setAttribute('text', {
+                            color: '#FFD700',
+                            width: 0.7,
+                            wrapCount: 15,
+                            letterSpacing: 2
+                        });
+                        background.setAttribute('width', '0.8');
+                        background.setAttribute('height', '0.18');
+                        background.setAttribute('color', 'rgba(0, 0, 0, 0.95)');
+                        background.setAttribute('opacity', '1');
+                        
+                        // Position label higher for better visibility
+                        labelContainer.setAttribute('position', '0 0.3 0');
+                    } else {
+                        // Restore normal
+                        label.setAttribute('text', {
+                            color: '#FFD700',
+                            width: 0.65,
+                            wrapCount: 20,
+                            letterSpacing: 1
+                        });
+                        background.setAttribute('width', '0.7');
+                        background.setAttribute('height', '0.15');
+                        background.setAttribute('color', 'rgba(0, 0, 0, 0.85)');
+                        background.setAttribute('opacity', '0.9');
+                        
+                        // Restore position
+                        labelContainer.setAttribute('position', '0 0.25 0');
+                    }
+                }
+            });
+        }
+        
+        // =====================
         // EXIT FUNCTIONALITY
         // =====================
+        function showExitModal() {
+            exitModal.style.display = 'flex';
+        }
+        
         function saveProgress() {
             // Save current scene to localStorage
             const progress = {
@@ -956,7 +1261,11 @@
                 if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
                 if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
                 if (e.key === 'Escape') {
-                    instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
+                    if (exitModal.style.display === 'flex') {
+                        exitModal.style.display = 'none';
+                    } else {
+                        instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
+                    }
                 }
             });
             
@@ -974,10 +1283,8 @@
                 }
             });
             
-            // Exit button
-            exitBtn.addEventListener('click', () => {
-                exitModal.style.display = 'flex';
-            });
+            // Exit button (desktop)
+            exitBtn.addEventListener('click', showExitModal);
             
             // Exit modal buttons
             cancelExitBtn.addEventListener('click', () => {
