@@ -22,8 +22,7 @@
                 label: { type: 'string' },       // Display label
                 icon: { type: 'string', default: 'arrow' }, // arrow, door, stairs, etc.
                 position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
-                rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} },
-                type: { type: 'string', default: 'scene' } // scene or exit
+                rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
             },
             
             init: function() {
@@ -38,10 +37,9 @@
                 
                 // Create outer ring (pulsing)
                 const ring = document.createElement('a-ring');
-                const ringColor = data.type === 'exit' ? '#FF6B6B' : '#FFD700';
                 ring.setAttribute('radius-inner', '0.08');
                 ring.setAttribute('radius-outer', '0.12');
-                ring.setAttribute('color', ringColor);
+                ring.setAttribute('color', '#FFD700');
                 ring.setAttribute('opacity', '0.6');
                 ring.setAttribute('shader', 'flat');
                 ring.setAttribute('animation', {
@@ -121,24 +119,18 @@
                 // CLICK/TAP EVENT
                 el.addEventListener('click', () => {
                     // Click feedback
-                    const clickColor = data.type === 'exit' ? '#FF4757' : '#4CAF50';
-                    circle.setAttribute('color', clickColor);
+                    circle.setAttribute('color', '#4CAF50');
                     circle.setAttribute('opacity', '0.9');
                     
                     setTimeout(() => {
                         circle.setAttribute('color', '#FFFFFF');
                         circle.setAttribute('opacity', '0');
                         
-                        if (data.type === 'exit') {
-                            // Show tour selection modal
-                            showTourSelection();
-                        } else {
-                            // Navigate to target scene
-                            const scenes = window.sceneList;
-                            const targetIndex = scenes.findIndex(s => s.id === data.target);
-                            if (targetIndex !== -1) {
-                                window.changeScene(targetIndex);
-                            }
+                        // Navigate to target scene
+                        const scenes = window.sceneList;
+                        const targetIndex = scenes.findIndex(s => s.id === data.target);
+                        if (targetIndex !== -1) {
+                            window.changeScene(targetIndex);
                         }
                     }, 300);
                 });
@@ -152,9 +144,7 @@
                     'up': 'M-0.3,0.3 L0,0 L0.3,0.3 M0,-0.5 L0,0',
                     'down': 'M-0.3,-0.3 L0,0 L0.3,-0.3 M0,0.5 L0,0',
                     'left': 'M0.3,-0.5 L0,0 L0.3,0.5 M-0.3,0 L0,0',
-                    'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0',
-                    'exit': 'M-0.3,-0.3 L0.3,0.3 M0.3,-0.3 L-0.3,0.3',
-                    'home': 'M-0.3,0.3 L0,0 L0.3,0.3 M0,-0.5 L0,0 L-0.3,-0.3 L0.3,-0.3 L0,0'
+                    'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0'
                 };
                 
                 if (iconMap[iconType]) {
@@ -164,13 +154,7 @@
                         path: iconMap[iconType]
                     });
                     path.setAttribute('material', 'color: #000000; shader: flat');
-                    
-                    // Rotate icons appropriately
-                    if (iconType === 'up' || iconType === 'down' || iconType === 'exit' || iconType === 'home') {
-                        path.setAttribute('rotation', '0 0 0');
-                    } else {
-                        path.setAttribute('rotation', '0 0 90');
-                    }
+                    path.setAttribute('rotation', iconType === 'up' || iconType === 'down' ? '0 0 0' : '0 0 90');
                     return path;
                 }
                 return null;
@@ -297,33 +281,6 @@
             transform: none !important;
         }
         
-        /* EXIT/MENU BUTTON */
-        #exit-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: all 0.2s;
-        }
-        
-        #exit-btn:hover {
-            background: rgba(220, 53, 69, 0.9);
-            transform: scale(1.1);
-        }
-        
         /* SCENE SELECTOR */
         .scene-selector {
             position: fixed;
@@ -403,137 +360,6 @@
             justify-content: center;
         }
         
-        /* TOUR SELECTION MODAL */
-        #tour-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            background: #1a1a2e;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: slideUp 0.4s ease;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .modal-header h2 {
-            color: #FFD700;
-            margin-bottom: 10px;
-        }
-        
-        .modal-header p {
-            color: #aaa;
-            font-size: 14px;
-        }
-        
-        .tour-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .tour-option {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 1px solid transparent;
-            text-align: center;
-        }
-        
-        .tour-option:hover {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: rgba(255, 215, 0, 0.3);
-            transform: translateY(-5px);
-        }
-        
-        .tour-option.active {
-            background: rgba(255, 215, 0, 0.15);
-            border-color: #FFD700;
-        }
-        
-        .tour-icon {
-            font-size: 30px;
-            margin-bottom: 10px;
-            color: #FFD700;
-        }
-        
-        .tour-title {
-            color: white;
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-        
-        .tour-desc {
-            color: #aaa;
-            font-size: 12px;
-        }
-        
-        .modal-actions {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .modal-btn {
-            padding: 12px 30px;
-            border-radius: 25px;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .modal-btn.primary {
-            background: #FFD700;
-            color: #000;
-        }
-        
-        .modal-btn.primary:hover {
-            background: #ffed4e;
-            transform: scale(1.05);
-        }
-        
-        .modal-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        .modal-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
         /* MOBILE OPTIMIZATION */
         @media (max-width: 768px) {
             #scene-info {
@@ -541,14 +367,6 @@
                 font-size: 13px;
                 padding: 8px 16px;
                 min-width: 160px;
-            }
-            
-            #exit-btn {
-                top: 15px;
-                left: 15px;
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
             }
             
             .controls {
@@ -570,14 +388,6 @@
                 width: 8px;
                 height: 8px;
             }
-            
-            .tour-options {
-                grid-template-columns: 1fr;
-            }
-            
-            .modal-content {
-                padding: 20px;
-            }
         }
         
         /* CURSOR STYLING */
@@ -593,9 +403,6 @@
         <div class="loading-text">Loading Shrine Tour...</div>
     </div>
     
-    <!-- EXIT/MENU BUTTON -->
-    <button id="exit-btn" title="Exit to Tour Selection">✕</button>
-    
     <!-- SCENE INFO -->
     <div id="scene-info">
         <i>📍</i>
@@ -610,44 +417,8 @@
         <h3>🗺️ Navigation Guide</h3>
         <p>• <b>Look around:</b> Drag or move device</p>
         <p>• <b>Navigate:</b> Click golden markers</p>
-        <p>• <b>Exit tour:</b> Click red X markers or ✕ button</p>
+        <p>• <b>Hover:</b> See destination names</p>
         <p>• <b>Change scene:</b> Use buttons or dots</p>
-        <p>• <b>Tour selection:</b> Press ESC key</p>
-    </div>
-    
-    <!-- TOUR SELECTION MODAL -->
-    <div id="tour-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🏛️ Bulacan Virtual Tours</h2>
-                <p>Select a virtual tour to explore</p>
-            </div>
-            
-            <div class="tour-options">
-                <div class="tour-option active" data-tour="delpilar">
-                    <div class="tour-icon">⛪</div>
-                    <div class="tour-title">Marcelo H. Del Pilar Shrine</div>
-                    <div class="tour-desc">Historical shrine of the great propagandist</div>
-                </div>
-                
-                <div class="tour-option" data-tour="hiyas">
-                    <div class="tour-icon">🏛️</div>
-                    <div class="tour-title">Hiyas ng Bulacan Museum</div>
-                    <div class="tour-desc">Provincial museum showcasing Bulacan's heritage</div>
-                </div>
-                
-                <div class="tour-option" data-tour="coming-soon">
-                    <div class="tour-icon">🔜</div>
-                    <div class="tour-title">More Tours Coming Soon</div>
-                    <div class="tour-desc">Other historical sites in development</div>
-                </div>
-            </div>
-            
-            <div class="modal-actions">
-                <button class="modal-btn secondary" id="cancel-btn">Cancel</button>
-                <button class="modal-btn primary" id="go-tour-btn">Start Tour</button>
-            </div>
-        </div>
     </div>
     
     <!-- A-FRAME SCENE -->
@@ -675,18 +446,7 @@
             </a-cursor>
         </a-entity>
         
-        <!-- EXIT HOTSPOT (Positioned overhead for easy access) -->
-        <a-entity id="exit-hotspot">
-            <a-entity nav-hotspot="
-                target: main-menu;
-                label: Exit to Tour Selection;
-                icon: exit;
-                position: 0 2 -3;
-                rotation: -45 0 0;
-                type: exit">
-            </a-entity>
-        </a-entity>
-        
+        <!-- HOTSPOTS -->
         <!-- FRONT VIEW -->
         <a-entity id="front-hotspots">
             <!-- To Left View -->
@@ -810,7 +570,6 @@
         let currentSceneIndex = 0;
         let imagesLoaded = 0;
         const totalImages = scenes.length;
-        let selectedTour = "delpilar";
         
         // =====================
         // DOM ELEMENTS
@@ -820,8 +579,6 @@
         const loading = document.getElementById('loading');
         const sceneSelector = document.getElementById('scene-selector');
         const instructions = document.getElementById('instructions');
-        const tourModal = document.getElementById('tour-modal');
-        const exitBtn = document.getElementById('exit-btn');
         
         // =====================
         // INITIALIZATION
@@ -912,7 +669,7 @@
         };
         
         function updateHotspots(sceneId) {
-            // Hide all hotspot groups except exit
+            // Hide all hotspot groups
             const hotspotGroups = [
                 'front-hotspots',
                 'left-hotspots',
@@ -932,63 +689,11 @@
                     currentHotspots.setAttribute('visible', 'true');
                 }, 300);
             }
-            
-            // Always show exit hotspot
-            const exitHotspot = document.getElementById('exit-hotspot');
-            if (exitHotspot) {
-                exitHotspot.setAttribute('visible', 'true');
-            }
         }
         
         function updateNavigation() {
             document.getElementById('prev-btn').disabled = currentSceneIndex === 0;
             document.getElementById('next-btn').disabled = currentSceneIndex === scenes.length - 1;
-        }
-        
-        // =====================
-        // TOUR SELECTION MODAL
-        // =====================
-        function showTourSelection() {
-            // Pause A-Frame scene
-            const scene = document.querySelector('a-scene');
-            scene.pause();
-            
-            // Show modal
-            tourModal.style.display = 'flex';
-            
-            // Reset selection to current tour
-            selectedTour = "delpilar";
-            updateTourSelection();
-        }
-        
-        function hideTourSelection() {
-            // Hide modal
-            tourModal.style.display = 'none';
-            
-            // Resume A-Frame scene
-            const scene = document.querySelector('a-scene');
-            scene.play();
-        }
-        
-        function updateTourSelection() {
-            document.querySelectorAll('.tour-option').forEach(option => {
-                option.classList.remove('active');
-                if (option.dataset.tour === selectedTour) {
-                    option.classList.add('active');
-                }
-            });
-        }
-        
-        function navigateToTour() {
-            if (selectedTour === "delpilar") {
-                // Already in this tour, just close modal
-                hideTourSelection();
-            } else if (selectedTour === "hiyas") {
-                // Navigate to Hiyas ng Bulacan Museum
-                window.location.href = "hiyas_museum.html";
-            } else if (selectedTour === "coming-soon") {
-                alert("This tour is coming soon! Check back later.");
-            }
         }
         
         // =====================
@@ -1004,19 +709,12 @@
                 changeScene(currentSceneIndex + 1);
             });
             
-            // Exit button
-            exitBtn.addEventListener('click', showTourSelection);
-            
             // Keyboard navigation
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
                 if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
                 if (e.key === 'Escape') {
-                    if (tourModal.style.display === 'flex') {
-                        hideTourSelection();
-                    } else {
-                        showTourSelection();
-                    }
+                    instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
                 }
             });
             
@@ -1031,24 +729,6 @@
                     !document.getElementById('instructions-btn').contains(e.target) &&
                     instructions.style.display === 'block') {
                     instructions.style.display = 'none';
-                }
-            });
-            
-            // Tour selection modal
-            document.querySelectorAll('.tour-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    selectedTour = option.dataset.tour;
-                    updateTourSelection();
-                });
-            });
-            
-            document.getElementById('cancel-btn').addEventListener('click', hideTourSelection);
-            document.getElementById('go-tour-btn').addEventListener('click', navigateToTour);
-            
-            // Close modal when clicking outside
-            tourModal.addEventListener('click', (e) => {
-                if (e.target === tourModal) {
-                    hideTourSelection();
                 }
             });
             
@@ -1087,10 +767,7 @@
             if (cursor) {
                 cursor.addEventListener('mouseenter', (e) => {
                     if (e.target.hasAttribute('data-hotspot')) {
-                        // Check if it's an exit hotspot
-                        const isExit = e.target.hasAttribute('data-type') && 
-                                       e.target.getAttribute('data-type') === 'exit';
-                        cursor.setAttribute('color', isExit ? '#FF6B6B' : '#FFD700');
+                        cursor.setAttribute('color', '#FFD700');
                     }
                 });
                 
