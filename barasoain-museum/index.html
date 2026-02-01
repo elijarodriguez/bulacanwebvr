@@ -403,7 +403,7 @@
     <!-- SCENE INFO -->
     <div id="scene-info">
         <i>📍</i>
-        <span id="scene-title">Scene 1</span>
+        <span id="scene-title">1st Scene</span>
     </div>
     
     <!-- INSTRUCTIONS BUTTON -->
@@ -420,15 +420,15 @@
     
     <!-- A-FRAME SCENE -->
     <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
-        <!-- ASSETS - 7 SIMPLE SCENES -->
+        <!-- ASSETS - 7 SCENES WITH SIMPLE NAMES -->
         <a-assets timeout="30000">
-            <img id="scene1" src="barasoain_museum/scene1.jpg" crossorigin="anonymous">
-            <img id="scene2" src="barasoain_museum/scene2.jpg" crossorigin="anonymous">
-            <img id="scene3" src="barasoain_museum/scene3.jpg" crossorigin="anonymous">
-            <img id="scene4" src="barasoain_museum/scene4.jpg" crossorigin="anonymous">
-            <img id="scene5" src="barasoain_museum/scene5.jpg" crossorigin="anonymous">
-            <img id="scene6" src="barasoain_museum/scene6.jpg" crossorigin="anonymous">
-            <img id="scene7" src="barasoain_museum/scene7.jpg" crossorigin="anonymous">
+            <img id="scene1" src="barasoain_museum/1st scene.jpg" crossorigin="anonymous">
+            <img id="scene2" src="barasoain_museum/2nd scene.jpg" crossorigin="anonymous">
+            <img id="scene3" src="barasoain_museum/3rd scene.jpg" crossorigin="anonymous">
+            <img id="scene4" src="barasoain_museum/4th scene.jpg" crossorigin="anonymous">
+            <img id="scene5" src="barasoain_museum/5th scene.jpg" crossorigin="anonymous">
+            <img id="scene6" src="barasoain_museum/6th scene.jpg" crossorigin="anonymous">
+            <img id="scene7" src="barasoain_museum/7th scene.jpg" crossorigin="anonymous">
         </a-assets>
         
         <!-- SKY -->
@@ -447,135 +447,135 @@
         </a-entity>
         
         <!-- HOTSPOTS -->
-        <!-- SCENE 1 -->
+        <!-- 1ST SCENE -->
         <a-entity id="scene1-hotspots">
-            <!-- To Scene 2 -->
+            <!-- To 2nd Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene2;
-                label: Next → Scene 2;
+                label: Next → 2nd Scene;
                 icon: right;
                 position: 2 0 -4;
                 rotation: 0 -30 0">
             </a-entity>
         </a-entity>
         
-        <!-- SCENE 2 -->
+        <!-- 2ND SCENE -->
         <a-entity id="scene2-hotspots" visible="false">
-            <!-- To Scene 1 -->
+            <!-- To 1st Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene1;
-                label: ← Previous Scene 1;
+                label: ← Previous 1st Scene;
                 icon: left;
                 position: -2 0 -4;
                 rotation: 0 30 0">
             </a-entity>
             
-            <!-- To Scene 3 -->
+            <!-- To 3rd Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene3;
-                label: Next → Scene 3;
+                label: Next → 3rd Scene;
                 icon: right;
                 position: 2 0 -4;
                 rotation: 0 -30 0">
             </a-entity>
         </a-entity>
         
-        <!-- SCENE 3 -->
+        <!-- 3RD SCENE -->
         <a-entity id="scene3-hotspots" visible="false">
-            <!-- To Scene 2 -->
+            <!-- To 2nd Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene2;
-                label: ← Previous Scene 2;
+                label: ← Previous 2nd Scene;
                 icon: left;
                 position: -2 0 -4;
                 rotation: 0 30 0">
             </a-entity>
             
-            <!-- To Scene 4 -->
+            <!-- To 4th Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene4;
-                label: Next → Scene 4;
+                label: Next → 4th Scene;
                 icon: right;
                 position: 2 0 -4;
                 rotation: 0 -30 0">
             </a-entity>
         </a-entity>
         
-        <!-- SCENE 4 -->
+        <!-- 4TH SCENE -->
         <a-entity id="scene4-hotspots" visible="false">
-            <!-- To Scene 3 -->
+            <!-- To 3rd Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene3;
-                label: ← Previous Scene 3;
+                label: ← Previous 3rd Scene;
                 icon: left;
                 position: -2 0 -4;
                 rotation: 0 30 0">
             </a-entity>
             
-            <!-- To Scene 5 -->
+            <!-- To 5th Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene5;
-                label: Next → Scene 5;
+                label: Next → 5th Scene;
                 icon: right;
                 position: 2 0 -4;
                 rotation: 0 -30 0">
             </a-entity>
         </a-entity>
         
-        <!-- SCENE 5 -->
+        <!-- 5TH SCENE -->
         <a-entity id="scene5-hotspots" visible="false">
-            <!-- To Scene 4 -->
+            <!-- To 4th Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene4;
-                label: ← Previous Scene 4;
+                label: ← Previous 4th Scene;
                 icon: left;
                 position: -2 0 -4;
                 rotation: 0 30 0">
             </a-entity>
             
-            <!-- To Scene 6 -->
+            <!-- To 6th Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene6;
-                label: Next → Scene 6;
+                label: Next → 6th Scene;
                 icon: right;
                 position: 2 0 -4;
                 rotation: 0 -30 0">
             </a-entity>
         </a-entity>
         
-        <!-- SCENE 6 -->
+        <!-- 6TH SCENE -->
         <a-entity id="scene6-hotspots" visible="false">
-            <!-- To Scene 5 -->
+            <!-- To 5th Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene5;
-                label: ← Previous Scene 5;
+                label: ← Previous 5th Scene;
                 icon: left;
                 position: -2 0 -4;
                 rotation: 0 30 0">
             </a-entity>
             
-            <!-- To Scene 7 -->
+            <!-- To 7th Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene7;
-                label: Next → Scene 7;
+                label: Next → 7th Scene;
                 icon: right;
                 position: 2 0 -4;
                 rotation: 0 -30 0">
             </a-entity>
         </a-entity>
         
-        <!-- SCENE 7 -->
+        <!-- 7TH SCENE -->
         <a-entity id="scene7-hotspots" visible="false">
-            <!-- To Scene 6 -->
+            <!-- To 6th Scene -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene6;
-                label: ← Previous Scene 6;
+                label: ← Previous 6th Scene;
                 icon: left;
                 position: -2 0 -4;
                 rotation: 0 30 0">
             </a-entity>
             
-            <!-- To Scene 1 (Loop back) -->
+            <!-- To 1st Scene (Loop back) -->
             <a-entity class="hotspot" nav-hotspot="
                 target: scene1;
                 label: Back to Start;
@@ -597,16 +597,16 @@
     
     <script>
         // =====================
-        // SCENE CONFIGURATION - 7 SIMPLE SCENES
+        // SCENE CONFIGURATION - 7 SCENES WITH SIMPLE NAMES
         // =====================
         const scenes = [
-            { id: "scene1", title: "Scene 1" },
-            { id: "scene2", title: "Scene 2" },
-            { id: "scene3", title: "Scene 3" },
-            { id: "scene4", title: "Scene 4" },
-            { id: "scene5", title: "Scene 5" },
-            { id: "scene6", title: "Scene 6" },
-            { id: "scene7", title: "Scene 7" }
+            { id: "scene1", title: "1st Scene" },
+            { id: "scene2", title: "2nd Scene" },
+            { id: "scene3", title: "3rd Scene" },
+            { id: "scene4", title: "4th Scene" },
+            { id: "scene5", title: "5th Scene" },
+            { id: "scene6", title: "6th Scene" },
+            { id: "scene7", title: "7th Scene" }
         ];
         
         window.sceneList = scenes;
@@ -641,7 +641,7 @@
         // IMAGE PRELOADING
         // =====================
         function preloadImages() {
-            scenes.forEach(scene => {
+            scenes.forEach((scene, index) => {
                 const img = new Image();
                 img.onload = () => {
                     imagesLoaded++;
@@ -655,7 +655,7 @@
                     }
                 };
                 img.onerror = () => {
-                    console.warn(`Image not found: barasoain_museum/${scene.id}.jpg`);
+                    console.warn(`Image not found: barasoain_museum/${getImageName(index + 1)}`);
                     imagesLoaded++;
                     if (imagesLoaded === totalImages) {
                         setTimeout(() => {
@@ -666,8 +666,14 @@
                         }, 500);
                     }
                 };
-                img.src = `barasoain_museum/${scene.id}.jpg`;
+                img.src = `barasoain_museum/${getImageName(index + 1)}`;
             });
+        }
+        
+        // Helper function to get image names (1st scene.jpg, 2nd scene.jpg, etc.)
+        function getImageName(sceneNumber) {
+            const suffixes = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th'];
+            return `${suffixes[sceneNumber - 1]} scene.jpg`;
         }
         
         // =====================
@@ -678,7 +684,7 @@
                 const dot = document.createElement('div');
                 dot.className = `scene-dot ${index === 0 ? 'active' : ''}`;
                 dot.dataset.index = index;
-                dot.title = `Scene ${index + 1}`;
+                dot.title = scene.title;
                 
                 dot.addEventListener('click', () => {
                     changeScene(index);
