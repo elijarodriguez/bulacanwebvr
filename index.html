@@ -25,7 +25,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
         
@@ -175,6 +175,15 @@
             background: rgba(255, 215, 0, 0.3);
         }
         
+        .barasoain-btn {
+            background: rgba(255, 142, 83, 0.2);
+            border-color: rgba(255, 142, 83, 0.3);
+        }
+        
+        .barasoain-btn:hover {
+            background: rgba(255, 142, 83, 0.3);
+        }
+        
         .instructions {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 15px;
@@ -309,6 +318,23 @@
                     <i class="fas fa-play"></i> Launch Tour
                 </button>
             </div>
+            
+            <!-- Barasoain Museum -->
+            <div class="project-card">
+                <div class="project-icon" style="color: #FF8E53;">
+                    <i class="fas fa-university"></i>
+                </div>
+                <h3>Barasoain Museum</h3>
+                <p>Known as the "Cradle of Democracy in the East," Barasoain Church is a significant historical site where the First Philippine Republic was inaugurated. 
+                    The museum showcases the rich history of the Philippine Revolution and the Malolos Congress.</p>
+                <div class="project-info">
+                    <span><i class="fas fa-compass"></i> Malolos, Bulacan</span>
+                    <span><i class="fas fa-image"></i> 7 Scenes</span>
+                </div>
+                <button class="launch-btn barasoain-btn" data-project="barasoain-museum">
+                    <i class="fas fa-play"></i> Launch Tour
+                </button>
+            </div>
         </div>
         
         <div class="instructions">
@@ -318,6 +344,7 @@
                 <li><i class="fas fa-mobile-alt"></i> <strong>Mobile:</strong> Swipe or move your device</li>
                 <li><i class="fas fa-bullseye"></i> Click on hotspots/arrows to navigate between views</li>
                 <li><i class="fas fa-vr-cardboard"></i> <strong>VR Mode:</strong> Put on your headset after launching tour</li>
+                <li><i class="fas fa-keyboard"></i> <strong>Keyboard:</strong> Press 1-4 to quickly select tours</li>
             </ul>
         </div>
     </div>
@@ -340,21 +367,27 @@
             
             <a-entity position="0 1.6 0">
                 <!-- Battle of Quinga Option -->
-                <a-entity class="vr-option" position="-1.5 0 -2" data-project="battle-of-quinga">
+                <a-entity class="vr-option" position="-2 0 -2" data-project="battle-of-quinga">
                     <a-box width="1" height="0.5" depth="0.1" color="#FF6B6B"></a-box>
                     <a-text value="Battle" position="0 0 0.1" align="center" color="white" width="1"></a-text>
                 </a-entity>
                 
                 <!-- Museum Option -->
-                <a-entity class="vr-option" position="0 0 -2" data-project="bulacan-museum">
+                <a-entity class="vr-option" position="-0.67 0 -2" data-project="bulacan-museum">
                     <a-box width="1" height="0.5" depth="0.1" color="#4ECDC4"></a-box>
                     <a-text value="Museum" position="0 0 0.1" align="center" color="white" width="1"></a-text>
                 </a-entity>
                 
                 <!-- Shrine Option -->
-                <a-entity class="vr-option" position="1.5 0 -2" data-project="del-pilar-shrine">
+                <a-entity class="vr-option" position="0.67 0 -2" data-project="del-pilar-shrine">
                     <a-box width="1" height="0.5" depth="0.1" color="#FFD700"></a-box>
                     <a-text value="Shrine" position="0 0 0.1" align="center" color="white" width="1"></a-text>
+                </a-entity>
+                
+                <!-- Barasoain Option -->
+                <a-entity class="vr-option" position="2 0 -2" data-project="barasoain-museum">
+                    <a-box width="1" height="0.5" depth="0.1" color="#FF8E53"></a-box>
+                    <a-text value="Barasoain" position="0 0 0.1" align="center" color="white" width="1"></a-text>
                 </a-entity>
             </a-entity>
             
@@ -390,6 +423,11 @@
                 name: 'Marcelo H. Del Pilar Shrine',
                 path: 'del-pilar-shrine/index.html',
                 color: '#FFD700'
+            },
+            'barasoain-museum': {
+                name: 'Barasoain Museum',
+                path: 'barasoain-museum/index.html',
+                color: '#FF8E53'
             }
         };
         
@@ -533,6 +571,7 @@
                 if (e.key === '1') launchProject('battle-of-quinga');
                 if (e.key === '2') launchProject('bulacan-museum');
                 if (e.key === '3') launchProject('del-pilar-shrine');
+                if (e.key === '4') launchProject('barasoain-museum');
                 
                 // Escape to close loading overlay
                 if (e.key === 'Escape') {
@@ -558,4 +597,3 @@
     </script>
 </body>
 </html>
-
