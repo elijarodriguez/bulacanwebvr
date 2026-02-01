@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Cache Prevention -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <title>Barasoain Museum - VR Tour</title>
+    
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    
+    <!-- Enhanced Hotspot Component -->
+    <script>
+        AFRAME.registerComponent('nav-hotspot', {
+            schema: {
+                target: { type: 'string' },      // Target scene ID
+                label: { type: 'string' },       // Display label
+                icon: { type: 'string', default: 'arrow' }, // arrow, door, stairs, etc.
+                position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
+                rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
+            },
+            
+            init: function() {
+                const el = this.el;
+                const data = this.data;
+                
+                // Create container
+                el.setAttribute('position', data.position);
+                el.setAttribute('rotation', data.rotation);
+                el.classList.add('clickable');
+                el.setAttribute('data-hotspot', 'true');
+                el.setAttribute('data-target', data.target); // Add data-target for compatibility
+                
+                // Create outer ring (pulsing)
+                const ring = document.createElement('a-ring');
+                ring.setAttribute('radius-inner', '0.08');
+                ring.setAttribute('radius-outer', '0.12');
+                ring.setAttribute('color', '#FFD700');
+                ring.setAttribute('opacity', '0.6');
+                ring.setAttribute('shader', 'flat');
+                ring.setAttribute('animation', {
+                    property: 'scale',
+                    to: '1.2 1.2 1',
+                    dir: 'alternate',
+                    loop: true,
+                    dur: 1200,
+                    easing: 'easeInOutSine'
+                });
+                el.appendChild(ring);
+                
+                // Create inner circle (hover effect)
+                const circle = document.createElement('a-circle');
+                circle.setAttribute('radius', '0.06');
+                circle.setAttribute('color', '#FFFFFF');
+                circle.setAttribute('opacity', '0');
+                circle.setAttribute('shader', 'flat');
+                circle.setAttribute('class', 'hotspot-inner');
+                el.appendChild(circle);
+                
+                // Create icon based on type
+                const icon = this.createIcon(data.icon);
+                if (icon) {
+                    icon.setAttribute('position', '0 0 0.001');
+                    icon.setAttribute('scale', '0.04 0.04 1');
+                    el.appendChild(icon);
+                }
+                
+                // Create label
+                const label = document.createElement('a-entity');
+                label.setAttribute('text', {
+                    value: data.label,
+                    align: 'center',
+                    color: '#FFFFFF',
+                    width: 0.6,
+                    font: 'roboto',
+                    baseline: 'center'
+                });
+                label.setAttribute('position', '0 0.2 0');
+                label.setAttribute('visible', 'false');
+                label.setAttribute('class', 'hotspot-label');
+                el.appendChild(label);
+                
+                // HOVER EFFECTS
+                el.addEventListener('mouseenter', () => {
+                    // Highlight inner circle
+                    circle.setAttribute('opacity', '0.8');
+                    circle.setAttribute('animation', {
+                        property: 'scale',
+                        to: '1.3 1.3 1',
+                        dur: 200,
+                        easing: 'easeOutQuad'
+                    });
+                    
+                    // Show label
+                    label.setAttribute('visible', 'true');
+                    label.setAttribute('animation', {
+                        property: 'scale',
+                        from: '0.8 0.8 1',
+                        to: '1 1 1',
+                        dur: 300,
+                        easing: 'easeOutBack'
+                    });
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    // Remove highlight
+                    circle.setAttribute('opacity', '0');
+                    circle.setAttribute('scale', '1 1 1');
+                    circle.removeAttribute('animation');
+                    
+                    // Hide label
+                    label.setAttribute('visible', 'false');
+                });
+                
+                // CLICK/TAP EVENT
+                el.addEventListener('click', () => {
+                    // Click feedback
+                    circle.setAttribute('color', '#4CAF50');
+                    circle.setAttribute('opacity', '0.9');
+                    
+                    setTimeout(() => {
+                        circle.setAttribute('color', '#FFFFFF');
+                        circle.setAttribute('opacity', '0');
+                        
+                        // Navigate to target scene
+                        const scenes = window.sceneList;
+                        const targetIndex = scenes.findIndex(s => s.id === data.target);
+                        if (targetIndex !== -1) {
+                            window.changeScene(targetIndex);
+                        }
+                    }, 300);
+                });
+            },
+            
+            createIcon: function(iconType) {
+                const iconMap = {
+                    'arrow': 'M-0.5,-0.5 L0.5,0 L-0.5,0.5 Z',
+                    'left': 'M0.3,-0.5 L0,0 L0.3,0.5 M-0.3,0 L0,0',
+                    'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0'
+                };
+                
+                if (iconMap[iconType]) {
+                    const path = document.createElement('a-entity');
+                    path.setAttribute('geometry', {
+                        primitive: 'path',
+                        path: iconMap[iconType]
+                    });
+                    path.setAttribute('material', 'color: #000000; shader: flat');
+                    path.setAttribute('rotation', iconType === 'arrow' ? '0 0 90' : '0 0 0');
+                    return path;
+                }
+                return null;
+            }
+        });
+    </script>
+    
+    <style>
+        /* RESET & BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden; 
+            background: #000;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* LOADING */
+        #loading {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #1a1a2e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 215, 0, 0.2);
+            border-top: 3px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 10px;
+        }
+        
+        /* SCENE INFO */
+        #scene-info {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+            justify-content: center;
+        }
+        
+        #scene-info i {
+            color: #FFD700;
+            font-size: 16px;
+        }
+        
+        /* NAVIGATION CONTROLS */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .controls button {
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .controls button:hover:not(:disabled) {
+            background: rgba(26, 26, 46, 0.95);
+            transform: scale(1.1);
+        }
+        
+        .controls button:active {
+            transform: scale(0.95);
+        }
+        
+        .controls button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* SCENE SELECTOR */
+        .scene-selector {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .scene-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .scene-dot.active {
+            background: #FFD700;
+            transform: scale(1.3);
+        }
+        
+        .scene-dot:hover {
+            background: rgba(255, 215, 0, 0.7);
+            transform: scale(1.2);
+        }
+        
+        /* INSTRUCTIONS */
+        #instructions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            max-width: 200px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        #instructions h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .instructions-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* MOBILE OPTIMIZATION */
+        @media (max-width: 768px) {
+            #scene-info {
+                top: 15px;
+                font-size: 13px;
+                padding: 8px 16px;
+                min-width: 160px;
+            }
+            
+            .controls {
+                bottom: 15px;
+                padding: 0 15px;
+            }
+            
+            .controls button {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            
+            .scene-selector {
+                bottom: 80px;
+            }
+            
+            .scene-dot {
+                width: 8px;
+                height: 8px;
+            }
+        }
+        
+        /* CURSOR STYLING */
+        a-cursor {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING -->
+    <div id="loading">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Barasoain Museum Tour...</div>
+    </div>
+    
+    <!-- SCENE INFO -->
+    <div id="scene-info">
+        <i>📍</i>
+        <span id="scene-title">Scene 1</span>
+    </div>
+    
+    <!-- INSTRUCTIONS BUTTON -->
+    <button class="instructions-btn" id="instructions-btn" title="Instructions">?</button>
+    
+    <!-- INSTRUCTIONS PANEL -->
+    <div id="instructions">
+        <h3>🗺️ Navigation Guide</h3>
+        <p>• <b>Look around:</b> Drag or move device</p>
+        <p>• <b>Navigate:</b> Click golden markers</p>
+        <p>• <b>Hover:</b> See destination names</p>
+        <p>• <b>Change scene:</b> Use buttons or dots</p>
+    </div>
+    
+    <!-- A-FRAME SCENE -->
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
+        <!-- ASSETS - 7 SIMPLE SCENES -->
+        <a-assets timeout="30000">
+            <img id="scene1" src="barasoain_museum/scene1.jpg" crossorigin="anonymous">
+            <img id="scene2" src="barasoain_museum/scene2.jpg" crossorigin="anonymous">
+            <img id="scene3" src="barasoain_museum/scene3.jpg" crossorigin="anonymous">
+            <img id="scene4" src="barasoain_museum/scene4.jpg" crossorigin="anonymous">
+            <img id="scene5" src="barasoain_museum/scene5.jpg" crossorigin="anonymous">
+            <img id="scene6" src="barasoain_museum/scene6.jpg" crossorigin="anonymous">
+            <img id="scene7" src="barasoain_museum/scene7.jpg" crossorigin="anonymous">
+        </a-assets>
+        
+        <!-- SKY -->
+        <a-sky id="scene-sky" src="#scene1"></a-sky>
+        
+        <!-- CAMERA WITH CURSOR -->
+        <a-entity camera look-controls="pointerLockEnabled: true">
+            <a-cursor 
+                id="cursor"
+                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                animation__mouseleave="property: scale; startEvents: mouseleave; from: 0.1 0.1 0.1; to: 1 1 1; dur: 500"
+                fuse="true"
+                fuse-timeout="500">
+            </a-cursor>
+        </a-entity>
+        
+        <!-- HOTSPOTS -->
+        <!-- SCENE 1 -->
+        <a-entity id="scene1-hotspots">
+            <!-- To Scene 2 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene2;
+                label: Next → Scene 2;
+                icon: right;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+        
+        <!-- SCENE 2 -->
+        <a-entity id="scene2-hotspots" visible="false">
+            <!-- To Scene 1 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene1;
+                label: ← Previous Scene 1;
+                icon: left;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
+            
+            <!-- To Scene 3 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene3;
+                label: Next → Scene 3;
+                icon: right;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+        
+        <!-- SCENE 3 -->
+        <a-entity id="scene3-hotspots" visible="false">
+            <!-- To Scene 2 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene2;
+                label: ← Previous Scene 2;
+                icon: left;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
+            
+            <!-- To Scene 4 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene4;
+                label: Next → Scene 4;
+                icon: right;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+        
+        <!-- SCENE 4 -->
+        <a-entity id="scene4-hotspots" visible="false">
+            <!-- To Scene 3 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene3;
+                label: ← Previous Scene 3;
+                icon: left;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
+            
+            <!-- To Scene 5 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene5;
+                label: Next → Scene 5;
+                icon: right;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+        
+        <!-- SCENE 5 -->
+        <a-entity id="scene5-hotspots" visible="false">
+            <!-- To Scene 4 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene4;
+                label: ← Previous Scene 4;
+                icon: left;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
+            
+            <!-- To Scene 6 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene6;
+                label: Next → Scene 6;
+                icon: right;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+        
+        <!-- SCENE 6 -->
+        <a-entity id="scene6-hotspots" visible="false">
+            <!-- To Scene 5 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene5;
+                label: ← Previous Scene 5;
+                icon: left;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
+            
+            <!-- To Scene 7 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene7;
+                label: Next → Scene 7;
+                icon: right;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+        
+        <!-- SCENE 7 -->
+        <a-entity id="scene7-hotspots" visible="false">
+            <!-- To Scene 6 -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene6;
+                label: ← Previous Scene 6;
+                icon: left;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
+            
+            <!-- To Scene 1 (Loop back) -->
+            <a-entity class="hotspot" nav-hotspot="
+                target: scene1;
+                label: Back to Start;
+                icon: arrow;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+    </a-scene>
+    
+    <!-- SCENE SELECTOR DOTS -->
+    <div class="scene-selector" id="scene-selector"></div>
+    
+    <!-- NAVIGATION CONTROLS -->
+    <div class="controls">
+        <button id="prev-btn" title="Previous Scene">←</button>
+        <button id="next-btn" title="Next Scene">→</button>
+    </div>
+    
+    <script>
+        // =====================
+        // SCENE CONFIGURATION - 7 SIMPLE SCENES
+        // =====================
+        const scenes = [
+            { id: "scene1", title: "Scene 1" },
+            { id: "scene2", title: "Scene 2" },
+            { id: "scene3", title: "Scene 3" },
+            { id: "scene4", title: "Scene 4" },
+            { id: "scene5", title: "Scene 5" },
+            { id: "scene6", title: "Scene 6" },
+            { id: "scene7", title: "Scene 7" }
+        ];
+        
+        window.sceneList = scenes;
+        
+        // =====================
+        // STATE
+        // =====================
+        let currentSceneIndex = 0;
+        let imagesLoaded = 0;
+        const totalImages = scenes.length;
+        
+        // =====================
+        // DOM ELEMENTS
+        // =====================
+        const sky = document.getElementById('scene-sky');
+        const sceneTitle = document.getElementById('scene-title');
+        const loading = document.getElementById('loading');
+        const sceneSelector = document.getElementById('scene-selector');
+        const instructions = document.getElementById('instructions');
+        
+        // =====================
+        // INITIALIZATION
+        // =====================
+        document.addEventListener('DOMContentLoaded', function() {
+            preloadImages();
+            createSceneDots();
+            setupEventListeners();
+            setupAframeEvents();
+        });
+        
+        // =====================
+        // IMAGE PRELOADING
+        // =====================
+        function preloadImages() {
+            scenes.forEach(scene => {
+                const img = new Image();
+                img.onload = () => {
+                    imagesLoaded++;
+                    if (imagesLoaded === totalImages) {
+                        setTimeout(() => {
+                            loading.style.opacity = '0';
+                            setTimeout(() => {
+                                loading.style.display = 'none';
+                            }, 500);
+                        }, 500);
+                    }
+                };
+                img.onerror = () => {
+                    console.warn(`Image not found: barasoain_museum/${scene.id}.jpg`);
+                    imagesLoaded++;
+                    if (imagesLoaded === totalImages) {
+                        setTimeout(() => {
+                            loading.style.opacity = '0';
+                            setTimeout(() => {
+                                loading.style.display = 'none';
+                            }, 500);
+                        }, 500);
+                    }
+                };
+                img.src = `barasoain_museum/${scene.id}.jpg`;
+            });
+        }
+        
+        // =====================
+        // SCENE DOTS
+        // =====================
+        function createSceneDots() {
+            scenes.forEach((scene, index) => {
+                const dot = document.createElement('div');
+                dot.className = `scene-dot ${index === 0 ? 'active' : ''}`;
+                dot.dataset.index = index;
+                dot.title = `Scene ${index + 1}`;
+                
+                dot.addEventListener('click', () => {
+                    changeScene(index);
+                });
+                
+                sceneSelector.appendChild(dot);
+            });
+        }
+        
+        // =====================
+        // SCENE MANAGEMENT
+        // =====================
+        window.changeScene = function(index) {
+            if (index < 0 || index >= scenes.length) return;
+            
+            currentSceneIndex = index;
+            const scene = scenes[index];
+            
+            console.log(`Changing to scene: ${scene.id}`);
+            
+            // Update sky
+            sky.setAttribute('src', `#${scene.id}`);
+            
+            // Update title
+            sceneTitle.textContent = scene.title;
+            
+            // Update scene dots
+            document.querySelectorAll('.scene-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+            
+            // Show/hide hotspots
+            updateHotspots(scene.id);
+            
+            // Update navigation buttons
+            updateNavigation();
+        };
+        
+        function updateHotspots(sceneId) {
+            // Hide all hotspot groups
+            const hotspotGroups = [
+                'scene1-hotspots',
+                'scene2-hotspots',
+                'scene3-hotspots',
+                'scene4-hotspots',
+                'scene5-hotspots',
+                'scene6-hotspots',
+                'scene7-hotspots'
+            ];
+            
+            hotspotGroups.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('visible', 'false');
+                }
+            });
+            
+            // Show current scene hotspots
+            const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
+            if (currentHotspots) {
+                currentHotspots.setAttribute('visible', 'true');
+            }
+        }
+        
+        function updateNavigation() {
+            document.getElementById('prev-btn').disabled = currentSceneIndex === 0;
+            document.getElementById('next-btn').disabled = currentSceneIndex === scenes.length - 1;
+        }
+        
+        // =====================
+        // EVENT LISTENERS
+        // =====================
+        function setupEventListeners() {
+            // Navigation buttons
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                changeScene(currentSceneIndex - 1);
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', () => {
+                changeScene(currentSceneIndex + 1);
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
+                if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
+                if (e.key === 'Escape') {
+                    instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
+                }
+                // Number keys for direct scene access (1-7)
+                if (e.key >= '1' && e.key <= '7') {
+                    const sceneIndex = parseInt(e.key) - 1;
+                    if (sceneIndex < scenes.length) {
+                        changeScene(sceneIndex);
+                    }
+                }
+            });
+            
+            // Instructions toggle
+            document.getElementById('instructions-btn').addEventListener('click', () => {
+                instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
+            });
+            
+            // Close instructions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!instructions.contains(e.target) && 
+                    !document.getElementById('instructions-btn').contains(e.target) &&
+                    instructions.style.display === 'block') {
+                    instructions.style.display = 'none';
+                }
+            });
+            
+            // Mobile swipe
+            let touchStartX = 0;
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > 60) {
+                    if (diff > 0) {
+                        changeScene(currentSceneIndex + 1);
+                    } else {
+                        changeScene(currentSceneIndex - 1);
+                    }
+                }
+            });
+        }
+        
+        // =====================
+        // A-FRAME EVENTS
+        // =====================
+        function setupAframeEvents() {
+            const scene = document.querySelector('a-scene');
+            
+            scene.addEventListener('loaded', () => {
+                console.log('A-Frame scene fully loaded');
+                
+                // Ensure hotspots are visible after scene loads
+                setTimeout(() => {
+                    updateHotspots(scenes[currentSceneIndex].id);
+                }, 500);
+            });
+            
+            // Improve cursor interaction
+            const cursor = document.getElementById('cursor');
+            if (cursor) {
+                cursor.addEventListener('mouseenter', (e) => {
+                    if (e.target.hasAttribute('data-hotspot')) {
+                        cursor.setAttribute('color', '#FFD700');
+                    }
+                });
+                
+                cursor.addEventListener('mouseleave', () => {
+                    cursor.setAttribute('color', '#FFF');
+                });
+            }
+        }
+        
+        // Initial scene
+        setTimeout(() => {
+            changeScene(0);
+        }, 1000);
+    </script>
+</body>
+</html>
