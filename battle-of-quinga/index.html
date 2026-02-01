@@ -34,6 +34,7 @@
                 el.setAttribute('rotation', data.rotation);
                 el.classList.add('clickable');
                 el.setAttribute('data-hotspot', 'true');
+                el.setAttribute('data-target', data.target); // Add data-target for compatibility
                 
                 // Create outer ring (pulsing)
                 const ring = document.createElement('a-ring');
@@ -449,7 +450,7 @@
         <!-- FRONT VIEW -->
         <a-entity id="front-hotspots">
             <!-- To Left View -->
-            <a-entity nav-hotspot="
+            <a-entity class="hotspot" nav-hotspot="
                 target: left;
                 label: Left View;
                 icon: left;
@@ -458,7 +459,7 @@
             </a-entity>
             
             <!-- To Right View -->
-            <a-entity nav-hotspot="
+            <a-entity class="hotspot" nav-hotspot="
                 target: right;
                 label: Right View;
                 icon: right;
@@ -470,7 +471,7 @@
         <!-- LEFT VIEW -->
         <a-entity id="left-hotspots" visible="false">
             <!-- To Front View -->
-            <a-entity nav-hotspot="
+            <a-entity class="hotspot" nav-hotspot="
                 target: front;
                 label: Front View;
                 icon: arrow;
@@ -482,7 +483,7 @@
         <!-- RIGHT VIEW -->
         <a-entity id="right-hotspots" visible="false">
             <!-- To Front View -->
-            <a-entity nav-hotspot="
+            <a-entity class="hotspot" nav-hotspot="
                 target: front;
                 label: Front View;
                 icon: arrow;
@@ -624,6 +625,8 @@
             
             // Update navigation buttons
             updateNavigation();
+            
+            console.log(`Changed to scene: ${scene.id}`);
         };
         
         function updateHotspots(sceneId) {
@@ -636,15 +639,16 @@
             
             hotspotGroups.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.setAttribute('visible', 'false');
+                if (el) {
+                    el.setAttribute('visible', 'false');
+                }
             });
             
             // Show current scene hotspots
             const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
             if (currentHotspots) {
-                setTimeout(() => {
-                    currentHotspots.setAttribute('visible', 'true');
-                }, 300);
+                currentHotspots.setAttribute('visible', 'true');
+                console.log(`Showing hotspots for: ${sceneId}`);
             }
         }
         
@@ -717,6 +721,11 @@
             
             scene.addEventListener('loaded', () => {
                 console.log('A-Frame scene fully loaded');
+                
+                // Ensure hotspots are visible after scene loads
+                setTimeout(() => {
+                    updateHotspots(scenes[currentSceneIndex].id);
+                }, 500);
             });
             
             // Improve cursor interaction
@@ -732,10 +741,19 @@
                     cursor.setAttribute('color', '#FFF');
                 });
             }
+            
+            // Add debug logging for hotspot clicks
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('[data-hotspot]')) {
+                    console.log('Hotspot clicked!');
+                }
+            });
         }
         
         // Initial scene
-        changeScene(0);
+        setTimeout(() => {
+            changeScene(0);
+        }, 1000);
     </script>
 </body>
 </html>
