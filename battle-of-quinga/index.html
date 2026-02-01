@@ -3,527 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Cache Prevention -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <title>Battle of Quinga - VR Tour</title>
-    <!-- A-Frame from CDN -->
+    
+    <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <style>
-        /* RESET & BASE */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            background: #000;
-        }
-        
-        /* LOADING SCREEN */
-        #loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s ease;
-        }
-        
-        .loader-container {
-            text-align: center;
-            max-width: 500px;
-            padding: 30px;
-        }
-        
-        .logo {
-            font-size: 2.5rem;
-            color: #FF6B6B;
-            margin-bottom: 20px;
-        }
-        
-        .logo i {
-            margin-right: 15px;
-        }
-        
-        .progress-container {
-            width: 100%;
-            max-width: 300px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            margin: 30px auto;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #FF6B6B, #FF8E53);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-        
-        .loading-text {
-            margin-top: 20px;
-            color: #aaa;
-            font-size: 0.9rem;
-        }
-        
-        /* SCENE TITLE */
-        #scene-title {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 500;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        #scene-title i {
-            color: #FF6B6B;
-        }
-        
-        /* NAVIGATION */
-        .nav-container {
-            position: fixed;
-            bottom: 25px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 25px;
-            z-index: 1000;
-        }
-        
-        .nav-btn {
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .nav-btn:hover {
-            background: rgba(26, 26, 46, 0.95);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-        
-        .nav-btn:active {
-            transform: translateY(0);
-        }
-        
-        .nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        /* SCENE THUMBNAILS */
-        .scene-thumbnails {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
-        
-        .thumbnail {
-            width: 70px;
-            height: 45px;
-            border-radius: 5px;
-            overflow: hidden;
-            opacity: 0.5;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-        
-        .thumbnail:hover {
-            opacity: 0.8;
-            transform: translateY(-5px);
-        }
-        
-        .thumbnail.active {
-            opacity: 1;
-            border-color: #FF6B6B;
-            transform: translateY(-5px);
-        }
-        
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        /* INSTRUCTIONS */
-        #instructions {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            max-width: 250px;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: none;
-        }
-        
-        #instructions h3 {
-            color: #FF6B6B;
-            margin-bottom: 10px;
-            font-size: 1rem;
-        }
-        
-        #instructions ul {
-            list-style: none;
-            margin-left: 5px;
-        }
-        
-        #instructions li {
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        #instructions i {
-            color: #FF6B6B;
-            width: 20px;
-        }
-        
-        .instructions-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* FULLSCREEN BUTTON */
-        #fullscreen-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        /* MOBILE RESPONSIVE */
-        @media (max-width: 768px) {
-            #scene-title {
-                font-size: 0.9rem;
-                padding: 10px 20px;
-                top: 15px;
-            }
-            
-            .nav-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 1.1rem;
-            }
-            
-            .nav-container {
-                padding: 0 15px;
-                bottom: 20px;
-            }
-            
-            .thumbnail {
-                width: 60px;
-                height: 40px;
-            }
-            
-            .scene-thumbnails {
-                bottom: 90px;
-            }
-            
-            #instructions {
-                right: 10px;
-                left: 10px;
-                max-width: none;
-            }
-        }
-        
-        /* HOTSPOT COUNTER */
-        .hotspot-counter {
-            position: fixed;
-            bottom: 180px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            z-index: 1000;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            text-align: center;
-            max-width: 90%;
-        }
-        
-        /* VIEW INDICATOR */
-        .view-indicator {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .view-indicator i {
-            color: #4ECDC4;
-        }
-        
-        /* CURSOR STYLING */
-        a-cursor {
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-    <!-- LOADING SCREEN -->
-    <div id="loading-screen">
-        <div class="loader-container">
-            <div class="logo">
-                <i class="fas fa-vr-cardboard"></i>
-                Battle of Quinga VR
-            </div>
-            <h2>360° Panoramic Tour</h2>
-            <div class="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
-            </div>
-            <p class="loading-text" id="loading-text">Loading panoramic views...</p>
-        </div>
-    </div>
-    
-    <!-- FULLSCREEN BUTTON -->
-    <button id="fullscreen-btn" title="Toggle Fullscreen">
-        <i class="fas fa-expand"></i>
-    </button>
-    
-    <!-- INSTRUCTIONS BUTTON -->
-    <button class="instructions-btn" id="instructions-btn" title="Show Instructions">
-        <i class="fas fa-question-circle"></i>
-    </button>
-    
-    <!-- INSTRUCTIONS PANEL -->
-    <div id="instructions">
-        <h3><i class="fas fa-info-circle"></i> Navigation Guide</h3>
-        <ul>
-            <li><i class="fas fa-mouse-pointer"></i> Drag to look around</li>
-            <li><i class="fas fa-arrow-left"></i> Previous view</li>
-            <li><i class="fas fa-arrow-right"></i> Next view</li>
-            <li><i class="fas fa-expand"></i> Toggle fullscreen</li>
-            <li><i class="fas fa-bullseye"></i> Click hotspots to navigate</li>
-            <li><i class="fas fa-mobile-alt"></i> Swipe left/right on mobile</li>
-        </ul>
-    </div>
-    
-    <!-- SCENE TITLE -->
-    <div id="scene-title">
-        <i class="fas fa-camera"></i>
-        <span id="scene-title-text">Front View</span>
-    </div>
-    
-    <!-- HOTSPOT COUNTER -->
-    <div class="hotspot-counter" id="hotspot-counter">
-        <i class="fas fa-bullseye"></i>
-        <span>Click arrows to navigate</span>
-    </div>
-    
-    <!-- VIEW INDICATOR -->
-    <div class="view-indicator" id="view-indicator">
-        <i class="fas fa-eye"></i>
-        <span>View 1/3</span>
-    </div>
-    
-    <!-- A-FRAME SCENE -->
-    <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
-        <!-- ASSETS -->
-        <a-assets timeout="30000">
-            <!-- 3 Panoramic Images -->
-            <img id="front" src="labanan_sa_quinga/front.jpg" crossorigin="anonymous">
-            <img id="left" src="labanan_sa_quinga/left.jpg" crossorigin="anonymous">
-            <img id="right" src="labanan_sa_quinga/right.jpg" crossorigin="anonymous">
-        </a-assets>
-        
-        <!-- SKY / 360 IMAGE -->
-        <a-sky id="scene-sky" src="#front"></a-sky>
-        
-        <!-- CAMERA WITH CURSOR -->
-        <a-entity camera look-controls="pointerLockEnabled: true">
-            <a-cursor 
-                id="cursor"
-                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
-                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
-                animation__mouseleave="property: scale; startEvents: mouseleave; from: 0.1 0.1 0.1; to: 1 1 1; dur: 500"
-                fuse="true"
-                fuse-timeout="500">
-            </a-cursor>
-        </a-entity>
-        
-        <!-- ======================= -->
-        <!-- ENHANCED HOTSPOTS - ALL ON LEFT SIDE -->
-        <!-- ======================= -->
-        
-        <!-- FRONT VIEW HOTSPOTS -->
-        <a-entity id="front-hotspots">
-            <!-- To Left View - Moved further left -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: left;
-                label: Left View;
-                icon: left;
-                position: -3 0 -3.5;
-                rotation: 0 45 0">
-            </a-entity>
-            
-            <!-- To Right View - Also on left side but pointing right -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: right;
-                label: Right View;
-                icon: right;
-                position: -2 0 -4;
-                rotation: 0 15 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- LEFT VIEW HOTSPOTS -->
-        <a-entity id="left-hotspots" visible="false">
-            <!-- Back to Front View - On left side -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: front;
-                label: Front View;
-                icon: arrow;
-                position: -3 0 -3.5;
-                rotation: 0 45 0">
-            </a-entity>
-            
-            <!-- To Right View from Left View - On left side -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: right;
-                label: Right View;
-                icon: right;
-                position: -2.5 0 -3.8;
-                rotation: 0 20 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- RIGHT VIEW HOTSPOTS -->
-        <a-entity id="right-hotspots" visible="false">
-            <!-- Back to Front View - On left side -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: front;
-                label: Front View;
-                icon: arrow;
-                position: -3 0 -3.5;
-                rotation: 0 45 0">
-            </a-entity>
-            
-            <!-- To Left View from Right View - On left side -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: left;
-                label: Left View;
-                icon: left;
-                position: -2.8 0 -3.6;
-                rotation: 0 50 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- Ambient Light -->
-        <a-light type="ambient" color="#FFF" intensity="0.6"></a-light>
-    </a-scene>
-    
-    <!-- THUMBNAIL NAVIGATION -->
-    <div class="scene-thumbnails" id="scene-thumbnails"></div>
-    
-    <!-- NAVIGATION BUTTONS -->
-    <div class="nav-container">
-        <button id="prev-btn" class="nav-btn" title="Previous View">
-            <i class="fas fa-arrow-left"></i>
-        </button>
-        <button id="next-btn" class="nav-btn" title="Next View">
-            <i class="fas fa-arrow-right"></i>
-        </button>
-    </div>
-    
+    <!-- Enhanced Hotspot Component -->
     <script>
-        // =====================
-        // ENHANCED HOTSPOT COMPONENT
-        // =====================
         AFRAME.registerComponent('nav-hotspot', {
             schema: {
-                target: { type: 'string' },
-                label: { type: 'string' },
-                icon: { type: 'string', default: 'arrow' },
+                target: { type: 'string' },      // Target scene ID
+                label: { type: 'string' },       // Display label
+                icon: { type: 'string', default: 'arrow' }, // arrow, door, stairs, etc.
                 position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
                 rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
             },
@@ -535,19 +32,19 @@
                 // Create container
                 el.setAttribute('position', data.position);
                 el.setAttribute('rotation', data.rotation);
+                el.classList.add('clickable');
                 el.setAttribute('data-hotspot', 'true');
-                el.setAttribute('class', 'clickable');
                 
                 // Create outer ring (pulsing)
                 const ring = document.createElement('a-ring');
                 ring.setAttribute('radius-inner', '0.08');
                 ring.setAttribute('radius-outer', '0.12');
-                ring.setAttribute('color', '#FF6B6B');
-                ring.setAttribute('opacity', '0.7');
+                ring.setAttribute('color', '#FFD700');
+                ring.setAttribute('opacity', '0.6');
                 ring.setAttribute('shader', 'flat');
                 ring.setAttribute('animation', {
                     property: 'scale',
-                    to: '1.3 1.3 1',
+                    to: '1.2 1.2 1',
                     dir: 'alternate',
                     loop: true,
                     dur: 1200,
@@ -557,7 +54,7 @@
                 
                 // Create inner circle (hover effect)
                 const circle = document.createElement('a-circle');
-                circle.setAttribute('radius', '0.07');
+                circle.setAttribute('radius', '0.06');
                 circle.setAttribute('color', '#FFFFFF');
                 circle.setAttribute('opacity', '0');
                 circle.setAttribute('shader', 'flat');
@@ -568,7 +65,7 @@
                 const icon = this.createIcon(data.icon);
                 if (icon) {
                     icon.setAttribute('position', '0 0 0.001');
-                    icon.setAttribute('scale', '0.045 0.045 1');
+                    icon.setAttribute('scale', '0.04 0.04 1');
                     el.appendChild(icon);
                 }
                 
@@ -578,24 +75,22 @@
                     value: data.label,
                     align: 'center',
                     color: '#FFFFFF',
-                    width: 0.8,
+                    width: 0.6,
                     font: 'roboto',
-                    baseline: 'center',
-                    wrapCount: 15
+                    baseline: 'center'
                 });
-                label.setAttribute('position', '0 0.25 0');
+                label.setAttribute('position', '0 0.2 0');
                 label.setAttribute('visible', 'false');
                 label.setAttribute('class', 'hotspot-label');
-                label.setAttribute('scale', '0.8 0.8 1');
                 el.appendChild(label);
                 
                 // HOVER EFFECTS
                 el.addEventListener('mouseenter', () => {
                     // Highlight inner circle
-                    circle.setAttribute('opacity', '0.9');
+                    circle.setAttribute('opacity', '0.8');
                     circle.setAttribute('animation', {
                         property: 'scale',
-                        to: '1.4 1.4 1',
+                        to: '1.3 1.3 1',
                         dur: 200,
                         easing: 'easeOutQuad'
                     });
@@ -626,12 +121,10 @@
                     // Click feedback
                     circle.setAttribute('color', '#4CAF50');
                     circle.setAttribute('opacity', '0.9');
-                    circle.setAttribute('scale', '1.5 1.5 1');
                     
                     setTimeout(() => {
                         circle.setAttribute('color', '#FFFFFF');
                         circle.setAttribute('opacity', '0');
-                        circle.setAttribute('scale', '1 1 1');
                         
                         // Navigate to target scene
                         const scenes = window.sceneList;
@@ -646,6 +139,10 @@
             createIcon: function(iconType) {
                 const iconMap = {
                     'arrow': 'M-0.5,-0.5 L0.5,0 L-0.5,0.5 Z',
+                    'door': 'M-0.4,-0.5 L0.4,-0.5 L0.4,0.5 L-0.4,0.5 Z M-0.2,-0.3 L0.2,-0.3 L0.2,0.3 L-0.2,0.3 Z',
+                    'stairs': 'M-0.4,0.5 L0.4,0.5 L0.4,0.3 L-0.4,0.3 L-0.4,0.1 L0.4,0.1 L0.4,-0.1 L-0.4,-0.1 L-0.4,-0.3 L0.4,-0.3 L0.4,-0.5 L-0.4,-0.5 Z',
+                    'up': 'M-0.3,0.3 L0,0 L0.3,0.3 M0,-0.5 L0,0',
+                    'down': 'M-0.3,-0.3 L0,0 L0.3,-0.3 M0,0.5 L0,0',
                     'left': 'M0.3,-0.5 L0,0 L0.3,0.5 M-0.3,0 L0,0',
                     'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0'
                 };
@@ -657,38 +154,376 @@
                         path: iconMap[iconType]
                     });
                     path.setAttribute('material', 'color: #000000; shader: flat');
-                    path.setAttribute('rotation', iconType === 'arrow' ? '0 0 90' : '0 0 0');
+                    path.setAttribute('rotation', iconType === 'up' || iconType === 'down' ? '0 0 0' : '0 0 90');
                     return path;
                 }
                 return null;
             }
         });
+    </script>
+    
+    <style>
+        /* RESET & BASE */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden; 
+            background: #000;
+            -webkit-tap-highlight-color: transparent;
+        }
         
+        /* LOADING */
+        #loading {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #1a1a2e;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 215, 0, 0.2);
+            border-top: 3px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 14px;
+            color: #aaa;
+            margin-top: 10px;
+        }
+        
+        /* SCENE INFO */
+        #scene-info {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+            justify-content: center;
+        }
+        
+        #scene-info i {
+            color: #FFD700;
+            font-size: 16px;
+        }
+        
+        /* NAVIGATION CONTROLS */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        .controls button {
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .controls button:hover:not(:disabled) {
+            background: rgba(26, 26, 46, 0.95);
+            transform: scale(1.1);
+        }
+        
+        .controls button:active {
+            transform: scale(0.95);
+        }
+        
+        .controls button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* SCENE SELECTOR */
+        .scene-selector {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .scene-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .scene-dot.active {
+            background: #FFD700;
+            transform: scale(1.3);
+        }
+        
+        .scene-dot:hover {
+            background: rgba(255, 215, 0, 0.7);
+            transform: scale(1.2);
+        }
+        
+        /* INSTRUCTIONS */
+        #instructions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 12px;
+            max-width: 200px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        
+        #instructions h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .instructions-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* MOBILE OPTIMIZATION */
+        @media (max-width: 768px) {
+            #scene-info {
+                top: 15px;
+                font-size: 13px;
+                padding: 8px 16px;
+                min-width: 160px;
+            }
+            
+            .controls {
+                bottom: 15px;
+                padding: 0 15px;
+            }
+            
+            .controls button {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            
+            .scene-selector {
+                bottom: 80px;
+            }
+            
+            .scene-dot {
+                width: 8px;
+                height: 8px;
+            }
+        }
+        
+        /* CURSOR STYLING */
+        a-cursor {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING -->
+    <div id="loading">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Battlefield Tour...</div>
+    </div>
+    
+    <!-- SCENE INFO -->
+    <div id="scene-info">
+        <i>📍</i>
+        <span id="scene-title">Front View</span>
+    </div>
+    
+    <!-- INSTRUCTIONS BUTTON -->
+    <button class="instructions-btn" id="instructions-btn" title="Instructions">?</button>
+    
+    <!-- INSTRUCTIONS PANEL -->
+    <div id="instructions">
+        <h3>🗺️ Navigation Guide</h3>
+        <p>• <b>Look around:</b> Drag or move device</p>
+        <p>• <b>Navigate:</b> Click golden markers</p>
+        <p>• <b>Hover:</b> See destination names</p>
+        <p>• <b>Change scene:</b> Use buttons or dots</p>
+    </div>
+    
+    <!-- A-FRAME SCENE -->
+    <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
+        <!-- ASSETS -->
+        <a-assets timeout="30000">
+            <img id="front" src="labanan_sa_quinga/front.jpg" crossorigin="anonymous">
+            <img id="left" src="labanan_sa_quinga/left.jpg" crossorigin="anonymous">
+            <img id="right" src="labanan_sa_quinga/right.jpg" crossorigin="anonymous">
+        </a-assets>
+        
+        <!-- SKY -->
+        <a-sky id="scene-sky" src="#front"></a-sky>
+        
+        <!-- CAMERA WITH CURSOR -->
+        <a-entity camera look-controls="pointerLockEnabled: true">
+            <a-cursor 
+                id="cursor"
+                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                animation__mouseleave="property: scale; startEvents: mouseleave; from: 0.1 0.1 0.1; to: 1 1 1; dur: 500"
+                fuse="true"
+                fuse-timeout="500">
+            </a-cursor>
+        </a-entity>
+        
+        <!-- HOTSPOTS -->
+        <!-- FRONT VIEW -->
+        <a-entity id="front-hotspots">
+            <!-- To Left View -->
+            <a-entity nav-hotspot="
+                target: left;
+                label: Left View;
+                icon: left;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
+            
+            <!-- To Right View -->
+            <a-entity nav-hotspot="
+                target: right;
+                label: Right View;
+                icon: right;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+        
+        <!-- LEFT VIEW -->
+        <a-entity id="left-hotspots" visible="false">
+            <!-- To Front View -->
+            <a-entity nav-hotspot="
+                target: front;
+                label: Front View;
+                icon: arrow;
+                position: 2 0 -4;
+                rotation: 0 -30 0">
+            </a-entity>
+        </a-entity>
+        
+        <!-- RIGHT VIEW -->
+        <a-entity id="right-hotspots" visible="false">
+            <!-- To Front View -->
+            <a-entity nav-hotspot="
+                target: front;
+                label: Front View;
+                icon: arrow;
+                position: -2 0 -4;
+                rotation: 0 30 0">
+            </a-entity>
+        </a-entity>
+    </a-scene>
+    
+    <!-- SCENE SELECTOR DOTS -->
+    <div class="scene-selector" id="scene-selector"></div>
+    
+    <!-- NAVIGATION CONTROLS -->
+    <div class="controls">
+        <button id="prev-btn" title="Previous Scene">←</button>
+        <button id="next-btn" title="Next Scene">→</button>
+    </div>
+    
+    <script>
         // =====================
-        // CONFIGURATION
+        // SCENE CONFIGURATION
         // =====================
         const scenes = [
-            { 
-                id: "front", 
-                title: "Front View",
-                description: "Main battlefield overview"
-            },
-            { 
-                id: "left", 
-                title: "Left View",
-                description: "Left flank perspective"
-            },
-            { 
-                id: "right", 
-                title: "Right View",
-                description: "Right flank perspective"
-            }
+            { id: "front", title: "Front View" },
+            { id: "left", title: "Left View" },
+            { id: "right", title: "Right View" }
         ];
         
         window.sceneList = scenes;
         
         // =====================
-        // STATE MANAGEMENT
+        // NAVIGATION MAP
+        // =====================
+        const navigationMap = {
+            "front": ["left", "right"],
+            "left": ["front"],
+            "right": ["front"]
+        };
+        
+        // =====================
+        // STATE
         // =====================
         let currentSceneIndex = 0;
         let imagesLoaded = 0;
@@ -698,97 +533,69 @@
         // DOM ELEMENTS
         // =====================
         const sky = document.getElementById('scene-sky');
-        const titleText = document.getElementById('scene-title-text');
-        const loadingScreen = document.getElementById('loading-screen');
-        const progressBar = document.getElementById('progress-bar');
-        const loadingText = document.getElementById('loading-text');
-        const sceneThumbnails = document.getElementById('scene-thumbnails');
+        const sceneTitle = document.getElementById('scene-title');
+        const loading = document.getElementById('loading');
+        const sceneSelector = document.getElementById('scene-selector');
         const instructions = document.getElementById('instructions');
-        const hotspotCounter = document.getElementById('hotspot-counter');
-        const viewIndicator = document.getElementById('view-indicator');
         
         // =====================
         // INITIALIZATION
         // =====================
         document.addEventListener('DOMContentLoaded', function() {
             preloadImages();
-            createThumbnails();
+            createSceneDots();
             setupEventListeners();
             setupAframeEvents();
-            updateNavigation();
-            updateViewIndicator();
         });
         
         // =====================
         // IMAGE PRELOADING
         // =====================
         function preloadImages() {
-            scenes.forEach((scene, index) => {
+            scenes.forEach(scene => {
                 const img = new Image();
-                
                 img.onload = () => {
                     imagesLoaded++;
-                    const progress = Math.round((imagesLoaded / totalImages) * 100);
-                    progressBar.style.width = `${progress}%`;
-                    loadingText.textContent = `Loading ${scene.title} (${imagesLoaded}/${totalImages})`;
-                    
                     if (imagesLoaded === totalImages) {
                         setTimeout(() => {
-                            loadingScreen.style.opacity = '0';
+                            loading.style.opacity = '0';
                             setTimeout(() => {
-                                loadingScreen.style.display = 'none';
-                                // Initialize after loading
-                                initHotspotNavigation();
+                                loading.style.display = 'none';
                             }, 500);
                         }, 500);
                     }
                 };
-                
                 img.onerror = () => {
-                    console.error(`Failed to load: labanan_sa_quinga/${scene.id}.jpg`);
+                    console.warn(`Image not found: labanan_sa_quinga/${scene.id}.jpg`);
                     imagesLoaded++;
                     if (imagesLoaded === totalImages) {
-                        loadingScreen.style.display = 'none';
-                        initHotspotNavigation();
+                        setTimeout(() => {
+                            loading.style.opacity = '0';
+                            setTimeout(() => {
+                                loading.style.display = 'none';
+                            }, 500);
+                        }, 500);
                     }
                 };
-                
                 img.src = `labanan_sa_quinga/${scene.id}.jpg`;
             });
         }
         
         // =====================
-        // HOTSPOT NAVIGATION INIT
+        // SCENE DOTS
         // =====================
-        function initHotspotNavigation() {
-            console.log('Hotspot navigation initialized');
-            // Force initial update to ensure hotspots are visible
-            setTimeout(() => {
-                updateHotspots(scenes[currentSceneIndex].id);
-            }, 100);
-        }
-        
-        // =====================
-        // THUMBNAIL CREATION
-        // =====================
-        function createThumbnails() {
+        function createSceneDots() {
             scenes.forEach((scene, index) => {
-                const thumbnail = document.createElement('div');
-                thumbnail.className = `thumbnail ${index === 0 ? 'active' : ''}`;
-                thumbnail.dataset.index = index;
-                thumbnail.title = scene.title;
+                const dot = document.createElement('div');
+                dot.className = `scene-dot ${index === 0 ? 'active' : ''}`;
+                dot.dataset.index = index;
+                dot.title = scene.title;
                 
-                const thumbImg = new Image();
-                thumbImg.src = `labanan_sa_quinga/${scene.id}.jpg`;
-                thumbImg.alt = scene.title;
-                
-                thumbnail.appendChild(thumbImg);
-                
-                thumbnail.addEventListener('click', () => {
+                dot.addEventListener('click', () => {
                     changeScene(index);
                 });
                 
-                sceneThumbnails.appendChild(thumbnail);
+                sceneSelector.appendChild(dot);
             });
         }
         
@@ -801,38 +608,26 @@
             currentSceneIndex = index;
             const scene = scenes[index];
             
-            console.log(`Changing to scene: ${scene.id}`);
-            
             // Update sky
             sky.setAttribute('src', `#${scene.id}`);
             
             // Update title
-            titleText.textContent = scene.title;
+            sceneTitle.textContent = scene.title;
             
-            // Update thumbnails
-            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
-                thumb.classList.toggle('active', i === index);
+            // Update scene dots
+            document.querySelectorAll('.scene-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
             });
             
-            // Update hotspots visibility with delay
-            setTimeout(() => {
-                updateHotspots(scene.id);
-            }, 100);
+            // Show/hide hotspots based on navigation map
+            updateHotspots(scene.id);
             
             // Update navigation buttons
             updateNavigation();
-            
-            // Update view indicator
-            updateViewIndicator();
-            
-            // Update hotspot counter
-            updateHotspotCounter();
         };
         
         function updateHotspots(sceneId) {
-            console.log(`Updating hotspots for: ${sceneId}`);
-            
-            // Hide all hotspot groups first
+            // Hide all hotspot groups
             const hotspotGroups = [
                 'front-hotspots',
                 'left-hotspots',
@@ -841,50 +636,21 @@
             
             hotspotGroups.forEach(id => {
                 const el = document.getElementById(id);
-                if (el) {
-                    el.setAttribute('visible', 'false');
-                }
+                if (el) el.setAttribute('visible', 'false');
             });
             
             // Show current scene hotspots
             const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
             if (currentHotspots) {
-                console.log(`Found hotspot group: ${sceneId}-hotspots`);
-                currentHotspots.setAttribute('visible', 'true');
-                
-                // Log all hotspots in this group
-                const hotspots = currentHotspots.querySelectorAll('[nav-hotspot]');
-                console.log(`Found ${hotspots.length} hotspots in group`);
-                
-                // Ensure each hotspot is interactive
-                hotspots.forEach((hotspot, i) => {
-                    console.log(`Hotspot ${i}:`, hotspot.getAttribute('nav-hotspot'));
-                });
-            } else {
-                console.warn(`No hotspot group found for: ${sceneId}`);
+                setTimeout(() => {
+                    currentHotspots.setAttribute('visible', 'true');
+                }, 300);
             }
-        }
-        
-        function updateHotspotCounter() {
-            const sceneId = scenes[currentSceneIndex].id;
-            const hotspotGroup = document.getElementById(`${sceneId}-hotspots`);
-            let hotspotCount = 0;
-            
-            if (hotspotGroup && hotspotGroup.getAttribute('visible') === 'true') {
-                hotspotCount = hotspotGroup.querySelectorAll('[nav-hotspot]').length;
-            }
-            
-            hotspotCounter.innerHTML = `<i class="fas fa-bullseye"></i> ${hotspotCount} navigation point${hotspotCount !== 1 ? 's' : ''} available`;
         }
         
         function updateNavigation() {
             document.getElementById('prev-btn').disabled = currentSceneIndex === 0;
             document.getElementById('next-btn').disabled = currentSceneIndex === scenes.length - 1;
-        }
-        
-        function updateViewIndicator() {
-            document.querySelector('#view-indicator span').textContent = 
-                `View ${currentSceneIndex + 1}/${scenes.length}`;
         }
         
         // =====================
@@ -904,38 +670,10 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
                 if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
-                if (e.key === 'Escape' && document.fullscreenElement) {
-                    document.exitFullscreen();
-                }
-                if (e.key === '1') changeScene(0);
-                if (e.key === '2') changeScene(1);
-                if (e.key === '3') changeScene(2);
-                if (e.key === 'i' || e.key === 'I') {
+                if (e.key === 'Escape') {
                     instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
                 }
             });
-            
-            // Touch/swipe for mobile
-            let touchStartX = 0;
-            document.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-            });
-            
-            document.addEventListener('touchend', (e) => {
-                const touchEndX = e.changedTouches[0].clientX;
-                const diff = touchStartX - touchEndX;
-                
-                if (Math.abs(diff) > 50) {
-                    if (diff > 0) {
-                        changeScene(currentSceneIndex + 1);
-                    } else {
-                        changeScene(currentSceneIndex - 1);
-                    }
-                }
-            });
-            
-            // Fullscreen toggle
-            document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
             
             // Instructions toggle
             document.getElementById('instructions-btn').addEventListener('click', () => {
@@ -948,6 +686,25 @@
                     !document.getElementById('instructions-btn').contains(e.target) &&
                     instructions.style.display === 'block') {
                     instructions.style.display = 'none';
+                }
+            });
+            
+            // Mobile swipe
+            let touchStartX = 0;
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+            
+            document.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = touchStartX - touchEndX;
+                
+                if (Math.abs(diff) > 60) {
+                    if (diff > 0) {
+                        changeScene(currentSceneIndex + 1);
+                    } else {
+                        changeScene(currentSceneIndex - 1);
+                    }
                 }
             });
         }
@@ -967,53 +724,18 @@
             if (cursor) {
                 cursor.addEventListener('mouseenter', (e) => {
                     if (e.target.hasAttribute('data-hotspot')) {
-                        cursor.setAttribute('color', '#FF6B6B');
-                        cursor.setAttribute('scale', '1.2 1.2 1');
+                        cursor.setAttribute('color', '#FFD700');
                     }
                 });
                 
                 cursor.addEventListener('mouseleave', () => {
                     cursor.setAttribute('color', '#FFF');
-                    cursor.setAttribute('scale', '1 1 1');
                 });
-            }
-            
-            // Debug: Log when hotspots are clicked
-            document.addEventListener('click', (e) => {
-                if (e.target.hasAttribute('data-hotspot')) {
-                    console.log('Hotspot clicked:', e.target.getAttribute('nav-hotspot'));
-                }
-            });
-        }
-        
-        // =====================
-        // FULLSCREEN FUNCTION
-        // =====================
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                });
-                document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-compress"></i>';
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                    document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-expand"></i>';
-                }
             }
         }
         
-        // Handle fullscreen change
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                document.getElementById('fullscreen-btn').innerHTML = '<i class="fas fa-expand"></i>';
-            }
-        });
-        
-        // Initial scene with delay to ensure everything loads
-        setTimeout(() => {
-            changeScene(0);
-        }, 500);
+        // Initial scene
+        changeScene(0);
     </script>
 </body>
 </html>
