@@ -16,197 +16,389 @@
     
     <!-- Enhanced Hotspot Component with VR-optimized labels -->
     <script>
-        AFRAME.registerComponent('nav-hotspot', {
-            schema: {
-                target: { type: 'string' },      // Target scene ID
-                label: { type: 'string' },       // Display label
-                icon: { type: 'string', default: 'arrow' }, // arrow, door, stairs, etc.
-                position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
-                rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
-            },
+        // Replace the existing AFRAME.registerComponent('nav-hotspot') with this enhanced version
+AFRAME.registerComponent('nav-hotspot', {
+    schema: {
+        target: { type: 'string' },
+        label: { type: 'string' },
+        icon: { type: 'string', default: 'arrow' },
+        position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
+        rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
+    },
+    
+    init: function() {
+        const el = this.el;
+        const data = this.data;
+        const self = this;
+        
+        // Store original position for animation
+        this.originalPosition = { ...data.position };
+        
+        // Create container
+        el.setAttribute('position', data.position);
+        el.setAttribute('rotation', data.rotation);
+        el.classList.add('clickable');
+        el.setAttribute('data-hotspot', 'true');
+        
+        // Create direction indicator (arrow pointing to target)
+        this.createDirectionIndicator();
+        
+        // Create outer ring (pulsing)
+        const ring = document.createElement('a-ring');
+        ring.setAttribute('radius-inner', '0.08');
+        ring.setAttribute('radius-outer', '0.12');
+        ring.setAttribute('color', '#FFD700');
+        ring.setAttribute('opacity', '0.6');
+        ring.setAttribute('shader', 'flat');
+        ring.setAttribute('class', 'hotspot-ring');
+        el.appendChild(ring);
+        
+        // Create inner circle (hover effect)
+        const circle = document.createElement('a-circle');
+        circle.setAttribute('radius', '0.06');
+        circle.setAttribute('color', '#FFFFFF');
+        circle.setAttribute('opacity', '0');
+        circle.setAttribute('shader', 'flat');
+        circle.setAttribute('class', 'hotspot-inner');
+        el.appendChild(circle);
+        
+        // Create icon based on type
+        const icon = this.createIcon(data.icon);
+        if (icon) {
+            icon.setAttribute('position', '0 0 0.001');
+            icon.setAttribute('scale', '0.04 0.04 1');
+            el.appendChild(icon);
+        }
+        
+        // Create VR-optimized navigation preview
+        this.createNavigationPreview();
+        
+        // HOVER EFFECTS with enhanced preview
+        el.addEventListener('mouseenter', () => {
+            this.showNavigationPreview();
+            circle.setAttribute('opacity', '0.8');
             
-            init: function() {
-                const el = this.el;
-                const data = this.data;
-                
-                // Create container
-                el.setAttribute('position', data.position);
-                el.setAttribute('rotation', data.rotation);
-                el.classList.add('clickable');
-                el.setAttribute('data-hotspot', 'true');
-                
-                // Create outer ring (pulsing)
-                const ring = document.createElement('a-ring');
-                ring.setAttribute('radius-inner', '0.08');
-                ring.setAttribute('radius-outer', '0.12');
-                ring.setAttribute('color', '#FFD700');
-                ring.setAttribute('opacity', '0.6');
-                ring.setAttribute('shader', 'flat');
-                ring.setAttribute('animation', {
-                    property: 'scale',
-                    to: '1.2 1.2 1',
-                    dir: 'alternate',
-                    loop: true,
-                    dur: 1200,
-                    easing: 'easeInOutSine'
-                });
-                el.appendChild(ring);
-                
-                // Create inner circle (hover effect)
-                const circle = document.createElement('a-circle');
-                circle.setAttribute('radius', '0.06');
-                circle.setAttribute('color', '#FFFFFF');
-                circle.setAttribute('opacity', '0');
-                circle.setAttribute('shader', 'flat');
-                circle.setAttribute('class', 'hotspot-inner');
-                el.appendChild(circle);
-                
-                // Create icon based on type
-                const icon = this.createIcon(data.icon);
-                if (icon) {
-                    icon.setAttribute('position', '0 0 0.001');
-                    icon.setAttribute('scale', '0.04 0.04 1');
-                    el.appendChild(icon);
-                }
-                
-                // Create VR-optimized label with billboard effect (always faces camera)
-                const labelContainer = document.createElement('a-entity');
-                labelContainer.setAttribute('class', 'hotspot-label-container');
-                labelContainer.setAttribute('position', '0 0.25 0'); // Position above hotspot
-                
-                // Add billboard component to make label face camera
-                labelContainer.setAttribute('look-at', '[camera]');
-                labelContainer.setAttribute('billboard', ''); // Custom billboard component
-                
-                // Create background panel for better readability
-                const labelBackground = document.createElement('a-plane');
-                labelBackground.setAttribute('width', '0.7');
-                labelBackground.setAttribute('height', '0.15');
-                labelBackground.setAttribute('color', 'rgba(0, 0, 0, 0.85)');
-                labelBackground.setAttribute('opacity', '0.9');
-                labelBackground.setAttribute('position', '0 0 0.001');
-                labelBackground.setAttribute('shader', 'flat');
-                labelBackground.setAttribute('side', 'double');
-                labelContainer.appendChild(labelBackground);
-                
-                // Create text with improved VR readability
-                const label = document.createElement('a-entity');
-                label.setAttribute('text', {
-                    value: data.label,
-                    align: 'center',
-                    color: '#FFD700', // Gold color for better contrast
-                    width: 0.65,
-                    font: 'roboto',
-                    baseline: 'center',
-                    wrapCount: 20, // Character wrap limit
-                    letterSpacing: 1, // Slightly spaced for readability
-                    lineHeight: 40
-                });
-                label.setAttribute('position', '0 0 0.002');
-                label.setAttribute('scale', '1 1 1');
-                label.setAttribute('visible', 'false');
-                label.setAttribute('class', 'hotspot-label');
-                labelContainer.appendChild(label);
-                
-                el.appendChild(labelContainer);
-                
-                // Store references for easy access
-                this.label = label;
-                this.labelContainer = labelContainer;
-                
-                // HOVER EFFECTS
-                el.addEventListener('mouseenter', () => {
-                    // Highlight inner circle
-                    circle.setAttribute('opacity', '0.8');
-                    circle.setAttribute('animation', {
-                        property: 'scale',
-                        to: '1.3 1.3 1',
-                        dur: 200,
-                        easing: 'easeOutQuad'
-                    });
-                    
-                    // Show label with animation
-                    label.setAttribute('visible', 'true');
-                    labelContainer.setAttribute('animation', {
-                        property: 'scale',
-                        from: '0.8 0.8 1',
-                        to: '1 1 1',
-                        dur: 300,
-                        easing: 'easeOutBack'
-                    });
-                    
-                    // Make label more prominent in VR
-                    labelBackground.setAttribute('color', 'rgba(0, 0, 0, 0.95)');
-                    labelBackground.setAttribute('opacity', '1');
-                });
-                
-                el.addEventListener('mouseleave', () => {
-                    // Remove highlight
-                    circle.setAttribute('opacity', '0');
-                    circle.setAttribute('scale', '1 1 1');
-                    circle.removeAttribute('animation');
-                    
-                    // Hide label
-                    label.setAttribute('visible', 'false');
-                    labelContainer.removeAttribute('animation');
-                    
-                    // Reset label background
-                    labelBackground.setAttribute('color', 'rgba(0, 0, 0, 0.85)');
-                    labelBackground.setAttribute('opacity', '0.9');
-                });
-                
-                // CLICK/TAP EVENT
-                el.addEventListener('click', () => {
-                    // Click feedback with enhanced visuals
-                    circle.setAttribute('color', '#4CAF50');
-                    circle.setAttribute('opacity', '0.9');
-                    
-                    // Make label stand out more on click
-                    labelBackground.setAttribute('color', 'rgba(76, 175, 80, 0.9)');
-                    label.setAttribute('text', 'color', '#FFFFFF');
-                    
-                    setTimeout(() => {
-                        circle.setAttribute('color', '#FFFFFF');
-                        circle.setAttribute('opacity', '0');
-                        
-                        // Reset label appearance
-                        labelBackground.setAttribute('color', 'rgba(0, 0, 0, 0.85)');
-                        label.setAttribute('text', 'color', '#FFD700');
-                        
-                        // Navigate to target scene
-                        const scenes = window.sceneList;
-                        const targetIndex = scenes.findIndex(s => s.id === data.target);
-                        if (targetIndex !== -1) {
-                            window.changeScene(targetIndex);
-                        }
-                    }, 300);
-                });
-            },
-            
-            createIcon: function(iconType) {
-                const iconMap = {
-                    'arrow': 'M-0.5,-0.5 L0.5,0 L-0.5,0.5 Z',
-                    'door': 'M-0.4,-0.5 L0.4,-0.5 L0.4,0.5 L-0.4,0.5 Z M-0.2,-0.3 L0.2,-0.3 L0.2,0.3 L-0.2,0.3 Z',
-                    'stairs': 'M-0.4,0.5 L0.4,0.5 L0.4,0.3 L-0.4,0.3 L-0.4,0.1 L0.4,0.1 L0.4,-0.1 L-0.4,-0.1 L-0.4,-0.3 L0.4,-0.3 L0.4,-0.5 L-0.4,-0.5 Z',
-                    'up': 'M-0.3,0.3 L0,0 L0.3,0.3 M0,-0.5 L0,0',
-                    'down': 'M-0.3,-0.3 L0,0 L0.3,-0.3 M0,0.5 L0,0',
-                    'left': 'M0.3,-0.5 L0,0 L0.3,0.5 M-0.3,0 L0,0',
-                    'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0'
-                };
-                
-                if (iconMap[iconType]) {
-                    const path = document.createElement('a-entity');
-                    path.setAttribute('geometry', {
-                        primitive: 'path',
-                        path: iconMap[iconType]
-                    });
-                    path.setAttribute('material', 'color: #000000; shader: flat');
-                    path.setAttribute('rotation', iconType === 'up' || iconType === 'down' ? '0 0 0' : '0 0 90');
-                    return path;
-                }
-                return null;
-            }
+            // Pulse animation
+            ring.setAttribute('animation', {
+                property: 'scale',
+                to: '1.3 1.3 1',
+                dir: 'alternate',
+                loop: true,
+                dur: 800,
+                easing: 'easeInOutSine'
+            });
         });
+        
+        el.addEventListener('mouseleave', () => {
+            this.hideNavigationPreview();
+            circle.setAttribute('opacity', '0');
+            ring.removeAttribute('animation');
+            ring.setAttribute('scale', '1 1 1');
+        });
+        
+        // CLICK/TAP EVENT with enhanced feedback
+        el.addEventListener('click', () => {
+            // Enhanced click feedback
+            this.playClickAnimation();
+            
+            // Show transition confirmation
+            this.showTransitionConfirmation();
+            
+            // Navigate after short delay
+            setTimeout(() => {
+                const scenes = window.sceneList;
+                const targetIndex = scenes.findIndex(s => s.id === data.target);
+                if (targetIndex !== -1) {
+                    window.changeScene(targetIndex);
+                }
+            }, 800);
+        });
+        
+        // Store for later access
+        this.ring = ring;
+        this.circle = circle;
+    },
+    
+    createDirectionIndicator: function() {
+        // Create an arrow pointing to the target direction
+        const directionIndicator = document.createElement('a-entity');
+        directionIndicator.setAttribute('class', 'direction-indicator');
+        directionIndicator.setAttribute('position', '0 0.2 0');
+        directionIndicator.setAttribute('visible', 'false');
+        
+        // Arrow line
+        const line = document.createElement('a-cylinder');
+        line.setAttribute('height', '0.3');
+        line.setAttribute('radius', '0.005');
+        line.setAttribute('color', '#4CAF50');
+        line.setAttribute('opacity', '0.7');
+        line.setAttribute('position', '0 0.15 0');
+        directionIndicator.appendChild(line);
+        
+        // Arrow head
+        const arrowHead = document.createElement('a-cone');
+        arrowHead.setAttribute('height', '0.08');
+        arrowHead.setAttribute('radius-bottom', '0.03');
+        arrowHead.setAttribute('color', '#4CAF50');
+        arrowHead.setAttribute('position', '0 0.35 0');
+        directionIndicator.appendChild(arrowHead);
+        
+        this.el.appendChild(directionIndicator);
+        this.directionIndicator = directionIndicator;
+    },
+    
+    createNavigationPreview: function() {
+        const data = this.data;
+        const targetScene = window.sceneList.find(s => s.id === data.target);
+        
+        // Create preview panel
+        const previewPanel = document.createElement('a-entity');
+        previewPanel.setAttribute('class', 'navigation-preview');
+        previewPanel.setAttribute('position', '0 0.6 0');
+        previewPanel.setAttribute('visible', 'false');
+        previewPanel.setAttribute('look-at', '[camera]');
+        
+        // Background
+        const background = document.createElement('a-plane');
+        background.setAttribute('width', '0.8');
+        background.setAttribute('height', '0.35');
+        background.setAttribute('color', 'rgba(0, 0, 0, 0.95)');
+        background.setAttribute('opacity', '0');
+        background.setAttribute('side', 'double');
+        background.setAttribute('class', 'preview-background');
+        previewPanel.appendChild(background);
+        
+        // Title
+        const title = document.createElement('a-text');
+        title.setAttribute('value', 'GOING TO:');
+        title.setAttribute('align', 'center');
+        title.setAttribute('color', '#FFD700');
+        title.setAttribute('width', '0.7');
+        title.setAttribute('position', '0 0.1 0.001');
+        title.setAttribute('scale', '0.6 0.6 1');
+        previewPanel.appendChild(title);
+        
+        // Destination name
+        const destination = document.createElement('a-text');
+        destination.setAttribute('value', targetScene ? targetScene.title.toUpperCase() : data.target.toUpperCase());
+        destination.setAttribute('align', 'center');
+        destination.setAttribute('color', '#FFFFFF');
+        destination.setAttribute('width', '0.7');
+        destination.setAttribute('position', '0 -0.03 0.001');
+        destination.setAttribute('scale', '0.8 0.8 1');
+        previewPanel.appendChild(destination);
+        
+        // Direction indicator text
+        const directionText = document.createElement('a-text');
+        directionText.setAttribute('value', this.getDirectionText(data.target));
+        directionText.setAttribute('align', 'center');
+        directionText.setAttribute('color', '#4CAF50');
+        directionText.setAttribute('width', '0.7');
+        directionText.setAttribute('position', '0 -0.15 0.001');
+        directionText.setAttribute('scale', '0.5 0.5 1');
+        previewPanel.appendChild(directionText);
+        
+        this.el.appendChild(previewPanel);
+        this.previewPanel = previewPanel;
+        this.previewBackground = background;
+    },
+    
+    getDirectionText: function(targetId) {
+        const directionMap = {
+            'front': '↖ FRONT VIEW',
+            'left': '↙ LEFT VIEW',
+            'right': '↗ RIGHT VIEW',
+            'rear': '↘ REAR VIEW'
+        };
+        return directionMap[targetId] || `→ ${targetId.toUpperCase()}`;
+    },
+    
+    showNavigationPreview: function() {
+        if (this.previewPanel) {
+            this.previewPanel.setAttribute('visible', 'true');
+            this.previewBackground.setAttribute('animation', {
+                property: 'opacity',
+                to: '0.95',
+                dur: 300,
+                easing: 'easeOutQuad'
+            });
+            
+            // Show direction indicator
+            if (this.directionIndicator) {
+                this.directionIndicator.setAttribute('visible', 'true');
+            }
+        }
+    },
+    
+    hideNavigationPreview: function() {
+        if (this.previewPanel) {
+            this.previewBackground.setAttribute('opacity', '0');
+            setTimeout(() => {
+                this.previewPanel.setAttribute('visible', 'false');
+            }, 300);
+            
+            // Hide direction indicator
+            if (this.directionIndicator) {
+                this.directionIndicator.setAttribute('visible', 'false');
+            }
+        }
+    },
+    
+    playClickAnimation: function() {
+        // Enhanced click animation
+        if (this.ring) {
+            this.ring.setAttribute('color', '#4CAF50');
+            this.ring.setAttribute('animation__click', {
+                property: 'scale',
+                to: '2 2 1',
+                dur: 400,
+                easing: 'easeOutBack'
+            });
+            
+            setTimeout(() => {
+                this.ring.setAttribute('color', '#FFD700');
+                this.ring.setAttribute('scale', '1 1 1');
+                this.ring.removeAttribute('animation__click');
+            }, 400);
+        }
+    },
+    
+    showTransitionConfirmation: function() {
+        // Create transition confirmation message
+        const transitionMsg = document.createElement('a-entity');
+        transitionMsg.setAttribute('class', 'transition-confirmation');
+        transitionMsg.setAttribute('position', '0 0 0');
+        transitionMsg.setAttribute('look-at', '[camera]');
+        
+        const background = document.createElement('a-plane');
+        background.setAttribute('width', '1');
+        background.setAttribute('height', '0.5');
+        background.setAttribute('color', 'rgba(76, 175, 80, 0.9)');
+        background.setAttribute('opacity', '0');
+        background.setAttribute('side', 'double');
+        
+        const text = document.createElement('a-text');
+        text.setAttribute('value', 'TRANSITIONING...');
+        text.setAttribute('align', 'center');
+        text.setAttribute('color', '#FFFFFF');
+        text.setAttribute('width', '0.9');
+        text.setAttribute('position', '0 0 0.001');
+        
+        transitionMsg.appendChild(background);
+        transitionMsg.appendChild(text);
+        document.querySelector('a-scene').appendChild(transitionMsg);
+        
+        // Animate in
+        background.setAttribute('animation', {
+            property: 'opacity',
+            to: '0.95',
+            dur: 300
+        });
+        
+        // Remove after animation
+        setTimeout(() => {
+            background.setAttribute('animation', {
+                property: 'opacity',
+                to: '0',
+                dur: 300
+            });
+            setTimeout(() => {
+                document.querySelector('a-scene').removeChild(transitionMsg);
+            }, 300);
+        }, 500);
+    },
+    
+    createIcon: function(iconType) {
+        // Keep existing icon creation logic
+        const iconMap = {
+            'arrow': 'M-0.5,-0.5 L0.5,0 L-0.5,0.5 Z',
+            'door': 'M-0.4,-0.5 L0.4,-0.5 L0.4,0.5 L-0.4,0.5 Z M-0.2,-0.3 L0.2,-0.3 L0.2,0.3 L-0.2,0.3 Z',
+            'stairs': 'M-0.4,0.5 L0.4,0.5 L0.4,0.3 L-0.4,0.3 L-0.4,0.1 L0.4,0.1 L0.4,-0.1 L-0.4,-0.1 L-0.4,-0.3 L0.4,-0.3 L0.4,-0.5 L-0.4,-0.5 Z',
+            'up': 'M-0.3,0.3 L0,0 L0.3,0.3 M0,-0.5 L0,0',
+            'down': 'M-0.3,-0.3 L0,0 L0.3,-0.3 M0,0.5 L0,0',
+            'left': 'M0.3,-0.5 L0,0 L0.3,0.5 M-0.3,0 L0,0',
+            'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0'
+        };
+        
+        if (iconMap[iconType]) {
+            const path = document.createElement('a-entity');
+            path.setAttribute('geometry', {
+                primitive: 'path',
+                path: iconMap[iconType]
+            });
+            path.setAttribute('material', 'color: #000000; shader: flat');
+            path.setAttribute('rotation', iconType === 'up' || iconType === 'down' ? '0 0 0' : '0 0 90');
+            return path;
+        }
+        return null;
+    }
+});
+        // Add this component to show scene transition notifications in VR
+AFRAME.registerComponent('scene-transition-notification', {
+    init: function() {
+        const el = this.el;
+        
+        // Create notification container
+        this.notification = document.createElement('a-entity');
+        this.notification.setAttribute('position', '0 1.5 -2');
+        this.notification.setAttribute('visible', 'false');
+        this.notification.setAttribute('look-at', '[camera]');
+        
+        // Background
+        const background = document.createElement('a-plane');
+        background.setAttribute('width', '1.2');
+        background.setAttribute('height', '0.4');
+        background.setAttribute('color', 'rgba(0, 0, 0, 0.9)');
+        background.setAttribute('opacity', '0');
+        background.setAttribute('side', 'double');
+        background.setAttribute('class', 'transition-notification-bg');
+        
+        // Text
+        const text = document.createElement('a-text');
+        text.setAttribute('value', '');
+        text.setAttribute('align', 'center');
+        text.setAttribute('color', '#FFD700');
+        text.setAttribute('width', '1.1');
+        text.setAttribute('position', '0 0 0.001');
+        text.setAttribute('class', 'transition-notification-text');
+        
+        this.notification.appendChild(background);
+        this.notification.appendChild(text);
+        el.appendChild(this.notification);
+        
+        this.background = background;
+        this.text = text;
+    },
+    
+    show: function(message, duration = 2000) {
+        const self = this;
+        
+        this.text.setAttribute('value', message);
+        this.notification.setAttribute('visible', 'true');
+        
+        // Fade in
+        this.background.setAttribute('animation', {
+            property: 'opacity',
+            to: '0.9',
+            dur: 500,
+            easing: 'easeOutQuad'
+        });
+        
+        // Fade out after duration
+        setTimeout(() => {
+            this.background.setAttribute('animation', {
+                property: 'opacity',
+                to: '0',
+                dur: 500,
+                easing: 'easeInQuad'
+            });
+            
+            setTimeout(() => {
+                this.notification.setAttribute('visible', 'false');
+            }, 500);
+        }, duration);
+    }
+});
         
         // Billboard component to make labels always face camera
         AFRAME.registerComponent('billboard', {
@@ -1023,36 +1215,89 @@
         // =====================
         // SCENE MANAGEMENT
         // =====================
-        window.changeScene = function(index) {
-            if (index < 0 || index >= scenes.length) return;
-            
-            currentSceneIndex = index;
-            const scene = scenes[index];
-            
-            // Update sky
-            sky.setAttribute('src', `#${scene.id}`);
-            
-            // Update title
-            sceneTitle.textContent = scene.title;
-            
-            // Update scene dots
-            document.querySelectorAll('.scene-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-            
-            // Show/hide hotspots based on navigation map
-            updateHotspots(scene.id);
-            
-            // Update navigation buttons
-            updateNavigation();
-            
-            // Update thumbnails (optional)
-            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
-                thumb.classList.toggle('active', i === index);
-            });
-            
-            console.log(`Navigated to: ${scene.title}`);
-        };
+        // Update the existing changeScene function
+window.changeScene = function(index) {
+    if (index < 0 || index >= scenes.length) return;
+    
+    const oldSceneIndex = currentSceneIndex;
+    currentSceneIndex = index;
+    const scene = scenes[index];
+    const oldScene = scenes[oldSceneIndex];
+    
+    // Get the scene transition notification component
+    const sceneEl = document.querySelector('a-scene');
+    let transitionComponent = sceneEl.components['scene-transition-notification'];
+    
+    if (!transitionComponent) {
+        sceneEl.setAttribute('scene-transition-notification', '');
+        transitionComponent = sceneEl.components['scene-transition-notification'];
+    }
+    
+    // Show transition notification in VR
+    if (transitionComponent) {
+        const direction = getDirectionFromTo(oldScene.id, scene.id);
+        transitionComponent.show(`ENTERING: ${scene.title}\n${direction}`, 1500);
+    }
+    
+    // Update sky with fade effect
+    const sky = document.getElementById('scene-sky');
+    sky.setAttribute('animation', {
+        property: 'opacity',
+        from: '1',
+        to: '0',
+        dur: 300,
+        easing: 'easeInOutQuad'
+    });
+    
+    setTimeout(() => {
+        sky.setAttribute('src', `#${scene.id}`);
+        sky.setAttribute('animation', {
+            property: 'opacity',
+            from: '0',
+            to: '1',
+            dur: 500,
+            easing: 'easeInOutQuad'
+        });
+    }, 300);
+    
+    // Update title
+    sceneTitle.textContent = scene.title;
+    
+    // Update scene dots
+    document.querySelectorAll('.scene-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+    });
+    
+    // Show/hide hotspots based on navigation map
+    updateHotspots(scene.id);
+    
+    // Update navigation buttons
+    updateNavigation();
+    
+    // Update thumbnails (optional)
+    document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+    });
+    
+    console.log(`Navigated from ${oldScene.title} to ${scene.title}`);
+};
+
+// Helper function to get direction text
+function getDirectionFromTo(from, to) {
+    const directionMap = {
+        'front-left': '← TURNING LEFT',
+        'front-right': '→ TURNING RIGHT',
+        'front-rear': '↻ ROTATING 180°',
+        'left-front': '→ TURNING RIGHT',
+        'left-rear': '← CONTINUING LEFT',
+        'right-front': '← TURNING LEFT',
+        'right-rear': '→ CONTINUING RIGHT',
+        'rear-left': '→ TURNING RIGHT',
+        'rear-right': '← TURNING LEFT'
+    };
+    
+    return directionMap[`${from}-${to}`] || '↻ CHANGING VIEW';
+}
         
         function updateHotspots(sceneId) {
             // Hide all hotspot groups
