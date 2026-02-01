@@ -14,9 +14,6 @@
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     
-    <!-- A-Frame Extras for VR Mode UI -->
-    <script src="https://unpkg.com/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
-    
     <style>
         /* RESET & BASE */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -63,8 +60,87 @@
             margin-top: 10px;
         }
         
-        /* SCENE INFO - Only show in desktop mode */
-        #scene-info {
+        /* VR EXIT BUTTON */
+        #vr-exit-ui {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .vr-exit-content {
+            background: rgba(26, 26, 46, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .vr-exit-content h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .vr-exit-content p {
+            color: #ddd;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        .vr-exit-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .vr-exit-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 120px;
+        }
+        
+        .vr-exit-btn.cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .vr-exit-btn.cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .vr-exit-btn.confirm {
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        
+        .vr-exit-btn.confirm:hover {
+            background: rgba(200, 35, 51, 0.95);
+        }
+        
+        /* CURRENT LOCATION INDICATOR */
+        #current-location {
             position: fixed;
             top: 20px;
             left: 50%;
@@ -85,17 +161,13 @@
             justify-content: center;
         }
         
-        .a-enter-vr #scene-info {
-            display: none !important;
-        }
-        
-        #scene-info i {
+        #current-location i {
             color: #FFD700;
             font-size: 16px;
         }
         
         /* TRANSITION NOTIFICATION */
-        #transition-notification {
+        .transition-notification {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -114,125 +186,35 @@
             min-width: 300px;
         }
         
-        /* EXIT CONFIRMATION MODAL */
-        #exit-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            backdrop-filter: blur(10px);
-        }
-        
-        .exit-modal-content {
-            background: rgba(26, 26, 46, 0.95);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        }
-        
-        .exit-modal-content h3 {
-            color: #FFD700;
-            margin-bottom: 15px;
-            font-size: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .exit-modal-content p {
-            color: #ddd;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-        
-        .exit-modal-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-        
-        .exit-modal-btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            min-width: 120px;
-        }
-        
-        .exit-modal-btn.cancel {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .exit-modal-btn.cancel:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .exit-modal-btn.confirm {
-            background: rgba(220, 53, 69, 0.9);
-            color: white;
-            border: 1px solid rgba(220, 53, 69, 0.5);
-        }
-        
-        .exit-modal-btn.confirm:hover {
-            background: rgba(200, 35, 51, 0.95);
-        }
-        
         /* MOBILE OPTIMIZATION */
         @media (max-width: 768px) {
-            #scene-info {
+            .vr-exit-content {
+                padding: 20px;
+                width: 95%;
+            }
+            
+            .vr-exit-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .vr-exit-btn {
+                width: 100%;
+                padding: 12px;
+            }
+            
+            #current-location {
                 top: 15px;
                 font-size: 13px;
                 padding: 8px 16px;
                 min-width: 160px;
             }
             
-            .exit-modal-content {
-                padding: 20px;
-                width: 95%;
-            }
-            
-            .exit-modal-buttons {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .exit-modal-btn {
-                width: 100%;
-                padding: 12px;
-            }
-            
-            #transition-notification {
+            .transition-notification {
                 font-size: 20px;
                 padding: 15px 20px;
                 min-width: 250px;
             }
-        }
-        
-        /* CURSOR STYLING */
-        a-cursor {
-            cursor: pointer;
-        }
-        
-        /* Hide desktop UI in VR mode */
-        .a-enter-vr #scene-info,
-        .a-enter-vr #transition-notification {
-            display: none !important;
         }
     </style>
 </head>
@@ -243,28 +225,28 @@
         <div class="loading-text">Loading Del Pilar Shrine Tour...</div>
     </div>
     
-    <!-- SCENE INFO (Desktop only) -->
-    <div id="scene-info">
+    <!-- CURRENT LOCATION INDICATOR -->
+    <div id="current-location">
         <i>📍</i>
-        <span id="scene-title">Front View</span>
+        <span id="location-text">FRONT VIEW</span>
     </div>
     
     <!-- TRANSITION NOTIFICATION -->
-    <div id="transition-notification">
+    <div id="transition-notification" class="transition-notification">
         <div id="transition-text">TRANSITIONING...</div>
     </div>
     
-    <!-- EXIT CONFIRMATION MODAL -->
-    <div id="exit-modal">
-        <div class="exit-modal-content">
+    <!-- VR EXIT UI (Shown when exit button is pressed in VR) -->
+    <div id="vr-exit-ui">
+        <div class="vr-exit-content">
             <h3><i>🚪</i> Exit VR Tour?</h3>
             <p>Are you sure you want to exit the VR tour?</p>
             <p style="color: #FFD700; font-size: 12px; margin-top: 10px;">
                 <i>⚠️</i> Your progress will be saved.
             </p>
-            <div class="exit-modal-buttons">
-                <button class="exit-modal-btn cancel" id="cancel-exit">Cancel</button>
-                <button class="exit-modal-btn confirm" id="confirm-exit">Exit Tour</button>
+            <div class="vr-exit-buttons">
+                <button class="vr-exit-btn cancel" id="vr-cancel-exit">Cancel</button>
+                <button class="vr-exit-btn confirm" id="vr-confirm-exit">Exit Tour</button>
             </div>
         </div>
     </div>
@@ -273,8 +255,7 @@
     <a-scene cursor="rayOrigin: mouse" 
              raycaster="objects: [data-hotspot], far: 20"
              vr-mode-ui="enabled: true"
-             loading-screen="enabled: false"
-             renderer="antialias: true">
+             loading-screen="enabled: false">
         
         <!-- ASSETS -->
         <a-assets timeout="30000">
@@ -301,18 +282,18 @@
         </a-entity>
         
         <!-- ======================= -->
-        <!-- VR EXIT BUTTON (Visible in Cardboard VR mode) -->
+        <!-- VR EXIT BUTTON (Floating in VR) -->
         <!-- ======================= -->
-        <a-entity id="vr-exit-button"
-                  position="1.5 -0.8 -3"
-                  scale="0.8 0.8 0.8"
+        <a-entity id="vr-exit-button" 
+                  position="0 -1.5 -2"
+                  scale="1 1 1"
                   class="clickable"
                   data-hotspot="true"
                   visible="false">
         </a-entity>
         
         <!-- ======================= -->
-        <!-- DEL PILAR SHRINE HOTSPOTS -->
+        <!-- DEL PILAR SHRINE HOTSPOTS WITH VR-OPTIMIZED FEEDBACK -->
         <!-- ======================= -->
         
         <!-- FRONT VIEW (connects to: left, right) -->
@@ -405,10 +386,10 @@
         // DEL PILAR SHRINE SCENE CONFIGURATION
         // =====================
         const scenes = [
-            { id: "front", title: "Front View", description: "Main entrance view" },
-            { id: "left", title: "Left View", description: "Left side view" },
-            { id: "right", title: "Right View", description: "Right side view" },
-            { id: "rear", title: "Rear View", description: "Back side view" }
+            { id: "front", title: "FRONT VIEW", description: "Main entrance view" },
+            { id: "left", title: "LEFT VIEW", description: "Left side view" },
+            { id: "right", title: "RIGHT VIEW", description: "Right side view" },
+            { id: "rear", title: "REAR VIEW", description: "Back side view" }
         ];
         
         window.sceneList = scenes;
@@ -425,20 +406,20 @@
         // DOM ELEMENTS
         // =====================
         const sky = document.getElementById('scene-sky');
-        const sceneTitle = document.getElementById('scene-title');
+        const locationText = document.getElementById('location-text');
         const loading = document.getElementById('loading');
         const transitionNotification = document.getElementById('transition-notification');
         const transitionText = document.getElementById('transition-text');
-        const exitModal = document.getElementById('exit-modal');
-        const cancelExitBtn = document.getElementById('cancel-exit');
-        const confirmExitBtn = document.getElementById('confirm-exit');
+        const vrExitUI = document.getElementById('vr-exit-ui');
+        const vrCancelExitBtn = document.getElementById('vr-cancel-exit');
+        const vrConfirmExitBtn = document.getElementById('vr-confirm-exit');
         const vrExitButton = document.getElementById('vr-exit-button');
         
         // =====================
         // CUSTOM A-FRAME COMPONENTS
         // =====================
         
-        // Hotspot Component with VR feedback
+        // Enhanced Hotspot Component for Cardboard VR
         AFRAME.registerComponent('nav-hotspot', {
             schema: {
                 target: { type: 'string' },
@@ -451,6 +432,7 @@
             init: function() {
                 const el = this.el;
                 const data = this.data;
+                const self = this;
                 
                 // Create container
                 el.setAttribute('position', data.position);
@@ -461,8 +443,11 @@
                 // Create visual elements
                 this.createHotspotVisuals(data);
                 
-                // Create navigation preview
+                // Create navigation preview (shown on hover)
                 this.createNavigationPreview();
+                
+                // Create direction arrow
+                this.createDirectionArrow();
                 
                 // Event listeners
                 this.setupEventListeners();
@@ -512,57 +497,73 @@
                     icon.setAttribute('scale', '0.05 0.05 1');
                     el.appendChild(icon);
                 }
-                
-                // Label (always facing camera)
-                const labelContainer = document.createElement('a-entity');
-                labelContainer.setAttribute('class', 'hotspot-label');
-                labelContainer.setAttribute('position', '0 0.25 0');
-                labelContainer.setAttribute('look-at', '[camera]');
-                labelContainer.setAttribute('visible', 'false');
-                
-                const labelBg = document.createElement('a-plane');
-                labelBg.setAttribute('width', '0.7');
-                labelBg.setAttribute('height', '0.15');
-                labelBg.setAttribute('color', 'rgba(0, 0, 0, 0.85)');
-                labelBg.setAttribute('opacity', '0');
-                labelBg.setAttribute('side', 'double');
-                
-                const labelText = document.createElement('a-text');
-                labelText.setAttribute('value', data.label);
-                labelText.setAttribute('align', 'center');
-                labelText.setAttribute('color', '#FFD700');
-                labelText.setAttribute('width', '0.65');
-                labelText.setAttribute('position', '0 0 0.001');
-                
-                labelContainer.appendChild(labelBg);
-                labelContainer.appendChild(labelText);
-                el.appendChild(labelContainer);
-                
-                this.labelContainer = labelContainer;
-                this.labelBg = labelBg;
-                this.labelText = labelText;
             },
             
             createNavigationPreview: function() {
                 const data = this.data;
                 const targetScene = window.sceneList.find(s => s.id === data.target);
                 
-                // Direction indicator
-                const direction = document.createElement('a-entity');
-                direction.setAttribute('class', 'direction-indicator');
-                direction.setAttribute('position', '0 0.15 0');
-                direction.setAttribute('visible', 'false');
+                // Create preview panel
+                const previewPanel = document.createElement('a-entity');
+                previewPanel.setAttribute('class', 'navigation-preview');
+                previewPanel.setAttribute('position', '0 0.4 0');
+                previewPanel.setAttribute('visible', 'false');
+                previewPanel.setAttribute('billboard', '');
                 
-                const arrow = document.createElement('a-cone');
-                arrow.setAttribute('height', '0.1');
-                arrow.setAttribute('radius-bottom', '0.03');
-                arrow.setAttribute('color', '#4CAF50');
-                arrow.setAttribute('rotation', '0 0 0');
+                // Background
+                const background = document.createElement('a-plane');
+                background.setAttribute('width', '0.6');
+                background.setAttribute('height', '0.2');
+                background.setAttribute('color', 'rgba(0, 0, 0, 0.95)');
+                background.setAttribute('opacity', '0');
+                background.setAttribute('side', 'double');
+                background.setAttribute('class', 'preview-background');
                 
-                direction.appendChild(arrow);
-                this.el.appendChild(direction);
-                this.direction = direction;
-                this.arrow = arrow;
+                // Destination text
+                const text = document.createElement('a-text');
+                text.setAttribute('value', targetScene ? targetScene.title : data.label);
+                text.setAttribute('align', 'center');
+                text.setAttribute('color', '#FFD700');
+                text.setAttribute('width', '0.55');
+                text.setAttribute('position', '0 0 0.001');
+                text.setAttribute('scale', '0.6 0.6 1');
+                
+                previewPanel.appendChild(background);
+                previewPanel.appendChild(text);
+                this.el.appendChild(previewPanel);
+                
+                this.previewPanel = previewPanel;
+                this.previewBackground = background;
+                this.previewText = text;
+            },
+            
+            createDirectionArrow: function() {
+                // Create arrow pointing to destination
+                const arrow = document.createElement('a-entity');
+                arrow.setAttribute('class', 'direction-arrow');
+                arrow.setAttribute('position', '0 0.15 0');
+                arrow.setAttribute('visible', 'false');
+                
+                // Arrow line
+                const line = document.createElement('a-cylinder');
+                line.setAttribute('height', '0.2');
+                line.setAttribute('radius', '0.005');
+                line.setAttribute('color', '#4CAF50');
+                line.setAttribute('opacity', '0.8');
+                line.setAttribute('position', '0 0.1 0');
+                
+                // Arrow head
+                const head = document.createElement('a-cone');
+                head.setAttribute('height', '0.06');
+                head.setAttribute('radius-bottom', '0.02');
+                head.setAttribute('color', '#4CAF50');
+                head.setAttribute('position', '0 0.25 0');
+                
+                arrow.appendChild(line);
+                arrow.appendChild(head);
+                this.el.appendChild(arrow);
+                
+                this.directionArrow = arrow;
             },
             
             createIcon: function(iconType) {
@@ -595,22 +596,19 @@
                     this.circle.setAttribute('opacity', '0.8');
                     this.ring.setAttribute('color', '#4CAF50');
                     
-                    // Show label
-                    if (this.labelContainer) {
-                        this.labelContainer.setAttribute('visible', 'true');
-                        this.labelBg.setAttribute('animation', {
+                    // Show preview
+                    if (this.previewPanel) {
+                        this.previewPanel.setAttribute('visible', 'true');
+                        this.previewBackground.setAttribute('animation', {
                             property: 'opacity',
                             to: '0.95',
                             dur: 300
                         });
                     }
                     
-                    // Show direction
-                    if (this.direction) {
-                        this.direction.setAttribute('visible', 'true');
-                        // Point arrow toward destination
-                        const targetAngle = this.getTargetAngle();
-                        this.arrow.setAttribute('rotation', `${targetAngle} 0 0`);
+                    // Show direction arrow
+                    if (this.directionArrow) {
+                        this.directionArrow.setAttribute('visible', 'true');
                     }
                 });
                 
@@ -620,17 +618,17 @@
                     this.circle.setAttribute('opacity', '0.3');
                     this.ring.setAttribute('color', '#FFD700');
                     
-                    // Hide label
-                    if (this.labelBg) {
-                        this.labelBg.setAttribute('opacity', '0');
+                    // Hide preview
+                    if (this.previewPanel) {
+                        this.previewBackground.setAttribute('opacity', '0');
                         setTimeout(() => {
-                            this.labelContainer.setAttribute('visible', 'false');
+                            this.previewPanel.setAttribute('visible', 'false');
                         }, 300);
                     }
                     
-                    // Hide direction
-                    if (this.direction) {
-                        this.direction.setAttribute('visible', 'false');
+                    // Hide direction arrow
+                    if (this.directionArrow) {
+                        this.directionArrow.setAttribute('visible', 'false');
                     }
                 });
                 
@@ -639,7 +637,7 @@
                     // Enhanced click feedback
                     this.playClickAnimation();
                     
-                    // Show where we're going
+                    // Show transition notification
                     const targetScene = window.sceneList.find(s => s.id === this.data.target);
                     if (targetScene) {
                         showTransitionNotification(`GOING TO: ${targetScene.title}`);
@@ -654,25 +652,6 @@
                         }
                     }, 800);
                 });
-            },
-            
-            getTargetAngle: function() {
-                // Calculate angle to point arrow based on target scene
-                const currentScene = scenes[currentSceneIndex].id;
-                const target = this.data.target;
-                
-                const angleMap = {
-                    'front-left': 45,    // Point up-left
-                    'front-right': -45,  // Point up-right
-                    'left-front': 135,   // Point right
-                    'left-rear': -135,   // Point left
-                    'right-front': 45,   // Point left
-                    'right-rear': -45,   // Point right
-                    'rear-left': 135,    // Point down-left
-                    'rear-right': -135   // Point down-right
-                };
-                
-                return angleMap[`${currentScene}-${target}`] || 0;
             },
             
             playClickAnimation: function() {
@@ -707,125 +686,6 @@
                         cameraPosition.z
                     );
                 }
-            }
-        });
-        
-        // VR Exit Button Component
-        AFRAME.registerComponent('vr-exit', {
-            init: function() {
-                const el = this.el;
-                
-                // Create exit button background
-                const background = document.createElement('a-plane');
-                background.setAttribute('width', '0.7');
-                background.setAttribute('height', '0.35');
-                background.setAttribute('color', '#DC3545');
-                background.setAttribute('opacity', '0.9');
-                background.setAttribute('shader', 'flat');
-                background.setAttribute('side', 'double');
-                background.setAttribute('class', 'vr-exit-bg');
-                
-                // Pulsing animation for VR visibility
-                background.setAttribute('animation', {
-                    property: 'opacity',
-                    to: '0.7',
-                    dir: 'alternate',
-                    loop: true,
-                    dur: 1500,
-                    easing: 'easeInOutSine'
-                });
-                
-                // Create exit icon
-                const icon = document.createElement('a-text');
-                icon.setAttribute('value', '🚪');
-                icon.setAttribute('align', 'center');
-                icon.setAttribute('color', '#FFFFFF');
-                icon.setAttribute('width', '0.8');
-                icon.setAttribute('position', '0 0.05 0.001');
-                icon.setAttribute('scale', '1 1 1');
-                
-                // Create exit text
-                const text = document.createElement('a-text');
-                text.setAttribute('value', 'EXIT VR');
-                text.setAttribute('align', 'center');
-                text.setAttribute('color', '#FFFFFF');
-                text.setAttribute('width', '0.8');
-                text.setAttribute('position', '0 -0.1 0.001');
-                text.setAttribute('scale', '0.6 0.6 1');
-                
-                // Create label (always faces camera)
-                const labelContainer = document.createElement('a-entity');
-                labelContainer.setAttribute('class', 'exit-label');
-                labelContainer.setAttribute('position', '0 0.25 0');
-                labelContainer.setAttribute('look-at', '[camera]');
-                labelContainer.setAttribute('visible', 'false');
-                
-                const labelBg = document.createElement('a-plane');
-                labelBg.setAttribute('width', '0.6');
-                labelBg.setAttribute('height', '0.12');
-                labelBg.setAttribute('color', 'rgba(0, 0, 0, 0.9)');
-                labelBg.setAttribute('opacity', '0');
-                labelBg.setAttribute('side', 'double');
-                
-                const labelText = document.createElement('a-text');
-                labelText.setAttribute('value', 'Exit to Menu');
-                labelText.setAttribute('align', 'center');
-                labelText.setAttribute('color', '#FFFFFF');
-                labelText.setAttribute('width', '0.55');
-                labelText.setAttribute('position', '0 0 0.001');
-                labelText.setAttribute('scale', '0.5 0.5 1');
-                
-                labelContainer.appendChild(labelBg);
-                labelContainer.appendChild(labelText);
-                
-                // Assemble button
-                el.appendChild(background);
-                el.appendChild(icon);
-                el.appendChild(text);
-                el.appendChild(labelContainer);
-                
-                // Store references
-                this.background = background;
-                this.labelContainer = labelContainer;
-                this.labelBg = labelBg;
-                
-                // Hover effects
-                el.addEventListener('mouseenter', () => {
-                    background.setAttribute('color', '#C82333');
-                    background.setAttribute('scale', '1.1 1.1 1');
-                    
-                    // Show label
-                    labelContainer.setAttribute('visible', 'true');
-                    labelBg.setAttribute('animation', {
-                        property: 'opacity',
-                        to: '0.95',
-                        dur: 300
-                    });
-                });
-                
-                el.addEventListener('mouseleave', () => {
-                    background.setAttribute('color', '#DC3545');
-                    background.setAttribute('scale', '1 1 1');
-                    
-                    // Hide label
-                    labelBg.setAttribute('opacity', '0');
-                    setTimeout(() => {
-                        labelContainer.setAttribute('visible', 'false');
-                    }, 300);
-                });
-                
-                // Click event
-                el.addEventListener('click', () => {
-                    // Click feedback
-                    background.setAttribute('color', '#28A745');
-                    background.setAttribute('scale', '1.05 1.05 1');
-                    
-                    setTimeout(() => {
-                        background.setAttribute('color', '#DC3545');
-                        background.setAttribute('scale', '1 1 1');
-                        showExitModal();
-                    }, 200);
-                });
             }
         });
         
@@ -873,13 +733,10 @@
             currentSceneIndex = index;
             const newScene = scenes[index];
             
-            // Update desktop scene info
-            sceneTitle.textContent = newScene.title;
+            // Update location indicator
+            locationText.textContent = newScene.title;
             
-            // Show where we arrived
-            showTransitionNotification(`NOW AT: ${newScene.title}`, 1500);
-            
-            // Fade transition
+            // Fade out current scene
             sky.setAttribute('animation', {
                 property: 'opacity',
                 from: '1',
@@ -903,6 +760,11 @@
                 
                 // Update hotspots
                 updateHotspots(newScene.id);
+                
+                // Show arrival notification
+                setTimeout(() => {
+                    showTransitionNotification(`NOW VIEWING: ${newScene.title}`, 1500);
+                }, 500);
                 
                 console.log(`Navigated from ${oldScene.title} to ${newScene.title}`);
             }, 400);
@@ -933,11 +795,65 @@
                 vrExitButton.removeChild(vrExitButton.firstChild);
             }
             
-            // Add VR exit component
-            vrExitButton.setAttribute('vr-exit', '');
+            // Create exit button background
+            const background = document.createElement('a-plane');
+            background.setAttribute('width', '0.7');
+            background.setAttribute('height', '0.35');
+            background.setAttribute('color', '#DC3545');
+            background.setAttribute('opacity', '0.9');
+            background.setAttribute('shader', 'flat');
+            background.setAttribute('side', 'double');
+            background.setAttribute('class', 'vr-exit-bg');
             
-            // Make it always face camera in VR
-            vrExitButton.setAttribute('look-at', '[camera]');
+            // Create exit icon
+            const icon = document.createElement('a-text');
+            icon.setAttribute('value', '🚪');
+            icon.setAttribute('align', 'center');
+            icon.setAttribute('color', '#FFFFFF');
+            icon.setAttribute('width', '0.8');
+            icon.setAttribute('position', '0 0.05 0.001');
+            icon.setAttribute('scale', '1 1 1');
+            
+            // Create exit text
+            const text = document.createElement('a-text');
+            text.setAttribute('value', 'EXIT VR');
+            text.setAttribute('align', 'center');
+            text.setAttribute('color', '#FFFFFF');
+            text.setAttribute('width', '0.8');
+            text.setAttribute('position', '0 -0.1 0.001');
+            text.setAttribute('scale', '0.6 0.6 1');
+            
+            // Add billboard effect
+            vrExitButton.setAttribute('billboard', '');
+            
+            // Add pulsing animation
+            background.setAttribute('animation', {
+                property: 'scale',
+                to: '1.1 1.1 1',
+                dir: 'alternate',
+                loop: true,
+                dur: 1500,
+                easing: 'easeInOutSine'
+            });
+            
+            // Assemble button
+            vrExitButton.appendChild(background);
+            vrExitButton.appendChild(icon);
+            vrExitButton.appendChild(text);
+            
+            // Add click event
+            vrExitButton.addEventListener('click', showVRExitUI);
+            
+            // Add hover effects
+            vrExitButton.addEventListener('mouseenter', () => {
+                background.setAttribute('color', '#C82333');
+                background.setAttribute('scale', '1.15 1.15 1');
+            });
+            
+            vrExitButton.addEventListener('mouseleave', () => {
+                background.setAttribute('color', '#DC3545');
+                background.setAttribute('scale', '1 1 1');
+            });
         }
         
         function toggleVRExitButton(show) {
@@ -946,9 +862,11 @@
                     createVRExitButton();
                     vrExitButton.setAttribute('visible', 'true');
                     
-                    // Position in lower right corner of view (easily accessible in VR)
-                    vrExitButton.setAttribute('position', '1.5 -0.8 -3');
-                    vrExitButton.setAttribute('scale', '0.8 0.8 0.8');
+                    // Position button slightly below eye level for easy access
+                    vrExitButton.setAttribute('position', '0 -1.2 -2');
+                    
+                    // Make it look at camera
+                    vrExitButton.setAttribute('look-at', '[camera]');
                 } else {
                     vrExitButton.setAttribute('visible', 'false');
                 }
@@ -984,14 +902,27 @@
         }
         
         // =====================
-        // EXIT MODAL
+        // VR EXIT UI
         // =====================
-        function showExitModal() {
-            exitModal.style.display = 'flex';
+        function showVRExitUI() {
+            vrExitUI.style.display = 'flex';
+            
+            // Make exit UI face camera in VR
+            if (isVRMode) {
+                const camera = document.querySelector('[camera]');
+                if (camera) {
+                    const cameraPosition = camera.getAttribute('position');
+                    // Position exit UI in front of camera
+                    vrExitUI.style.transform = 'none';
+                    vrExitUI.style.left = '50%';
+                    vrExitUI.style.top = '50%';
+                    vrExitUI.style.transform = 'translate(-50%, -50%)';
+                }
+            }
         }
         
-        function hideExitModal() {
-            exitModal.style.display = 'none';
+        function hideVRExitUI() {
+            vrExitUI.style.display = 'none';
         }
         
         function exitTour() {
@@ -1004,14 +935,16 @@
             // Exit after delay
             setTimeout(() => {
                 // In real implementation, redirect to main menu
-                window.location.href = 'main-menu.html';
+                // window.location.href = 'main-menu.html';
+                
+                // For demo, just reload
+                window.location.reload();
             }, 1200);
         }
         
         function saveProgress() {
             const progress = {
                 lastScene: currentSceneIndex,
-                lastSceneTitle: scenes[currentSceneIndex].title,
                 timestamp: new Date().toISOString()
             };
             localStorage.setItem('delPilarTourProgress', JSON.stringify(progress));
@@ -1023,21 +956,21 @@
         function setupVREvents() {
             const scene = document.querySelector('a-scene');
             
-            // VR mode entered (Cardboard mode)
+            // VR mode entered
             scene.addEventListener('enter-vr', () => {
-                console.log('VR mode entered - Cardboard style');
+                console.log('VR mode entered');
                 isVRMode = true;
                 
                 // Show VR exit button
                 toggleVRExitButton(true);
                 
-                // Optimize for VR
-                optimizeForVR();
-                
-                // Show VR instructions
+                // Show initial instruction
                 setTimeout(() => {
-                    showTransitionNotification('LOOK AT MARKERS TO NAVIGATE', 3000);
+                    showTransitionNotification('LOOK AT GOLDEN MARKERS TO NAVIGATE', 3000);
                 }, 1000);
+                
+                // Hide desktop UI elements
+                document.body.classList.add('vr-active');
             });
             
             // VR mode exited
@@ -1047,19 +980,26 @@
                 
                 // Hide VR exit button
                 toggleVRExitButton(false);
+                
+                // Show desktop UI
+                document.body.classList.remove('vr-active');
             });
             
-            // Scene loaded
+            // Detect Cardboard viewer (mobile)
             scene.addEventListener('loaded', () => {
-                // Optimize for mobile
                 if (isMobileDevice()) {
-                    optimizeForMobile();
+                    // Optimize for mobile VR
+                    optimizeForMobileVR();
                 }
             });
         }
         
-        function optimizeForVR() {
-            // Increase hotspot size for VR
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        function optimizeForMobileVR() {
+            // Increase hotspot size for mobile
             const hotspots = document.querySelectorAll('[nav-hotspot]');
             hotspots.forEach(hotspot => {
                 const ring = hotspot.querySelector('.hotspot-ring');
@@ -1067,63 +1007,36 @@
                     ring.setAttribute('radius-inner', '0.1');
                     ring.setAttribute('radius-outer', '0.15');
                 }
-                
-                // Make labels larger in VR
-                const label = hotspot.querySelector('.hotspot-label');
-                if (label) {
-                    const bg = label.querySelector('a-plane');
-                    const text = label.querySelector('a-text');
-                    if (bg && text) {
-                        bg.setAttribute('width', '0.8');
-                        bg.setAttribute('height', '0.18');
-                        text.setAttribute('scale', '0.7 0.7 1');
-                    }
-                }
             });
             
-            // Make cursor more visible in VR
-            const cursor = document.querySelector('a-cursor');
+            // Adjust cursor for mobile
+            const cursor = document.getElementById('cursor');
             if (cursor) {
-                cursor.setAttribute('scale', '1.2 1.2 1');
-                cursor.setAttribute('color', '#FFA500');
+                cursor.setAttribute('scale', '1.5 1.5 1');
             }
-        }
-        
-        function optimizeForMobile() {
-            // Adjust for mobile performance
-            const scene = document.querySelector('a-scene');
-            scene.setAttribute('renderer', 'antialias: false');
-        }
-        
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
         
         // =====================
         // EVENT LISTENERS
         // =====================
         function setupEventListeners() {
-            // Exit modal buttons
-            cancelExitBtn.addEventListener('click', hideExitModal);
-            confirmExitBtn.addEventListener('click', exitTour);
+            // VR exit UI buttons
+            vrCancelExitBtn.addEventListener('click', hideVRExitUI);
+            vrConfirmExitBtn.addEventListener('click', exitTour);
             
-            // Close modal when clicking outside
-            exitModal.addEventListener('click', (e) => {
-                if (e.target === exitModal) {
-                    hideExitModal();
-                }
-            });
-            
-            // Keyboard shortcuts
+            // Keyboard shortcuts (for testing)
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
-                    if (exitModal.style.display === 'flex') {
-                        hideExitModal();
+                    if (vrExitUI.style.display === 'flex') {
+                        hideVRExitUI();
                     } else if (isVRMode) {
-                        // In VR mode, pressing escape should show exit modal
-                        showExitModal();
+                        showVRExitUI();
                     }
                 }
+                
+                // Scene navigation (for testing)
+                if (e.key === 'ArrowLeft') changeScene(currentSceneIndex > 0 ? currentSceneIndex - 1 : scenes.length - 1);
+                if (e.key === 'ArrowRight') changeScene(currentSceneIndex < scenes.length - 1 ? currentSceneIndex + 1 : 0);
             });
             
             // Save progress when page closes
