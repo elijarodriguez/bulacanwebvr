@@ -185,7 +185,7 @@
     </div>
 
     <!-- BACK BUTTON -->
-    <button id="back-button" onclick="goToMenu()">
+    <button id="back-button">
         ↩ Back to Menu
     </button>
 
@@ -282,6 +282,14 @@
 
     <script>
         // =====================
+        // NAVIGATION FUNCTION
+        // =====================
+        function goToMenu() {
+            // Navigate to your GitHub Pages menu
+            window.location.href = "https://elijarodriguez.github.io/bulacanwebvr/index.html";
+        }
+
+        // =====================
         // SIMPLE METRICS SYSTEM
         // =====================
         class SimpleMetrics {
@@ -298,7 +306,7 @@
                 this.startMonitoring();
                 this.startSessionTimer();
                 this.setupHotspotInteractions();
-                this.goToMenu();
+                this.setupBackButton();
 
                 // Hide loading screen after images load
                 this.preloadImages();
@@ -321,7 +329,27 @@
                             }, 500);
                         }
                     };
+                    img.onerror = () => {
+                        loaded++; // Count as loaded even if error
+                        if (loaded === images.length) {
+                            setTimeout(() => {
+                                document.getElementById('loading').style.opacity = '0';
+                                setTimeout(() => {
+                                    document.getElementById('loading').style.display = 'none';
+                                }, 500);
+                            }, 500);
+                        }
+                    };
                     img.src = `labanan_sa_quinga/${imgId}.jpg`;
+                });
+            }
+
+            setupBackButton() {
+                document.getElementById('back-button').addEventListener('click', () => {
+                    // Optional: Add confirmation dialog
+                    if (confirm("Return to Main Menu?\nYour performance data will be saved.")) {
+                        goToMenu();
+                    }
                 });
             }
 
@@ -411,52 +439,69 @@
                 });
             }
 
-            goToMenu() {
-            // Navigate to another HTML file
-            window.location.href = "https://elijarodriguez.github.io/bulacanwebvr/index.html";
-        }
+            changeScene(targetId, sceneName) {
+                // Update sky image
+                const sky = document.querySelector('#scene-sky');
+                sky.setAttribute('src', `#${targetId}`);
 
-        changeScene(targetId, sceneName) {
-            // Update sky image
-            const sky = document.querySelector('#scene-sky');
-            sky.setAttribute('src', `#${targetId}`);
+                // Update scene info
+                this.metrics.currentScene = sceneName;
+                document.getElementById('scene-name').textContent = `📍 ${sceneName}`;
+                document.getElementById('current-scene').textContent = sceneName;
 
-            // Update scene info
-            this.metrics.currentScene = sceneName;
-            document.getElementById('scene-name').textContent = `📍 ${sceneName}`;
-            document.getElementById('current-scene').textContent = sceneName;
+                // Show/Hide hotspots
+                document.getElementById('front-hotspots').setAttribute('visible', targetId === 'front');
+                document.getElementById('left-hotspots').setAttribute('visible', targetId === 'left');
+                document.getElementById('right-hotspots').setAttribute('visible', targetId === 'right');
 
-            // Show/Hide hotspots
-            document.getElementById('front-hotspots').setAttribute('visible', targetId === 'front');
-            document.getElementById('left-hotspots').setAttribute('visible', targetId === 'left');
-            document.getElementById('right-hotspots').setAttribute('visible', targetId === 'right');
+                // Record scene visit
+                if (!this.metrics.scenesVisited.includes(sceneName)) {
+                    this.metrics.scenesVisited.push(sceneName);
+                }
 
-            // Record scene visit
-            if (!this.metrics.scenesVisited.includes(sceneName)) {
-                this.metrics.scenesVisited.push(sceneName);
+                this.updateDisplay();
             }
 
-            this.updateDisplay();
+            recordHotspotClick() {
+                this.metrics.hotspotsClicked++;
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                document.getElementById('fps-value').textContent = this.metrics.fps;
+                document.getElementById('latency-value').textContent = Math.round(this.metrics.latency) + 'ms';
+                document.getElementById('hotspot-count').textContent = this.metrics.hotspotsClicked;
+                document.getElementById('current-scene').textContent = this.metrics.currentScene;
+            }
         }
 
-        recordHotspotClick() {
-            this.metrics.hotspotsClicked++;
-            this.updateDisplay();
-        }
+        // =====================
+        // INITIALIZE EVERYTHING
+        // =====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize metrics system
+            const metrics = new SimpleMetrics();
 
-        updateDisplay() {
-            document.getElementById('fps-value').textContent = this.metrics.fps;
-            document.getElementById('latency-value').textContent = Math.round(this.metrics.latency) + 'ms';
-            document.getElementById('hotspot-count').textContent = this.metrics.hotspotsClicked;
-            document.getElementById('current-scene').textContent = this.metrics.currentScene;
-        }
-        }
+            // Add some guidance for demo
+            setTimeout(() => {
+                if (metrics.metrics.hotspotsClicked === 0) {
+                    console.log('💡 DEMO TIP: Click the golden rings to navigate between scenes');
+                    console.log('💡 The back button returns to the Main Menu');
+                    console.log('💡 Performance metrics update in real-time');
+                }
+            }, 3000);
+        });
 
-        // Initialize metrics system
-        const metrics = new SimpleMetrics();
-
-        // Export function for thesis data
+        // =====================
+        // EXPORT FUNCTION
+        // =====================
         window.exportMetrics = function () {
+            // Check if metrics exists
+            if (typeof metrics === 'undefined') {
+                alert('Metrics system not initialized yet. Please wait a moment.');
+                return;
+            }
+
             const data = {
                 thesisProject: "Low-cost VR Viewing Device for Bulacan Historical Sites",
                 timestamp: new Date().toISOString(),
@@ -495,18 +540,8 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            alert('✅ Thesis metrics exported!');
+            alert('✅ Thesis metrics exported!\n\nYou can show this data to your defense panel.');
         };
-
-        // Add some guidance for demo
-        setTimeout(() => {
-            if (metrics.metrics.hotspotsClicked === 0) {
-                console.log('💡 DEMO TIP: Click the golden rings to navigate between scenes');
-                console.log('💡 The back button returns to the front view');
-                console.log('💡 Performance metrics update in real-time');
-            }
-        }, 3000);
     </script>
 </body>
-
 </html>
