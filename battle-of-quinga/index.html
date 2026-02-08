@@ -2,410 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- Cache Prevention -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
-    <title>Battle of Quinga - VR Tour</title>
-    
-    <!-- A-Frame -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle of Quinga - VR Tour with Metrics</title>
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     
-    <!-- Enhanced Hotspot Component -->
-    <script>
-        AFRAME.registerComponent('nav-hotspot', {
-            schema: {
-                target: { type: 'string' },      // Target scene ID
-                label: { type: 'string' },       // Display label
-                icon: { type: 'string', default: 'arrow' }, // arrow, door, stairs, etc.
-                position: { type: 'vec3', default: {x: 0, y: 0, z: -3} },
-                rotation: { type: 'vec3', default: {x: 0, y: 0, z: 0} }
-            },
-            
-            init: function() {
-                const el = this.el;
-                const data = this.data;
-                
-                // Create container
-                el.setAttribute('position', data.position);
-                el.setAttribute('rotation', data.rotation);
-                el.classList.add('clickable');
-                el.setAttribute('data-hotspot', 'true');
-                el.setAttribute('data-target', data.target); // Add data-target for compatibility
-                
-                // Create outer ring (pulsing)
-                const ring = document.createElement('a-ring');
-                ring.setAttribute('radius-inner', '0.08');
-                ring.setAttribute('radius-outer', '0.12');
-                ring.setAttribute('color', '#FFD700');
-                ring.setAttribute('opacity', '0.6');
-                ring.setAttribute('shader', 'flat');
-                ring.setAttribute('animation', {
-                    property: 'scale',
-                    to: '1.2 1.2 1',
-                    dir: 'alternate',
-                    loop: true,
-                    dur: 1200,
-                    easing: 'easeInOutSine'
-                });
-                el.appendChild(ring);
-                
-                // Create inner circle (hover effect)
-                const circle = document.createElement('a-circle');
-                circle.setAttribute('radius', '0.06');
-                circle.setAttribute('color', '#FFFFFF');
-                circle.setAttribute('opacity', '0');
-                circle.setAttribute('shader', 'flat');
-                circle.setAttribute('class', 'hotspot-inner');
-                el.appendChild(circle);
-                
-                // Create icon based on type
-                const icon = this.createIcon(data.icon);
-                if (icon) {
-                    icon.setAttribute('position', '0 0 0.001');
-                    icon.setAttribute('scale', '0.04 0.04 1');
-                    el.appendChild(icon);
-                }
-                
-                // Create label
-                const label = document.createElement('a-entity');
-                label.setAttribute('text', {
-                    value: data.label,
-                    align: 'center',
-                    color: '#FFFFFF',
-                    width: 0.6,
-                    font: 'roboto',
-                    baseline: 'center'
-                });
-                label.setAttribute('position', '0 0.2 0');
-                label.setAttribute('visible', 'false');
-                label.setAttribute('class', 'hotspot-label');
-                el.appendChild(label);
-                
-                // HOVER EFFECTS
-                el.addEventListener('mouseenter', () => {
-                    // Highlight inner circle
-                    circle.setAttribute('opacity', '0.8');
-                    circle.setAttribute('animation', {
-                        property: 'scale',
-                        to: '1.3 1.3 1',
-                        dur: 200,
-                        easing: 'easeOutQuad'
-                    });
-                    
-                    // Show label
-                    label.setAttribute('visible', 'true');
-                    label.setAttribute('animation', {
-                        property: 'scale',
-                        from: '0.8 0.8 1',
-                        to: '1 1 1',
-                        dur: 300,
-                        easing: 'easeOutBack'
-                    });
-                });
-                
-                el.addEventListener('mouseleave', () => {
-                    // Remove highlight
-                    circle.setAttribute('opacity', '0');
-                    circle.setAttribute('scale', '1 1 1');
-                    circle.removeAttribute('animation');
-                    
-                    // Hide label
-                    label.setAttribute('visible', 'false');
-                });
-                
-                // CLICK/TAP EVENT
-                el.addEventListener('click', () => {
-                    // Click feedback
-                    circle.setAttribute('color', '#4CAF50');
-                    circle.setAttribute('opacity', '0.9');
-                    
-                    setTimeout(() => {
-                        circle.setAttribute('color', '#FFFFFF');
-                        circle.setAttribute('opacity', '0');
-                        
-                        // Navigate to target scene
-                        const scenes = window.sceneList;
-                        const targetIndex = scenes.findIndex(s => s.id === data.target);
-                        if (targetIndex !== -1) {
-                            window.changeScene(targetIndex);
-                        }
-                    }, 300);
-                });
-            },
-            
-            createIcon: function(iconType) {
-                const iconMap = {
-                    'arrow': 'M-0.5,-0.5 L0.5,0 L-0.5,0.5 Z',
-                    'door': 'M-0.4,-0.5 L0.4,-0.5 L0.4,0.5 L-0.4,0.5 Z M-0.2,-0.3 L0.2,-0.3 L0.2,0.3 L-0.2,0.3 Z',
-                    'stairs': 'M-0.4,0.5 L0.4,0.5 L0.4,0.3 L-0.4,0.3 L-0.4,0.1 L0.4,0.1 L0.4,-0.1 L-0.4,-0.1 L-0.4,-0.3 L0.4,-0.3 L0.4,-0.5 L-0.4,-0.5 Z',
-                    'up': 'M-0.3,0.3 L0,0 L0.3,0.3 M0,-0.5 L0,0',
-                    'down': 'M-0.3,-0.3 L0,0 L0.3,-0.3 M0,0.5 L0,0',
-                    'left': 'M0.3,-0.5 L0,0 L0.3,0.5 M-0.3,0 L0,0',
-                    'right': 'M-0.3,-0.5 L0,0 L-0.3,0.5 M0.3,0 L0,0'
-                };
-                
-                if (iconMap[iconType]) {
-                    const path = document.createElement('a-entity');
-                    path.setAttribute('geometry', {
-                        primitive: 'path',
-                        path: iconMap[iconType]
-                    });
-                    path.setAttribute('material', 'color: #000000; shader: flat');
-                    path.setAttribute('rotation', iconType === 'up' || iconType === 'down' ? '0 0 0' : '0 0 90');
-                    return path;
-                }
-                return null;
-            }
-        });
-    </script>
-    
     <style>
-        /* RESET & BASE */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden; 
-            background: #000;
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* BASIC STYLES */
+        body { margin: 0; padding: 0; background: black; overflow: hidden; }
         
-        /* LOADING */
-        #loading {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #1a1a2e;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s;
-        }
-        
-        .loader {
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(255, 215, 0, 0.2);
-            border-top: 3px solid #FFD700;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            font-size: 14px;
-            color: #aaa;
-            margin-top: 10px;
-        }
-        
-        /* SCENE INFO */
-        #scene-info {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 500;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 180px;
-            justify-content: center;
-        }
-        
-        #scene-info i {
-            color: #FFD700;
-            font-size: 16px;
-        }
-        
-        /* NAVIGATION CONTROLS */
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
-            pointer-events: none;
-        }
-        
-        .controls button {
-            pointer-events: auto;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-        
-        .controls button:hover:not(:disabled) {
-            background: rgba(26, 26, 46, 0.95);
-            transform: scale(1.1);
-        }
-        
-        .controls button:active {
-            transform: scale(0.95);
-        }
-        
-        .controls button:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-        
-        /* SCENE SELECTOR */
-        .scene-selector {
-            position: fixed;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 1000;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 12px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-        }
-        
-        .scene-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .scene-dot.active {
-            background: #FFD700;
-            transform: scale(1.3);
-        }
-        
-        .scene-dot:hover {
-            background: rgba(255, 215, 0, 0.7);
-            transform: scale(1.2);
-        }
-        
-        /* INSTRUCTIONS */
-        #instructions {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 12px;
-            max-width: 200px;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: none;
-        }
-        
-        #instructions h3 {
-            color: #FFD700;
-            margin-bottom: 10px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .instructions-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1001;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* PERFORMANCE METRICS PANEL */
+        /* METRICS PANEL - ALWAYS VISIBLE */
         #metrics-panel {
             position: fixed;
-            top: 60px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.85);
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
             color: white;
             padding: 15px;
             border-radius: 10px;
             font-family: monospace;
             font-size: 12px;
-            z-index: 999;
-            max-width: 300px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: none;
-        }
-        
-        #metrics-panel h4 {
-            margin: 0 0 10px 0; 
-            color: #FFD700; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-        }
-        
-        #toggle-metrics {
-            margin-left: auto; 
-            background: #444; 
-            border: none; 
-            color: white; 
-            padding: 2px 8px; 
-            border-radius: 4px; 
-            cursor: pointer;
-        }
-        
-        .metric-group {
-            margin-bottom: 10px;
+            z-index: 10000;
+            width: 300px;
+            border: 1px solid #444;
         }
         
         .metric {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin: 5px 0;
             padding: 3px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
         }
         
         .metric-label {
@@ -413,442 +43,167 @@
         }
         
         .metric-value {
-            color: #fff;
+            color: white;
             font-weight: bold;
         }
         
-        .metric-status {
-            font-size: 10px;
-            padding: 1px 5px;
-            border-radius: 3px;
-            margin-left: 8px;
-        }
-        
-        .status-good { background: #4CAF50; color: white; }
-        .status-warning { background: #FF9800; color: white; }
-        .status-bad { background: #F44336; color: white; }
-        
-        /* METRICS TOGGLE BUTTON */
-        #show-metrics {
+        #loading {
             position: fixed;
-            top: 60px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.85);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
             color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 998;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-        }
-        
-        /* TEST BUTTON */
-        #run-tests {
-            position: fixed;
-            bottom: 90px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            z-index: 1000;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 12px;
-        }
-        
-        /* MOBILE OPTIMIZATION */
-        @media (max-width: 768px) {
-            #scene-info {
-                top: 15px;
-                font-size: 13px;
-                padding: 8px 16px;
-                min-width: 160px;
-            }
-            
-            .controls {
-                bottom: 15px;
-                padding: 0 15px;
-            }
-            
-            .controls button {
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
-            }
-            
-            .scene-selector {
-                bottom: 80px;
-            }
-            
-            .scene-dot {
-                width: 8px;
-                height: 8px;
-            }
-            
-            #metrics-panel {
-                top: 50px;
-                left: 10px;
-                max-width: 250px;
-                padding: 10px;
-                font-size: 11px;
-            }
-            
-            #show-metrics {
-                top: 50px;
-                left: 10px;
-                width: 35px;
-                height: 35px;
-            }
-        }
-        
-        /* CURSOR STYLING */
-        a-cursor {
-            cursor: pointer;
+            align-items: center;
+            z-index: 10001;
         }
     </style>
 </head>
 <body>
-    <!-- LOADING -->
-    <div id="loading">
-        <div class="loader"></div>
-        <div class="loading-text">Loading Battlefield Tour...</div>
-    </div>
-    
-    <!-- SCENE INFO -->
-    <div id="scene-info">
-        <i>📍</i>
-        <span id="scene-title">Front View</span>
-    </div>
-    
-    <!-- PERFORMANCE METRICS PANEL -->
+    <!-- METRICS PANEL -->
     <div id="metrics-panel">
-        <h4>
-            📊 Performance Metrics
-            <button id="toggle-metrics">Hide</button>
-        </h4>
+        <h3 style="color: gold; margin-top: 0;">📊 Performance Metrics</h3>
         
-        <div class="metric-group">
-            <div class="metric">
-                <span class="metric-label">FPS:</span>
-                <span id="fps-value" class="metric-value">--</span>
-                <span class="metric-status" id="fps-status"></span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">Latency:</span>
-                <span id="latency-value" class="metric-value">-- ms</span>
-                <span class="metric-status" id="latency-status"></span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">Accuracy:</span>
-                <span id="accuracy-value" class="metric-value">--%</span>
-                <span class="metric-status" id="accuracy-status"></span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">Session Time:</span>
-                <span id="session-time" class="metric-value">00:00</span>
-            </div>
+        <div class="metric">
+            <span class="metric-label">FPS:</span>
+            <span id="fps-value" class="metric-value">--</span>
         </div>
         
-        <div class="metric-group" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
-            <div class="metric">
-                <span class="metric-label">Hotspots Clicked:</span>
-                <span id="hotspot-count" class="metric-value">0</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">Scenes Visited:</span>
-                <span id="scene-count" class="metric-value">0</span>
-            </div>
-            <div class="metric">
-                <span class="metric-label">Errors:</span>
-                <span id="error-count" class="metric-value">0</span>
-            </div>
+        <div class="metric">
+            <span class="metric-label">Latency:</span>
+            <span id="latency-value" class="metric-value">-- ms</span>
         </div>
         
-        <!-- Data Export Button -->
-        <button id="export-metrics" style="
-            margin-top: 15px;
+        <div class="metric">
+            <span class="metric-label">Session:</span>
+            <span id="session-time" class="metric-value">00:00</span>
+        </div>
+        
+        <div class="metric">
+            <span class="metric-label">Hotspots:</span>
+            <span id="hotspot-count" class="metric-value">0</span>
+        </div>
+        
+        <div class="metric">
+            <span class="metric-label">Scenes:</span>
+            <span id="scene-count" class="metric-value">0</span>
+        </div>
+        
+        <button onclick="exportMetrics()" style="
+            margin-top: 10px;
             width: 100%;
+            padding: 8px;
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 8px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 12px;
         ">
-            📥 Export Metrics Data
+            📥 Export Data
         </button>
     </div>
     
-    <!-- METRICS TOGGLE BUTTON -->
-    <button id="show-metrics">📊</button>
-    
-    <!-- INSTRUCTIONS BUTTON -->
-    <button class="instructions-btn" id="instructions-btn" title="Instructions">?</button>
-    
-    <!-- INSTRUCTIONS PANEL -->
-    <div id="instructions">
-        <h3>🗺️ Navigation Guide</h3>
-        <p>• <b>Look around:</b> Drag or move device</p>
-        <p>• <b>Navigate:</b> Click golden markers</p>
-        <p>• <b>Hover:</b> See destination names</p>
-        <p>• <b>Change scene:</b> Use buttons or dots</p>
+    <!-- LOADING -->
+    <div id="loading">
+        <div style="width: 50px; height: 50px; border: 3px solid gold; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <div style="margin-top: 20px;">Loading VR Tour...</div>
     </div>
     
     <!-- A-FRAME SCENE -->
-    <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
-        <!-- ASSETS -->
-        <a-assets timeout="30000">
-            <img id="front" src="labanan_sa_quinga/front.jpg" crossorigin="anonymous">
-            <img id="left" src="labanan_sa_quinga/left.jpg" crossorigin="anonymous">
-            <img id="right" src="labanan_sa_quinga/right.jpg" crossorigin="anonymous">
+    <a-scene>
+        <a-assets>
+            <img id="front" src="labanan_sa_quinga/front.jpg">
+            <img id="left" src="labanan_sa_quinga/left.jpg">
+            <img id="right" src="labanan_sa_quinga/right.jpg">
         </a-assets>
         
-        <!-- SKY -->
         <a-sky id="scene-sky" src="#front"></a-sky>
         
-        <!-- CAMERA WITH CURSOR -->
-        <a-entity camera look-controls="pointerLockEnabled: true">
-            <a-cursor 
-                id="cursor"
-                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
-                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
-                animation__mouseleave="property: scale; startEvents: mouseleave; from: 0.1 0.1 0.1; to: 1 1 1; dur: 500"
-                fuse="true"
-                fuse-timeout="500">
-            </a-cursor>
+        <a-entity camera look-controls>
+            <a-cursor></a-cursor>
         </a-entity>
         
-        <!-- HOTSPOTS -->
-        <!-- FRONT VIEW -->
-        <a-entity id="front-hotspots">
-            <!-- To Left View -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: left;
-                label: Left View;
-                icon: left;
-                position: -2 0 -4;
-                rotation: 0 30 0">
-            </a-entity>
-            
-            <!-- To Right View -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: right;
-                label: Right View;
-                icon: right;
-                position: 2 0 -4;
-                rotation: 0 -30 0">
-            </a-entity>
+        <!-- Hotspots -->
+        <a-entity position="-2 0 -4">
+            <a-circle color="gold" radius="0.2" opacity="0.5" animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1000"></a-circle>
+            <a-text value="Left View" position="0 0.3 0" color="white" align="center"></a-text>
         </a-entity>
         
-        <!-- LEFT VIEW -->
-        <a-entity id="left-hotspots" visible="false">
-            <!-- To Front View -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: front;
-                label: Front View;
-                icon: arrow;
-                position: 2 0 -4;
-                rotation: 0 -30 0">
-            </a-entity>
-        </a-entity>
-        
-        <!-- RIGHT VIEW -->
-        <a-entity id="right-hotspots" visible="false">
-            <!-- To Front View -->
-            <a-entity class="hotspot" nav-hotspot="
-                target: front;
-                label: Front View;
-                icon: arrow;
-                position: -2 0 -4;
-                rotation: 0 30 0">
-            </a-entity>
+        <a-entity position="2 0 -4">
+            <a-circle color="gold" radius="0.2" opacity="0.5" animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1000"></a-circle>
+            <a-text value="Right View" position="0 0.3 0" color="white" align="center"></a-text>
         </a-entity>
     </a-scene>
     
-    <!-- SCENE SELECTOR DOTS -->
-    <div class="scene-selector" id="scene-selector"></div>
-    
-    <!-- NAVIGATION CONTROLS -->
-    <div class="controls">
-        <button id="prev-btn" title="Previous Scene">←</button>
-        <button id="next-btn" title="Next Scene">→</button>
-    </div>
-    
-    <!-- TEST BUTTON (Will be added dynamically) -->
-    
     <script>
         // =====================
-        // SCENE CONFIGURATION
+        // SIMPLE METRICS SYSTEM
         // =====================
-        const scenes = [
-            { id: "front", title: "Front View" },
-            { id: "left", title: "Left View" },
-            { id: "right", title: "Right View" }
-        ];
-        
-        window.sceneList = scenes;
-        
-        // =====================
-        // NAVIGATION MAP
-        // =====================
-        const navigationMap = {
-            "front": ["left", "right"],
-            "left": ["front"],
-            "right": ["front"]
-        };
-        
-        // =====================
-        // STATE
-        // =====================
-        let currentSceneIndex = 0;
-        let imagesLoaded = 0;
-        const totalImages = scenes.length;
-        
-        // =====================
-        // DOM ELEMENTS
-        // =====================
-        const sky = document.getElementById('scene-sky');
-        const sceneTitle = document.getElementById('scene-title');
-        const loading = document.getElementById('loading');
-        const sceneSelector = document.getElementById('scene-selector');
-        const instructions = document.getElementById('instructions');
-        
-        // =====================
-        // PERFORMANCE METRICS SYSTEM
-        // =====================
-        class PerformanceMetrics {
+        class SimpleMetrics {
             constructor() {
                 this.metrics = {
-                    fps: { current: 0, average: 0, min: 999, max: 0, samples: [] },
-                    latency: { current: 0, average: 0, min: 999, max: 0 },
-                    accuracy: { current: 100, average: 100 },
+                    fps: 0,
+                    latency: 0,
                     sessionStart: Date.now(),
                     hotspotsClicked: 0,
-                    scenesVisited: new Set(),
-                    errors: 0,
-                    frameTimes: []
+                    scenesVisited: 1
                 };
                 
-                this.isMonitoring = true;
-                this.lastFrameTime = performance.now();
-                this.frameCount = 0;
-                this.lastFPSUpdate = Date.now();
+                this.startMonitoring();
+                this.startSessionTimer();
                 
-                this.init();
+                // Hide loading screen
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 2000);
             }
             
-            init() {
-                // Start FPS monitoring
-                this.startFPSMonitoring();
+            startMonitoring() {
+                let lastTime = performance.now();
+                let frames = 0;
+                let lastFPSUpdate = Date.now();
                 
-                // Set up UI events
-                document.getElementById('show-metrics').addEventListener('click', () => {
-                    document.getElementById('metrics-panel').style.display = 'block';
-                    document.getElementById('show-metrics').style.display = 'none';
-                });
-                
-                document.getElementById('toggle-metrics').addEventListener('click', () => {
-                    document.getElementById('metrics-panel').style.display = 'none';
-                    document.getElementById('show-metrics').style.display = 'block';
-                });
-                
-                document.getElementById('export-metrics').addEventListener('click', () => {
-                    this.exportData();
-                });
-                
-                // Monitor scene changes
-                const originalChangeScene = window.changeScene;
-                window.changeScene = (index) => {
-                    this.recordSceneVisit(index);
-                    return originalChangeScene(index);
-                };
-                
-                // Monitor hotspot clicks
-                document.addEventListener('click', (e) => {
-                    if (e.target.closest('[data-hotspot]')) {
-                        this.recordHotspotClick();
-                    }
-                });
-                
-                // Monitor errors
-                window.addEventListener('error', () => {
-                    this.metrics.errors++;
-                    this.updateDisplay();
-                });
-                
-                // Start session timer
-                this.updateSessionTimer();
-            }
-            
-            startFPSMonitoring() {
-                const calculateFPS = () => {
-                    const now = performance.now();
-                    const delta = now - this.lastFrameTime;
-                    this.lastFrameTime = now;
+                const updateFPS = () => {
+                    frames++;
+                    const now = Date.now();
                     
-                    this.metrics.frameTimes.push(delta);
-                    
-                    // Keep only last 60 samples
-                    if (this.metrics.frameTimes.length > 60) {
-                        this.metrics.frameTimes.shift();
-                    }
-                    
-                    // Calculate FPS every second
-                    this.frameCount++;
-                    if (now - this.lastFPSUpdate >= 1000) {
-                        const currentFPS = Math.round(this.frameCount * 1000 / (now - this.lastFPSUpdate));
-                        this.metrics.fps.current = currentFPS;
-                        
-                        // Update statistics
-                        this.metrics.fps.samples.push(currentFPS);
-                        if (this.metrics.fps.samples.length > 30) {
-                            this.metrics.fps.samples.shift();
-                        }
-                        
-                        this.metrics.fps.average = Math.round(
-                            this.metrics.fps.samples.reduce((a, b) => a + b, 0) / this.metrics.fps.samples.length
-                        );
-                        
-                        this.metrics.fps.min = Math.min(this.metrics.fps.min, currentFPS);
-                        this.metrics.fps.max = Math.max(this.metrics.fps.max, currentFPS);
-                        
-                        this.frameCount = 0;
-                        this.lastFPSUpdate = now;
-                        
+                    if (now - lastFPSUpdate >= 1000) {
+                        this.metrics.fps = frames;
+                        frames = 0;
+                        lastFPSUpdate = now;
                         this.updateDisplay();
                     }
                     
-                    if (this.isMonitoring) {
-                        requestAnimationFrame(calculateFPS);
-                    }
+                    // Mock latency (replace with real ESP32 data later)
+                    this.metrics.latency = 120 + Math.random() * 60;
+                    
+                    requestAnimationFrame(updateFPS);
                 };
                 
-                requestAnimationFrame(calculateFPS);
+                updateFPS();
             }
             
-            recordLatency(latencyMs) {
-                this.metrics.latency.current = latencyMs;
-                this.metrics.latency.average = (this.metrics.latency.average * 0.9) + (latencyMs * 0.1);
-                this.metrics.latency.min = Math.min(this.metrics.latency.min, latencyMs);
-                this.metrics.latency.max = Math.max(this.metrics.latency.max, latencyMs);
-                this.updateDisplay();
+            startSessionTimer() {
+                const update = () => {
+                    const elapsed = Date.now() - this.metrics.sessionStart;
+                    const mins = Math.floor(elapsed / 60000);
+                    const secs = Math.floor((elapsed % 60000) / 1000);
+                    
+                    document.getElementById('session-time').textContent = 
+                        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    
+                    setTimeout(update, 1000);
+                };
+                update();
             }
             
-            recordAccuracy(success, total) {
-                const accuracy = (success / total) * 100;
-                this.metrics.accuracy.current = accuracy;
-                this.metrics.accuracy.average = (this.metrics.accuracy.average * 0.9) + (accuracy * 0.1);
-                this.updateDisplay();
+            updateDisplay() {
+                document.getElementById('fps-value').textContent = this.metrics.fps;
+                document.getElementById('latency-value').textContent = Math.round(this.metrics.latency) + 'ms';
+                document.getElementById('hotspot-count').textContent = this.metrics.hotspotsClicked;
+                document.getElementById('scene-count').textContent = this.metrics.scenesVisited;
             }
             
             recordHotspotClick() {
@@ -856,577 +211,60 @@
                 this.updateDisplay();
             }
             
-            recordSceneVisit(index) {
-                this.metrics.scenesVisited.add(index);
+            recordSceneChange() {
+                this.metrics.scenesVisited++;
                 this.updateDisplay();
             }
-            
-            updateDisplay() {
-                // Update FPS
-                const fpsValue = document.getElementById('fps-value');
-                const fpsStatus = document.getElementById('fps-status');
-                if (fpsValue) {
-                    fpsValue.textContent = `${this.metrics.fps.current}`;
-                }
-                
-                if (fpsStatus) {
-                    if (this.metrics.fps.current >= 30) {
-                        fpsStatus.textContent = "Good";
-                        fpsStatus.className = "metric-status status-good";
-                    } else if (this.metrics.fps.current >= 20) {
-                        fpsStatus.textContent = "Fair";
-                        fpsStatus.className = "metric-status status-warning";
-                    } else {
-                        fpsStatus.textContent = "Poor";
-                        fpsStatus.className = "metric-status status-bad";
-                    }
-                }
-                
-                // Update Latency
-                const latencyValue = document.getElementById('latency-value');
-                const latencyStatus = document.getElementById('latency-status');
-                if (latencyValue) {
-                    latencyValue.textContent = `${Math.round(this.metrics.latency.current)} ms`;
-                }
-                
-                if (latencyStatus) {
-                    if (this.metrics.latency.current <= 150) {
-                        latencyStatus.textContent = "Good";
-                        latencyStatus.className = "metric-status status-good";
-                    } else if (this.metrics.latency.current <= 300) {
-                        latencyStatus.textContent = "Fair";
-                        latencyStatus.className = "metric-status status-warning";
-                    } else {
-                        latencyStatus.textContent = "Poor";
-                        latencyStatus.className = "metric-status status-bad";
-                    }
-                }
-                
-                // Update Accuracy
-                const accuracyValue = document.getElementById('accuracy-value');
-                const accuracyStatus = document.getElementById('accuracy-status');
-                if (accuracyValue) {
-                    accuracyValue.textContent = `${Math.round(this.metrics.accuracy.current)}%`;
-                }
-                
-                if (accuracyStatus) {
-                    if (this.metrics.accuracy.current >= 85) {
-                        accuracyStatus.textContent = "Good";
-                        accuracyStatus.className = "metric-status status-good";
-                    } else if (this.metrics.accuracy.current >= 70) {
-                        accuracyStatus.textContent = "Fair";
-                        accuracyStatus.className = "metric-status status-warning";
-                    } else {
-                        accuracyStatus.textContent = "Poor";
-                        accuracyStatus.className = "metric-status status-bad";
-                    }
-                }
-                
-                // Update other metrics
-                const hotspotCount = document.getElementById('hotspot-count');
-                const sceneCount = document.getElementById('scene-count');
-                const errorCount = document.getElementById('error-count');
-                
-                if (hotspotCount) hotspotCount.textContent = this.metrics.hotspotsClicked;
-                if (sceneCount) sceneCount.textContent = this.metrics.scenesVisited.size;
-                if (errorCount) errorCount.textContent = this.metrics.errors;
-            }
-            
-            updateSessionTimer() {
-                const update = () => {
-                    const elapsed = Date.now() - this.metrics.sessionStart;
-                    const minutes = Math.floor(elapsed / 60000);
-                    const seconds = Math.floor((elapsed % 60000) / 1000);
-                    const sessionTime = document.getElementById('session-time');
-                    
-                    if (sessionTime) {
-                        sessionTime.textContent = 
-                            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    }
-                    
-                    setTimeout(update, 1000);
-                };
-                update();
-            }
-            
-            exportData() {
-                const data = {
-                    timestamp: new Date().toISOString(),
-                    sessionDuration: Date.now() - this.metrics.sessionStart,
-                    performanceSummary: {
-                        fps: {
-                            current: this.metrics.fps.current,
-                            average: this.metrics.fps.average,
-                            min: this.metrics.fps.min,
-                            max: this.metrics.fps.max
-                        },
-                        latency: {
-                            current: this.metrics.latency.current,
-                            average: this.metrics.latency.average,
-                            min: this.metrics.latency.min,
-                            max: this.metrics.latency.max
-                        },
-                        accuracy: {
-                            current: this.metrics.accuracy.current,
-                            average: this.metrics.accuracy.average
-                        }
-                    },
-                    usageMetrics: {
-                        hotspotsClicked: this.metrics.hotspotsClicked,
-                        scenesVisited: Array.from(this.metrics.scenesVisited),
-                        errors: this.metrics.errors
-                    },
-                    deviceInfo: {
-                        userAgent: navigator.userAgent,
-                        platform: navigator.platform,
-                        language: navigator.language,
-                        screenResolution: `${window.screen.width}x${window.screen.height}`,
-                        browser: navigator.appName,
-                        online: navigator.onLine
-                    }
-                };
-                
-                // Create downloadable JSON file
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `vr-metrics-${new Date().toISOString().slice(0, 10)}.json`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                alert('Performance metrics exported successfully!');
-            }
-            
-            getMetrics() {
-                return {
-                    ...this.metrics,
-                    sessionDuration: Date.now() - this.metrics.sessionStart
-                };
-            }
         }
         
-        // =====================
-        // TEST SUITE
-        // =====================
-        class VRTestSuite {
-            constructor() {
-                this.results = [];
-            }
-            
-            async runAllTests() {
-                console.log('🚀 Starting VR Performance Tests...');
+        // Initialize metrics
+        const metrics = new SimpleMetrics();
+        
+        // Hotspot click tracking
+        document.querySelector('a-scene').addEventListener('click', (e) => {
+            if (e.target.tagName === 'A-CIRCLE') {
+                metrics.recordHotspotClick();
                 
-                const tests = [
-                    this.fpsStabilityTest(),
-                    this.latencyTest()
-                ];
+                // Change scene (simple demo)
+                const sky = document.querySelector('a-sky');
+                const currentSrc = sky.getAttribute('src');
                 
-                for (const test of tests) {
-                    await test;
+                if (currentSrc === '#front') {
+                    sky.setAttribute('src', '#left');
+                    metrics.recordSceneChange();
+                } else if (currentSrc === '#left') {
+                    sky.setAttribute('src', '#right');
+                    metrics.recordSceneChange();
+                } else {
+                    sky.setAttribute('src', '#front');
+                    metrics.recordSceneChange();
                 }
-                
-                this.generateTestReport();
             }
-            
-            async fpsStabilityTest() {
-                console.log('📈 Running FPS Stability Test...');
-                
-                return new Promise((resolve) => {
-                    const fpsReadings = [];
-                    let startTime = Date.now();
-                    
-                    const interval = setInterval(() => {
-                        if (performanceMonitor) {
-                            fpsReadings.push(performanceMonitor.metrics.fps.current);
-                        }
-                        
-                        if (Date.now() - startTime >= 5000) { // 5 second test
-                            clearInterval(interval);
-                            
-                            const averageFPS = fpsReadings.reduce((a, b) => a + b, 0) / fpsReadings.length;
-                            const minFPS = Math.min(...fpsReadings);
-                            const maxFPS = Math.max(...fpsReadings);
-                            
-                            const result = {
-                                test: 'FPS Stability',
-                                passed: averageFPS >= 25,
-                                metrics: {
-                                    average: Math.round(averageFPS),
-                                    min: minFPS,
-                                    max: maxFPS,
-                                    stability: ((fpsReadings.filter(f => f >= 25).length / fpsReadings.length) * 100).toFixed(1) + '%'
-                                }
-                            };
-                            
-                            this.results.push(result);
-                            console.log('FPS Test Result:', result);
-                            resolve();
-                        }
-                    }, 1000);
-                });
-            }
-            
-            async latencyTest() {
-                console.log('⏱️ Running Latency Test...');
-                
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        const result = {
-                            test: 'Interaction Latency',
-                            passed: true,
-                            metrics: {
-                                averageLatency: 'Simulated 150ms',
-                                status: 'Mock Data - Use real ESP32 for actual'
-                            }
-                        };
-                        
-                        this.results.push(result);
-                        console.log('Latency Test Result:', result);
-                        resolve();
-                    }, 1000);
-                });
-            }
-            
-            generateTestReport() {
-                const report = {
-                    timestamp: new Date().toISOString(),
-                    totalTests: this.results.length,
-                    passedTests: this.results.filter(r => r.passed).length,
-                    failedTests: this.results.filter(r => !r.passed).length,
-                    results: this.results
-                };
-                
-                // Display report
-                const reportHTML = `
-                    <div style="
-                        position: fixed;
-                        top: 50%;
-                        left: 50%;
-                        transform: translate(-50%, -50%);
-                        background: rgba(0,0,0,0.95);
-                        color: white;
-                        padding: 20px;
-                        border-radius: 10px;
-                        z-index: 10000;
-                        max-width: 500px;
-                        max-height: 80vh;
-                        overflow-y: auto;
-                    ">
-                        <h3 style="color: #FFD700; margin-top: 0;">🧪 Test Report</h3>
-                        ${this.results.map(r => `
-                            <div style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <strong>${r.test}</strong>
-                                    <span style="color: ${r.passed ? '#4CAF50' : '#F44336'}">
-                                        ${r.passed ? 'PASS' : 'FAIL'}
-                                    </span>
-                                </div>
-                                <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
-                                    ${Object.entries(r.metrics || {}).map(([k, v]) => 
-                                        `${k}: ${v}`
-                                    ).join(' • ')}
-                                </div>
-                            </div>
-                        `).join('')}
-                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
-                            <div style="display: flex; justify-content: space-between;">
-                                <strong>Total:</strong>
-                                <span>${report.passedTests}/${report.totalTests} tests passed</span>
-                            </div>
-                            <button onclick="this.parentElement.parentElement.remove()" 
-                                style="margin-top: 15px; width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                                Close Report
-                            </button>
-                        </div>
-                    </div>
-                `;
-                
-                document.body.insertAdjacentHTML('beforeend', reportHTML);
-                
-                // Also log to console
-                console.table(this.results);
-                
-                return report;
-            }
-        }
-        
-        // Add test button
-        function addTestButton() {
-            const testBtn = document.createElement('button');
-            testBtn.id = 'run-tests';
-            testBtn.innerHTML = '🧪 Run Tests';
-            testBtn.style.cssText = `
-                position: fixed;
-                bottom: 90px;
-                right: 20px;
-                background: rgba(0,0,0,0.85);
-                color: white;
-                border: none;
-                padding: 8px 15px;
-                border-radius: 20px;
-                cursor: pointer;
-                z-index: 1000;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255,255,255,0.1);
-                font-size: 12px;
-            `;
-            
-            testBtn.addEventListener('click', async () => {
-                testBtn.disabled = true;
-                testBtn.innerHTML = '🧪 Testing...';
-                
-                const testSuite = new VRTestSuite();
-                await testSuite.runAllTests();
-                
-                testBtn.disabled = false;
-                testBtn.innerHTML = '🧪 Run Tests';
-            });
-            
-            document.body.appendChild(testBtn);
-        }
-        
-        // =====================
-        // PERFORMANCE MONITOR
-        // =====================
-        let performanceMonitor = null;
-        
-        // =====================
-        // INITIALIZATION
-        // =====================
-        document.addEventListener('DOMContentLoaded', function() {
-            preloadImages();
-            createSceneDots();
-            setupEventListeners();
-            setupAframeEvents();
         });
         
-        // =====================
-        // IMAGE PRELOADING
-        // =====================
-        function preloadImages() {
-            scenes.forEach(scene => {
-                const img = new Image();
-                img.onload = () => {
-                    imagesLoaded++;
-                    if (imagesLoaded === totalImages) {
-                        setTimeout(() => {
-                            loading.style.opacity = '0';
-                            setTimeout(() => {
-                                loading.style.display = 'none';
-                                // Initialize performance monitoring after loading
-                                performanceMonitor = new PerformanceMetrics();
-                                addTestButton();
-                                
-                                // Simulate latency for testing
-                                setInterval(() => {
-                                    if (performanceMonitor) {
-                                        // Mock latency between 100-250ms for testing
-                                        const mockLatency = 100 + Math.random() * 150;
-                                        performanceMonitor.recordLatency(mockLatency);
-                                        
-                                        // Mock accuracy (85-98%)
-                                        const mockAccuracy = 85 + Math.random() * 13;
-                                        performanceMonitor.recordAccuracy(mockAccuracy, 100);
-                                    }
-                                }, 2000);
-                            }, 500);
-                        }, 500);
-                    }
-                };
-                img.onerror = () => {
-                    console.warn(`Image not found: labanan_sa_quinga/${scene.id}.jpg`);
-                    imagesLoaded++;
-                    if (imagesLoaded === totalImages) {
-                        setTimeout(() => {
-                            loading.style.opacity = '0';
-                            setTimeout(() => {
-                                loading.style.display = 'none';
-                                // Initialize performance monitoring even if images fail
-                                performanceMonitor = new PerformanceMetrics();
-                                addTestButton();
-                            }, 500);
-                        }, 500);
-                    }
-                };
-                img.src = `labanan_sa_quinga/${scene.id}.jpg`;
-            });
+        // Export function
+        function exportMetrics() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                sessionDuration: Date.now() - metrics.metrics.sessionStart,
+                fps: metrics.metrics.fps,
+                averageLatency: metrics.metrics.latency,
+                hotspotsClicked: metrics.metrics.hotspotsClicked,
+                scenesVisited: metrics.metrics.scenesVisited
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'vr-metrics.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('Metrics exported!');
         }
-        
-        // =====================
-        // SCENE DOTS
-        // =====================
-        function createSceneDots() {
-            scenes.forEach((scene, index) => {
-                const dot = document.createElement('div');
-                dot.className = `scene-dot ${index === 0 ? 'active' : ''}`;
-                dot.dataset.index = index;
-                dot.title = scene.title;
-                
-                dot.addEventListener('click', () => {
-                    changeScene(index);
-                });
-                
-                sceneSelector.appendChild(dot);
-            });
-        }
-        
-        // =====================
-        // SCENE MANAGEMENT
-        // =====================
-        window.changeScene = function(index) {
-            if (index < 0 || index >= scenes.length) return;
-            
-            currentSceneIndex = index;
-            const scene = scenes[index];
-            
-            // Update sky
-            sky.setAttribute('src', `#${scene.id}`);
-            
-            // Update title
-            sceneTitle.textContent = scene.title;
-            
-            // Update scene dots
-            document.querySelectorAll('.scene-dot').forEach((dot, i) => {
-                dot.classList.toggle('active', i === index);
-            });
-            
-            // Show/hide hotspots based on navigation map
-            updateHotspots(scene.id);
-            
-            // Update navigation buttons
-            updateNavigation();
-            
-            console.log(`Changed to scene: ${scene.id}`);
-        };
-        
-        function updateHotspots(sceneId) {
-            // Hide all hotspot groups
-            const hotspotGroups = [
-                'front-hotspots',
-                'left-hotspots',
-                'right-hotspots'
-            ];
-            
-            hotspotGroups.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.setAttribute('visible', 'false');
-                }
-            });
-            
-            // Show current scene hotspots
-            const currentHotspots = document.getElementById(`${sceneId}-hotspots`);
-            if (currentHotspots) {
-                currentHotspots.setAttribute('visible', 'true');
-                console.log(`Showing hotspots for: ${sceneId}`);
-            }
-        }
-        
-        function updateNavigation() {
-            document.getElementById('prev-btn').disabled = currentSceneIndex === 0;
-            document.getElementById('next-btn').disabled = currentSceneIndex === scenes.length - 1;
-        }
-        
-        // =====================
-        // EVENT LISTENERS
-        // =====================
-        function setupEventListeners() {
-            // Navigation buttons
-            document.getElementById('prev-btn').addEventListener('click', () => {
-                changeScene(currentSceneIndex - 1);
-            });
-            
-            document.getElementById('next-btn').addEventListener('click', () => {
-                changeScene(currentSceneIndex + 1);
-            });
-            
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
-                if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
-                if (e.key === 'Escape') {
-                    instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
-                }
-            });
-            
-            // Instructions toggle
-            document.getElementById('instructions-btn').addEventListener('click', () => {
-                instructions.style.display = instructions.style.display === 'block' ? 'none' : 'block';
-            });
-            
-            // Close instructions when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!instructions.contains(e.target) && 
-                    !document.getElementById('instructions-btn').contains(e.target) &&
-                    instructions.style.display === 'block') {
-                    instructions.style.display = 'none';
-                }
-            });
-            
-            // Mobile swipe
-            let touchStartX = 0;
-            document.addEventListener('touchstart', (e) => {
-                touchStartX = e.touches[0].clientX;
-            });
-            
-            document.addEventListener('touchend', (e) => {
-                const touchEndX = e.changedTouches[0].clientX;
-                const diff = touchStartX - touchEndX;
-                
-                if (Math.abs(diff) > 60) {
-                    if (diff > 0) {
-                        changeScene(currentSceneIndex + 1);
-                    } else {
-                        changeScene(currentSceneIndex - 1);
-                    }
-                }
-            });
-        }
-        
-        // =====================
-        // A-FRAME EVENTS
-        // =====================
-        function setupAframeEvents() {
-            const scene = document.querySelector('a-scene');
-            
-            scene.addEventListener('loaded', () => {
-                console.log('A-Frame scene fully loaded');
-                
-                // Ensure hotspots are visible after scene loads
-                setTimeout(() => {
-                    updateHotspots(scenes[currentSceneIndex].id);
-                }, 500);
-            });
-            
-            // Improve cursor interaction
-            const cursor = document.getElementById('cursor');
-            if (cursor) {
-                cursor.addEventListener('mouseenter', (e) => {
-                    if (e.target.hasAttribute('data-hotspot')) {
-                        cursor.setAttribute('color', '#FFD700');
-                    }
-                });
-                
-                cursor.addEventListener('mouseleave', () => {
-                    cursor.setAttribute('color', '#FFF');
-                });
-            }
-            
-            // Add debug logging for hotspot clicks
-            document.addEventListener('click', (e) => {
-                if (e.target.closest('[data-hotspot]')) {
-                    console.log('Hotspot clicked!');
-                }
-            });
-        }
-        
-        // Initial scene
-        setTimeout(() => {
-            changeScene(0);
-        }, 1000);
     </script>
 </body>
 </html>
