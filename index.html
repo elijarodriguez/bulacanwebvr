@@ -6,8 +6,6 @@
     <title>Virtual Tours VR Hub</title>
     <!-- A-Frame for VR -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         * {
@@ -17,11 +15,9 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            color: white;
-            min-height: 100vh;
+            margin: 0;
             overflow: hidden;
+            background-color: #000;
         }
         
         #loading-screen {
@@ -30,31 +26,29 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            background: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10000;
-            transition: opacity 0.5s;
+            color: white;
+            font-family: Arial, sans-serif;
         }
         
-        .loading-icon {
-            font-size: 4rem;
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #333;
+            border-top: 5px solid #FF6B6B;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
             margin-bottom: 20px;
-            color: #FF6B6B;
         }
         
-        .loading-text {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-        
-        .loading-subtext {
-            color: #aaa;
-            margin-top: 20px;
-            text-align: center;
-            max-width: 80%;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         #vr-scene {
@@ -63,422 +57,316 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
         }
         
-        /* Hidden info panel that can be toggled */
-        #info-panel {
+        #instructions {
             position: fixed;
             bottom: 20px;
-            left: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            max-width: 300px;
-            z-index: 100;
-            display: none;
-            backdrop-filter: blur(5px);
-        }
-        
-        #info-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 107, 107, 0.8);
             color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-family: Arial, sans-serif;
+            text-align: center;
             z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen">
-        <div class="loading-icon">
-            <i class="fas fa-vr-cardboard fa-spin"></i>
-        </div>
-        <div class="loading-text">Loading VR Environment...</div>
-        <div class="loading-subtext">
-            <p>Put on your VR headset for the best experience</p>
-            <p style="font-size: 0.9rem; margin-top: 10px;">If using mobile, place device in VR viewer</p>
-        </div>
+        <div class="spinner"></div>
+        <h2>Loading VR Environment</h2>
+        <p>Please wait while we prepare your VR experience...</p>
+    </div>
+
+    <!-- Instructions -->
+    <div id="instructions" style="display: none;">
+        <p>Look at a location and click or gaze to select</p>
+        <p>Press 1-4 for quick selection</p>
     </div>
 
     <!-- VR Scene -->
     <div id="vr-scene">
-        <a-scene embedded>
-            <!-- Sky -->
+        <a-scene embedded vr-mode-ui="enabled: true">
+            <!-- Background -->
             <a-sky color="#0a1929"></a-sky>
             
-            <!-- Stars -->
-            <a-entity geometry="primitive: sphere" radius="100" material="shader: flat; src: #stars"
-                scale="-1 1 1"></a-entity>
-            
-            <!-- Title -->
-            <a-text value="VIRTUAL TOURS HUB" 
-                   position="0 4 -8" 
+            <!-- Menu Title -->
+            <a-text value="VIRTUAL TOURS" 
+                   position="0 3 -4" 
                    align="center" 
                    color="#FF6B6B" 
-                   width="8"
-                   scale="2 2 1"></a-text>
-                   
-            <a-text value="Choose a Historical Site" 
-                   position="0 3 -8" 
-                   align="center" 
-                   color="#4ECDC4" 
                    width="6"
-                   scale="1.5 1.5 1"></a-text>
+                   scale="2 2 1"></a-text>
             
-            <!-- Main Menu Position -->
-            <a-entity position="0 1.6 0">
-                <!-- Battle of Quinga Option -->
-                <a-entity class="vr-option" position="-3 0 -4" data-project="battle-of-quinga">
-                    <a-box width="1.5" height="0.8" depth="0.1" color="#FF6B6B">
-                        <a-animation attribute="rotation"
-                            to="0 360 0"
-                            dur="20000"
-                            repeat="indefinite"
-                            easing="linear"></a-animation>
+            <!-- Menu Options -->
+            <a-entity id="menu-options" position="0 1.6 0">
+                <!-- Battle of Quinga -->
+                <a-entity class="menu-option" 
+                         position="-2 0.5 -2" 
+                         data-project="battle-of-quinga"
+                         data-color="#FF6B6B">
+                    <a-box width="1" height="1" depth="0.1" color="#FF6B6B">
+                        <a-animation attribute="rotation" 
+                                   to="0 360 0" 
+                                   dur="10000" 
+                                   repeat="indefinite"></a-animation>
                     </a-box>
-                    <a-text value="BATTLE OF QUINGA" 
-                           position="0 0.6 0.06" 
+                    <a-text value="Battle of Quinga" 
+                           position="0 -0.7 0.1" 
                            align="center" 
                            color="white" 
-                           width="1.4"
-                           scale="0.8 0.8 1"></a-text>
-                    <a-text value="Plaridel, Bulacan" 
-                           position="0 0.3 0.06" 
+                           width="2"></a-text>
+                    <a-text value="1" 
+                           position="0 0 0.1" 
                            align="center" 
-                           color="#aaa" 
-                           width="1.4"
-                           scale="0.5 0.5 1"></a-text>
+                           color="white" 
+                           width="1"></a-text>
                 </a-entity>
                 
-                <!-- Museum Option -->
-                <a-entity class="vr-option" position="-1 0 -4" data-project="bulacan-museum">
-                    <a-box width="1.5" height="0.8" depth="0.1" color="#4ECDC4">
-                        <a-animation attribute="rotation"
-                            to="0 360 0"
-                            dur="20000"
-                            repeat="indefinite"
-                            easing="linear"></a-animation>
+                <!-- Bulacan Museum -->
+                <a-entity class="menu-option" 
+                         position="-0.7 0.5 -2" 
+                         data-project="bulacan-museum"
+                         data-color="#4ECDC4">
+                    <a-box width="1" height="1" depth="0.1" color="#4ECDC4">
+                        <a-animation attribute="rotation" 
+                                   to="0 360 0" 
+                                   dur="10000" 
+                                   repeat="indefinite"></a-animation>
                     </a-box>
-                    <a-text value="BULACAN MUSEUM" 
-                           position="0 0.6 0.06" 
+                    <a-text value="Bulacan Museum" 
+                           position="0 -0.7 0.1" 
                            align="center" 
                            color="white" 
-                           width="1.4"
-                           scale="0.8 0.8 1"></a-text>
-                    <a-text value="Malolos, Bulacan" 
-                           position="0 0.3 0.06" 
+                           width="2"></a-text>
+                    <a-text value="2" 
+                           position="0 0 0.1" 
                            align="center" 
-                           color="#aaa" 
-                           width="1.4"
-                           scale="0.5 0.5 1"></a-text>
+                           color="white" 
+                           width="1"></a-text>
                 </a-entity>
                 
-                <!-- Shrine Option -->
-                <a-entity class="vr-option" position="1 0 -4" data-project="del-pilar-shrine">
-                    <a-box width="1.5" height="0.8" depth="0.1" color="#FFD700">
-                        <a-animation attribute="rotation"
-                            to="0 360 0"
-                            dur="20000"
-                            repeat="indefinite"
-                            easing="linear"></a-animation>
+                <!-- Del Pilar Shrine -->
+                <a-entity class="menu-option" 
+                         position="0.7 0.5 -2" 
+                         data-project="del-pilar-shrine"
+                         data-color="#FFD700">
+                    <a-box width="1" height="1" depth="0.1" color="#FFD700">
+                        <a-animation attribute="rotation" 
+                                   to="0 360 0" 
+                                   dur="10000" 
+                                   repeat="indefinite"></a-animation>
                     </a-box>
-                    <a-text value="DEL PILAR SHRINE" 
-                           position="0 0.6 0.06" 
+                    <a-text value="Del Pilar Shrine" 
+                           position="0 -0.7 0.1" 
                            align="center" 
                            color="white" 
-                           width="1.4"
-                           scale="0.8 0.8 1"></a-text>
-                    <a-text value="Bulakan, Bulacan" 
-                           position="0 0.3 0.06" 
+                           width="2"></a-text>
+                    <a-text value="3" 
+                           position="0 0 0.1" 
                            align="center" 
-                           color="#aaa" 
-                           width="1.4"
-                           scale="0.5 0.5 1"></a-text>
+                           color="white" 
+                           width="1"></a-text>
                 </a-entity>
                 
-                <!-- Barasoain Option -->
-                <a-entity class="vr-option" position="3 0 -4" data-project="barasoain-museum">
-                    <a-box width="1.5" height="0.8" depth="0.1" color="#FF8E53">
-                        <a-animation attribute="rotation"
-                            to="0 360 0"
-                            dur="20000"
-                            repeat="indefinite"
-                            easing="linear"></a-animation>
+                <!-- Barasoain Museum -->
+                <a-entity class="menu-option" 
+                         position="2 0.5 -2" 
+                         data-project="barasoain-museum"
+                         data-color="#FF8E53">
+                    <a-box width="1" height="1" depth="0.1" color="#FF8E53">
+                        <a-animation attribute="rotation" 
+                                   to="0 360 0" 
+                                   dur="10000" 
+                                   repeat="indefinite"></a-animation>
                     </a-box>
-                    <a-text value="BARASOAIN MUSEUM" 
-                           position="0 0.6 0.06" 
+                    <a-text value="Barasoain Museum" 
+                           position="0 -0.7 0.1" 
                            align="center" 
                            color="white" 
-                           width="1.4"
-                           scale="0.8 0.8 1"></a-text>
-                    <a-text value="Malolos, Bulacan" 
-                           position="0 0.3 0.06" 
+                           width="2"></a-text>
+                    <a-text value="4" 
+                           position="0 0 0.1" 
                            align="center" 
-                           color="#aaa" 
-                           width="1.4"
-                           scale="0.5 0.5 1"></a-text>
+                           color="white" 
+                           width="1"></a-text>
                 </a-entity>
             </a-entity>
             
-            <!-- Floor -->
-            <a-circle position="0 -1.5 0" radius="10" color="#1a2b3a" rotation="-90 0 0"></a-circle>
-            
-            <!-- Instructions -->
-            <a-text value="Look at an option and click to select" 
-                   position="0 -0.5 -4" 
-                   align="center" 
-                   color="#4ECDC4" 
-                   width="6"></a-text>
-            
-            <!-- Navigation -->
-            <a-entity camera look-controls="pointerLockEnabled: true" position="0 1.6 0">
+            <!-- Camera and Cursor -->
+            <a-entity camera look-controls position="0 1.6 0">
                 <a-cursor 
                     fuse="true"
-                    fuse-timeout="1000"
-                    material="color: #FF6B6B; shader: flat"
-                    raycaster="objects: .vr-option">
+                    fuse-timeout="2000"
+                    material="color: #FF6B6B"
+                    position="0 0 -1">
                 </a-cursor>
             </a-entity>
             
             <!-- Lighting -->
-            <a-light type="ambient" color="#445" intensity="0.6"></a-light>
-            <a-light type="point" intensity="1" position="5 5 5" color="#4ECDC4"></a-light>
-            <a-light type="point" intensity="0.5" position="-5 3 -5" color="#FF6B6B"></a-light>
-            <a-light type="point" intensity="0.5" position="0 5 -10" color="#FFFFFF"></a-light>
-            
-            <!-- Background music (optional) -->
-            <a-sound src="https://cdn.aframe.io/basic-guide/audio/backgroundnoise.wav" autoplay="true" loop="true" volume="0.3"></a-sound>
+            <a-light type="ambient" color="#fff" intensity="0.6"></a-light>
+            <a-light type="point" intensity="1" position="5 5 5" color="#fff"></a-light>
+            <a-light type="point" intensity="0.5" position="-5 5 5" color="#4ECDC4"></a-light>
         </a-scene>
     </div>
 
-    <!-- Info Toggle Button -->
-    <button id="info-toggle">
-        <i class="fas fa-info"></i>
-    </button>
-
-    <!-- Info Panel -->
-    <div id="info-panel">
-        <h3><i class="fas fa-vr-cardboard"></i> VR Instructions</h3>
-        <p>1. Put on your VR headset</p>
-        <p>2. Look at the floating boxes</p>
-        <p>3. Hold gaze for 1 second to select</p>
-        <p>4. Move your head to look around</p>
-        <p><strong>Keyboard Shortcuts:</strong></p>
-        <p>1-4: Quick select tours</p>
-        <p>ESC: Exit VR mode</p>
-    </div>
-
-    <!-- Stars texture asset -->
     <script>
+        // Project configuration
+        const projects = {
+            'battle-of-quinga': {
+                name: 'Battle of Quinga',
+                path: 'battle-of-quinga/index.html',
+                color: '#FF6B6B'
+            },
+            'bulacan-museum': {
+                name: 'Hiyas ng Bulacan Museum',
+                path: 'hiyas-ng-bulacan-museum/index.html',
+                color: '#4ECDC4'
+            },
+            'del-pilar-shrine': {
+                name: 'Marcelo H. Del Pilar Shrine',
+                path: 'del-pilar-shrine/index.html',
+                color: '#FFD700'
+            },
+            'barasoain-museum': {
+                name: 'Barasoain Museum',
+                path: 'barasoain-museum/index.html',
+                color: '#FF8E53'
+            }
+        };
+        
+        // Wait for DOM to load
         document.addEventListener('DOMContentLoaded', function() {
-            // Create stars texture
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
+            const loadingScreen = document.getElementById('loading-screen');
+            const instructions = document.getElementById('instructions');
             
-            // Create starfield
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, 512, 512);
-            
-            for (let i = 0; i < 2000; i++) {
-                const x = Math.random() * 512;
-                const y = Math.random() * 512;
-                const radius = Math.random() * 1.2;
-                const alpha = Math.random() * 0.8 + 0.2;
-                
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.fill();
-            }
-            
-            const starsTexture = canvas.toDataURL();
-            
-            // Add to A-Frame assets
-            const assets = document.querySelector('a-assets');
-            if (assets) {
-                const img = document.createElement('img');
-                img.id = 'stars';
-                img.src = starsTexture;
-                assets.appendChild(img);
-            }
-            
-            // Projects configuration
-            const projects = {
-                'battle-of-quinga': {
-                    name: 'Battle of Quinga',
-                    path: 'battle-of-quinga/index.html',
-                    color: '#FF6B6B'
-                },
-                'bulacan-museum': {
-                    name: 'Hiyas ng Bulacan Museum',
-                    path: 'hiyas-ng-bulacan-museum/index.html',
-                    color: '#4ECDC4'
-                },
-                'del-pilar-shrine': {
-                    name: 'Marcelo H. Del Pilar Shrine',
-                    path: 'del-pilar-shrine/index.html',
-                    color: '#FFD700'
-                },
-                'barasoain-museum': {
-                    name: 'Barasoain Museum',
-                    path: 'barasoain-museum/index.html',
-                    color: '#FF8E53'
-                }
-            };
-            
-            // Hide loading screen after A-Frame loads
+            // Hide loading screen when A-Frame is ready
             const scene = document.querySelector('a-scene');
             scene.addEventListener('loaded', function() {
                 setTimeout(() => {
-                    const loadingScreen = document.getElementById('loading-screen');
                     loadingScreen.style.opacity = '0';
                     setTimeout(() => {
                         loadingScreen.style.display = 'none';
+                        instructions.style.display = 'block';
                     }, 500);
-                }, 2000);
+                }, 1000);
             });
             
-            // Setup VR interactions
-            function setupVRInteractions() {
-                const vrOptions = document.querySelectorAll('.vr-option');
-                
-                vrOptions.forEach(option => {
-                    // Hover effects
-                    option.addEventListener('mouseenter', function() {
-                        this.setAttribute('scale', '1.1 1.1 1.1');
-                        this.setAttribute('animation', {
-                            property: 'position.y',
-                            to: '0.2',
-                            dur: 300,
-                            easing: 'easeOutQuad'
-                        });
-                    });
-                    
-                    option.addEventListener('mouseleave', function() {
-                        this.setAttribute('scale', '1 1 1');
-                        this.setAttribute('animation', {
-                            property: 'position.y',
-                            to: '0',
-                            dur: 300,
-                            easing: 'easeOutQuad'
-                        });
-                    });
-                    
-                    // Click events (for cursor)
-                    option.addEventListener('click', function() {
-                        const project = this.getAttribute('data-project');
-                        launchProject(project);
-                    });
+            // Setup click events for menu options
+            setupMenuInteractions();
+            
+            // Setup keyboard shortcuts
+            setupKeyboardShortcuts();
+        });
+        
+        function setupMenuInteractions() {
+            const menuOptions = document.querySelectorAll('.menu-option');
+            
+            menuOptions.forEach(option => {
+                // Click event
+                option.addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-project');
+                    launchProject(projectId);
                 });
                 
-                // Cursor fusion events
-                const cursor = document.querySelector('a-cursor');
-                if (cursor) {
-                    cursor.addEventListener('fusing', function(evt) {
-                        const target = evt.detail.intersectedEl;
-                        if (target && target.classList.contains('vr-option')) {
-                            const project = target.getAttribute('data-project');
-                            launchProject(project);
-                        }
-                    });
-                }
-            }
-            
-            // Launch project
-            function launchProject(projectId) {
-                const project = projects[projectId];
-                if (!project) {
-                    console.error('Project not found:', projectId);
-                    return;
-                }
+                // Mouse enter/leave for visual feedback
+                option.addEventListener('mouseenter', function() {
+                    const color = this.getAttribute('data-color');
+                    const box = this.querySelector('a-box');
+                    if (box) {
+                        box.setAttribute('color', '#FFFFFF');
+                        box.setAttribute('scale', '1.2 1.2 1.2');
+                    }
+                });
                 
-                // Show loading
-                const loadingScreen = document.getElementById('loading-screen');
-                loadingScreen.style.display = 'flex';
-                loadingScreen.style.opacity = '1';
-                loadingScreen.innerHTML = `
-                    <div class="loading-icon" style="color: ${project.color}">
-                        <i class="fas fa-spinner fa-spin"></i>
-                    </div>
-                    <div class="loading-text">Launching ${project.name}</div>
-                    <div class="loading-subtext">
-                        <p>Entering virtual tour...</p>
-                        <p>Make sure VR headset is ready</p>
-                    </div>
-                `;
-                
-                // Navigate after delay
-                setTimeout(() => {
-                    window.location.href = project.path;
-                }, 2000);
-            }
+                option.addEventListener('mouseleave', function() {
+                    const color = this.getAttribute('data-color');
+                    const box = this.querySelector('a-box');
+                    if (box) {
+                        box.setAttribute('color', color);
+                        box.setAttribute('scale', '1 1 1');
+                    }
+                });
+            });
             
-            // Keyboard shortcuts
+            // Setup cursor fusion events
+            const cursor = document.querySelector('a-cursor');
+            if (cursor) {
+                cursor.addEventListener('fusing', function(evt) {
+                    const intersectedEl = evt.detail.intersectedEl;
+                    if (intersectedEl && intersectedEl.classList.contains('menu-option')) {
+                        const projectId = intersectedEl.getAttribute('data-project');
+                        launchProject(projectId);
+                    }
+                });
+            }
+        }
+        
+        function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function(e) {
-                // Number keys to launch projects
+                // Number keys 1-4
                 if (e.key === '1') launchProject('battle-of-quinga');
                 if (e.key === '2') launchProject('bulacan-museum');
                 if (e.key === '3') launchProject('del-pilar-shrine');
                 if (e.key === '4') launchProject('barasoain-museum');
                 
-                // I key to toggle info panel
-                if (e.key === 'i' || e.key === 'I') {
-                    const panel = document.getElementById('info-panel');
-                    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+                // Spacebar for testing
+                if (e.key === ' ') {
+                    alert('Available tours: 1-4 keys or click on boxes');
                 }
                 
-                // Fullscreen toggle with F key
+                // F for fullscreen
                 if (e.key === 'f' || e.key === 'F') {
-                    if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen();
-                    } else {
-                        document.exitFullscreen();
-                    }
+                    toggleFullscreen();
                 }
             });
+        }
+        
+        function launchProject(projectId) {
+            const project = projects[projectId];
+            if (!project) {
+                console.error('Project not found:', projectId);
+                return;
+            }
             
-            // Info panel toggle
-            document.getElementById('info-toggle').addEventListener('click', function() {
-                const panel = document.getElementById('info-panel');
-                panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-            });
+            // Show loading
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.display = 'flex';
+            loadingScreen.style.opacity = '1';
+            loadingScreen.innerHTML = `
+                <div class="spinner" style="border-top-color: ${project.color}"></div>
+                <h2>Loading ${project.name}</h2>
+                <p>Entering virtual tour...</p>
+            `;
             
-            // Initialize VR interactions after scene loads
-            scene.addEventListener('loaded', setupVRInteractions);
-            
-            // Auto-enter VR mode if available
-            if (navigator.xr) {
-                scene.addEventListener('loaded', function() {
-                    setTimeout(() => {
-                        if (scene.hasAttribute('vr-mode-ui')) {
-                            scene.setAttribute('vr-mode-ui', 'enabled: true');
-                        }
-                    }, 1000);
+            // Navigate after short delay
+            setTimeout(() => {
+                window.location.href = project.path;
+            }, 1500);
+        }
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Fullscreen error:', err);
                 });
+            } else {
+                document.exitFullscreen();
             }
-            
-            // Mobile VR detection
-            if (/Android|iPhone|iPad/i.test(navigator.userAgent)) {
-                const loadingSubtext = document.querySelector('.loading-subtext');
-                if (loadingSubtext) {
-                    loadingSubtext.innerHTML += '<p style="color: #4ECDC4;">Mobile VR detected - place in VR viewer</p>';
-                }
-            }
-        });
+        }
+        
+        // Add click sound for feedback
+        function playClickSound() {
+            const audio = new Audio();
+            audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
+            audio.volume = 0.3;
+            audio.play().catch(() => {});
+        }
     </script>
 </body>
 </html>
