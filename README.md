@@ -1,3 +1,3 @@
 # bulacanwebvr
 
-elijarodriguez.github.io/bulacanwebvr/index.html
+# elijarodriguez.github.io/bulacanwebvr/index.html
