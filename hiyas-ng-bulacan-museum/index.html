@@ -681,7 +681,7 @@
                         }
                     };
                     img.onerror = () => {
-                        loaded++; // Count as loaded even if error
+                        loaded++;
                         if (loaded === totalImages) {
                             setTimeout(() => {
                                 document.getElementById('loading').style.opacity = '0';
@@ -718,7 +718,7 @@
                         this.updateDisplay();
                     }
 
-                    // Mock latency (can be replaced with real data later)
+                    // Mock latency
                     this.metrics.latency = 100 + Math.random() * 80;
 
                     requestAnimationFrame(updateFPS);
@@ -755,16 +755,19 @@
 
                         const targetIndex = scenes.findIndex(s => s.id === target);
                         if (targetIndex !== -1) {
-                            // Call the global changeScene function
                             window.changeScene(targetIndex);
                         }
                     }
                 });
+
+                // ADD THIS DEBUG CODE - to verify hotspots are being detected
+                console.log('Hotspot interactions setup complete');
             }
 
             recordHotspotClick() {
                 this.metrics.hotspotsClicked++;
                 this.updateDisplay();
+                console.log('Hotspot clicked! Total clicks:', this.metrics.hotspotsClicked); // DEBUG
             }
 
             updateDisplay() {
@@ -772,18 +775,30 @@
                 document.getElementById('latency-value').textContent = Math.round(this.metrics.latency) + 'ms';
                 document.getElementById('hotspot-count').textContent = this.metrics.hotspotsClicked;
                 document.getElementById('current-scene').textContent = this.metrics.currentScene;
+
+                // DEBUG - log current values
+                console.log('Display updated - Current scene:', this.metrics.currentScene);
             }
 
             updateSceneInfo(sceneName) {
+                // Update the metrics object
                 this.metrics.currentScene = sceneName;
+
+                // Update both displays
                 document.getElementById('scene-name').textContent = `📍 ${sceneName}`;
                 document.getElementById('current-scene').textContent = sceneName;
 
+                // Track visited scenes
                 if (!this.metrics.scenesVisited.includes(sceneName)) {
                     this.metrics.scenesVisited.push(sceneName);
                 }
 
+                // Update the display
                 this.updateDisplay();
+
+                // DEBUG - confirm update
+                console.log('Scene updated to:', sceneName);
+                console.log('Visited scenes:', this.metrics.scenesVisited);
             }
         }
 
@@ -856,9 +871,12 @@
             // Update navigation buttons
             updateNavigation();
 
-            // Update metrics - THIS WAS MISSING
+            // Update metrics - THIS IS CRITICAL
             if (metrics) {
                 metrics.updateSceneInfo(scene.title);
+                console.log('Metrics updated with scene:', scene.title); // DEBUG
+            } else {
+                console.error('Metrics object not found!'); // DEBUG
             }
 
             console.log(`Navigated to: ${scene.title}`);
