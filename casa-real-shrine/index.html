@@ -503,38 +503,30 @@
         <div class="loading-subtext">Performance metrics will appear on top-left</div>
     </div>
     
-    <!-- SCENE SELECTOR DOTS -->
-    <div class="scene-selector" id="scene-selector"></div>
-    
-    <!-- NAVIGATION CONTROLS -->
-    <div class="controls">
-        <button id="prev-btn" title="Previous Scene">←</button>
-        <button id="next-btn" title="Next Scene">→</button>
-    </div>
     
     <!-- A-FRAME SCENE -->
     <a-scene cursor="rayOrigin: mouse" raycaster="objects: [class='hotspot']">
         <!-- ASSETS -->
         <a-assets timeout="30000">
             <!-- GROUND FLOOR (1st Floor) Images -->
-            <img id="main_entrance" src="images/casa_real/main_entrance.jpg" crossorigin="anonymous">
-            <img id="entrance" src="images/casa_real/entrance.jpg" crossorigin="anonymous">
-            <img id="left_side_entrance" src="images/casa_real/left_side_entrance.jpg" crossorigin="anonymous">
-            <img id="stairs_1f" src="images/casa_real/stairs_1f.jpg" crossorigin="anonymous">
-            <img id="outside" src="images/casa_real/outside.jpg" crossorigin="anonymous">
-            <img id="hallway_to_flagpole" src="images/casa_real/hallway_to_flagpole.jpg" crossorigin="anonymous">
-            <img id="flagpole" src="images/casa_real/flagpole.jpg" crossorigin="anonymous">
+            <img id="main_entrance" src="casa_real/main_entrance.jpg" crossorigin="anonymous">
+            <img id="entrance" src="casa_real/entrance.jpg" crossorigin="anonymous">
+            <img id="left_side_entrance" src="casa_real/left_side_entrance.jpg" crossorigin="anonymous">
+            <img id="stairs_1f" src="casa_real/stairs_1f.jpg" crossorigin="anonymous">
+            <img id="outside" src="casa_real/outside.jpg" crossorigin="anonymous">
+            <img id="hallway_to_flagpole" src="casa_real/hallway_to_flagpole.jpg" crossorigin="anonymous">
+            <img id="flagpole" src="casa_real/flagpole.jpg" crossorigin="anonymous">
             
             <!-- SECOND FLOOR Images -->
-            <img id="stairs_2f" src="images/casa_real/stairs_2f.jpg" crossorigin="anonymous">
-            <img id="floor2_1" src="images/casa_real/floor2_1.jpg" crossorigin="anonymous">
-            <img id="floor2_2" src="images/casa_real/floor2_2.jpg" crossorigin="anonymous">
-            <img id="floor2_3" src="images/casa_real/floor2_3.jpg" crossorigin="anonymous">
-            <img id="floor2_4" src="images/casa_real/floor2_4.jpg" crossorigin="anonymous">
-            <img id="floor2_5" src="images/casa_real/floor2_5.jpg" crossorigin="anonymous">
-            <img id="upstairs" src="images/casa_real/upstairs.jpg" crossorigin="anonymous">
-            <img id="left_side_stairs" src="images/casa_real/left_side_stairs.jpg" crossorigin="anonymous">
-            <img id="left_side_stairs_2" src="images/casa_real/left_side_stairs_2.jpg" crossorigin="anonymous">
+            <img id="stairs_2f" src="casa_real/stairs_2f.jpg" crossorigin="anonymous">
+            <img id="floor2_1" src="casa_real/floor2_1.jpg" crossorigin="anonymous">
+            <img id="floor2_2" src="casa_real/floor2_2.jpg" crossorigin="anonymous">
+            <img id="floor2_3" src="casa_real/floor2_3.jpg" crossorigin="anonymous">
+            <img id="floor2_4" src="casa_real/floor2_4.jpg" crossorigin="anonymous">
+            <img id="floor2_5" src="casa_real/floor2_5.jpg" crossorigin="anonymous">
+            <img id="upstairs" src="casa_real/upstairs.jpg" crossorigin="anonymous">
+            <img id="left_side_stairs" src="casa_real/left_side_stairs.jpg" crossorigin="anonymous">
+            <img id="left_side_stairs_2" src="casa_real/left_side_stairs_2.jpg" crossorigin="anonymous">
         </a-assets>
         
         <!-- SKY -->
@@ -1163,20 +1155,7 @@
         // EVENT LISTENERS
         // =====================
         function setupEventListeners() {
-            // Navigation buttons
-            document.getElementById('prev-btn').addEventListener('click', () => {
-                changeScene(currentSceneIndex - 1);
-            });
-            
-            document.getElementById('next-btn').addEventListener('click', () => {
-                changeScene(currentSceneIndex + 1);
-            });
-            
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowLeft') changeScene(currentSceneIndex - 1);
-                if (e.key === 'ArrowRight') changeScene(currentSceneIndex + 1);
-            });
+           
             
             // Mobile swipe
             let touchStartX = 0;
