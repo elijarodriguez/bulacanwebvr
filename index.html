@@ -86,7 +86,7 @@
     <!-- Instructions -->
     <div id="instructions" style="display: none;">
         <p>Look at a location and click or gaze to select</p>
-        <p>Press 1-4 for quick selection</p>
+        <p>Press 1-5 for quick selection</p>
     </div>
 
     <!-- VR Scene -->
@@ -97,17 +97,24 @@
             
             <!-- Menu Title -->
             <a-text value="VIRTUAL TOURS" 
-                   position="0 3 -4" 
+                   position="0 3.5 -4" 
                    align="center" 
                    color="#FF6B6B" 
                    width="6"
                    scale="2 2 1"></a-text>
+            <a-text value="Bulacan Historical Sites" 
+                   position="0 2.8 -4" 
+                   align="center" 
+                   color="#FFFFFF" 
+                   width="5"
+                   scale="1.2 1.2 1"
+                   opacity="0.8"></a-text>
             
-            <!-- Menu Options -->
+            <!-- Menu Options - Arranged in a curved arc for better visibility -->
             <a-entity id="menu-options" position="0 1.6 0">
-                <!-- Battle of Quinga -->
+                <!-- Battle of Quinga (Left) -->
                 <a-entity class="menu-option" 
-                         position="-2 0.5 -2" 
+                         position="-2.5 0.5 -2" 
                          data-project="battle-of-quinga"
                          data-color="#FF6B6B">
                     <a-box width="1" height="1" depth="0.1" color="#FF6B6B">
@@ -116,21 +123,28 @@
                                    dur="10000" 
                                    repeat="indefinite"></a-animation>
                     </a-box>
-                    <a-text value="Battle of Quinga" 
-                           position="0 -0.7 0.1" 
+                    <a-text value="Battle" 
+                           position="0 0.2 0.1" 
                            align="center" 
                            color="white" 
-                           width="2"></a-text>
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
+                    <a-text value="of Quinga" 
+                           position="0 -0.2 0.1" 
+                           align="center" 
+                           color="white" 
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
                     <a-text value="1" 
-                           position="0 0 0.1" 
+                           position="0 -0.6 0.1" 
                            align="center" 
                            color="white" 
                            width="1"></a-text>
                 </a-entity>
                 
-                <!-- Bulacan Museum -->
+                <!-- Bulacan Museum (Left-Center) -->
                 <a-entity class="menu-option" 
-                         position="-0.7 0.5 -2" 
+                         position="-1.3 0.5 -2" 
                          data-project="bulacan-museum"
                          data-color="#4ECDC4">
                     <a-box width="1" height="1" depth="0.1" color="#4ECDC4">
@@ -139,21 +153,28 @@
                                    dur="10000" 
                                    repeat="indefinite"></a-animation>
                     </a-box>
-                    <a-text value="Bulacan Museum" 
-                           position="0 -0.7 0.1" 
+                    <a-text value="Hiyas ng" 
+                           position="0 0.2 0.1" 
                            align="center" 
                            color="white" 
-                           width="2"></a-text>
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
+                    <a-text value="Bulacan" 
+                           position="0 -0.2 0.1" 
+                           align="center" 
+                           color="white" 
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
                     <a-text value="2" 
-                           position="0 0 0.1" 
+                           position="0 -0.6 0.1" 
                            align="center" 
                            color="white" 
                            width="1"></a-text>
                 </a-entity>
                 
-                <!-- Del Pilar Shrine -->
+                <!-- Del Pilar Shrine (Center) -->
                 <a-entity class="menu-option" 
-                         position="0.7 0.5 -2" 
+                         position="0 0.5 -2" 
                          data-project="del-pilar-shrine"
                          data-color="#FFD700">
                     <a-box width="1" height="1" depth="0.1" color="#FFD700">
@@ -162,21 +183,28 @@
                                    dur="10000" 
                                    repeat="indefinite"></a-animation>
                     </a-box>
-                    <a-text value="Del Pilar Shrine" 
-                           position="0 -0.7 0.1" 
+                    <a-text value="Del Pilar" 
+                           position="0 0.2 0.1" 
                            align="center" 
                            color="white" 
-                           width="2"></a-text>
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
+                    <a-text value="Shrine" 
+                           position="0 -0.2 0.1" 
+                           align="center" 
+                           color="white" 
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
                     <a-text value="3" 
-                           position="0 0 0.1" 
+                           position="0 -0.6 0.1" 
                            align="center" 
                            color="white" 
                            width="1"></a-text>
                 </a-entity>
                 
-                <!-- Barasoain Museum -->
+                <!-- Barasoain Museum (Right-Center) -->
                 <a-entity class="menu-option" 
-                         position="2 0.5 -2" 
+                         position="1.3 0.5 -2" 
                          data-project="barasoain-museum"
                          data-color="#FF8E53">
                     <a-box width="1" height="1" depth="0.1" color="#FF8E53">
@@ -185,18 +213,58 @@
                                    dur="10000" 
                                    repeat="indefinite"></a-animation>
                     </a-box>
-                    <a-text value="Barasoain Museum" 
-                           position="0 -0.7 0.1" 
+                    <a-text value="Barasoain" 
+                           position="0 0.2 0.1" 
                            align="center" 
                            color="white" 
-                           width="2"></a-text>
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
+                    <a-text value="Museum" 
+                           position="0 -0.2 0.1" 
+                           align="center" 
+                           color="white" 
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
                     <a-text value="4" 
-                           position="0 0 0.1" 
+                           position="0 -0.6 0.1" 
+                           align="center" 
+                           color="white" 
+                           width="1"></a-text>
+                </a-entity>
+                
+                <!-- CASA REAL SHRINE (Right) - NEW -->
+                <a-entity class="menu-option" 
+                         position="2.5 0.5 -2" 
+                         data-project="casa-real-shrine"
+                         data-color="#9B59B6">
+                    <a-box width="1" height="1" depth="0.1" color="#9B59B6">
+                        <a-animation attribute="rotation" 
+                                   to="0 360 0" 
+                                   dur="10000" 
+                                   repeat="indefinite"></a-animation>
+                    </a-box>
+                    <a-text value="Casa Real" 
+                           position="0 0.2 0.1" 
+                           align="center" 
+                           color="white" 
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
+                    <a-text value="Shrine" 
+                           position="0 -0.2 0.1" 
+                           align="center" 
+                           color="white" 
+                           width="2"
+                           scale="0.8 0.8 1"></a-text>
+                    <a-text value="5" 
+                           position="0 -0.6 0.1" 
                            align="center" 
                            color="white" 
                            width="1"></a-text>
                 </a-entity>
             </a-entity>
+            
+            <!-- Floor Grid for reference -->
+            <a-grid position="0 0 -4" width="10" height="10" color="#FFFFFF" opacity="0.2"></a-grid>
             
             <!-- Camera and Cursor -->
             <a-entity camera look-controls position="0 1.6 0">
@@ -212,11 +280,12 @@
             <a-light type="ambient" color="#fff" intensity="0.6"></a-light>
             <a-light type="point" intensity="1" position="5 5 5" color="#fff"></a-light>
             <a-light type="point" intensity="0.5" position="-5 5 5" color="#4ECDC4"></a-light>
+            <a-light type="point" intensity="0.5" position="5 5 -5" color="#9B59B6"></a-light>
         </a-scene>
     </div>
 
     <script>
-        // Project configuration
+        // Project configuration - ADDED CASA REAL SHRINE
         const projects = {
             'battle-of-quinga': {
                 name: 'Battle of Quinga',
@@ -237,6 +306,12 @@
                 name: 'Barasoain Museum',
                 path: 'barasoain-museum/index.html',
                 color: '#FF8E53'
+            },
+            // NEW: Casa Real Shrine
+            'casa-real-shrine': {
+                name: 'Casa Real Shrine',
+                path: 'casa-real-shrine/index.html',
+                color: '#9B59B6' // Purple color
             }
         };
         
@@ -309,15 +384,16 @@
         
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function(e) {
-                // Number keys 1-4
+                // Number keys 1-5
                 if (e.key === '1') launchProject('battle-of-quinga');
                 if (e.key === '2') launchProject('bulacan-museum');
                 if (e.key === '3') launchProject('del-pilar-shrine');
                 if (e.key === '4') launchProject('barasoain-museum');
+                if (e.key === '5') launchProject('casa-real-shrine'); // NEW
                 
                 // Spacebar for testing
                 if (e.key === ' ') {
-                    alert('Available tours: 1-4 keys or click on boxes');
+                    alert('Available tours: 1-5 keys or click on colored boxes');
                 }
                 
                 // F for fullscreen
