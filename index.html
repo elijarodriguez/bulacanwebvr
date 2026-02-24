@@ -428,6 +428,21 @@
         .loading-hidden {
             display: none !important;
         }
+
+        /* ===== DEBUG PANEL ===== */
+        #debug-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1001;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -525,6 +540,9 @@
     <!-- Selection Feedback -->
     <div id="selection-feedback"></div>
 
+    <!-- Debug Panel -->
+    <div id="debug-panel"></div>
+
     <!-- VR Scene -->
     <div id="vr-scene">
         <a-scene embedded vr-mode-ui="enabled: true" id="main-scene" stats="false">
@@ -548,11 +566,11 @@
                        position="0 -0.8 0.1"></a-text>
             </a-entity>
             
-            <!-- Menu Options - Enhanced with 3D cards -->
+            <!-- Menu Options - Arranged in a wider arc -->
             <a-entity id="menu-options" position="0 1.2 0">
-                <!-- Battle of Quinga -->
+                <!-- Battle of Quinga (Far Left) -->
                 <a-entity class="menu-option" 
-                         position="-2.8 0.5 -2.5" 
+                         position="-3.2 0.5 -3" 
                          data-project="battle-of-quinga"
                          data-color="#FF6B6B">
                     <a-box width="1.2" height="1.4" depth="0.15" color="#FF6B6B"></a-box>
@@ -562,9 +580,9 @@
                     <a-text value="1" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
                 </a-entity>
                 
-                <!-- Hiyas ng Bulacan Museum -->
+                <!-- Hiyas ng Bulacan Museum (Left) -->
                 <a-entity class="menu-option" 
-                         position="-1.4 0.5 -2.5" 
+                         position="-1.6 0.5 -2.5" 
                          data-project="bulacan-museum"
                          data-color="#4ECDC4">
                     <a-box width="1.2" height="1.4" depth="0.15" color="#4ECDC4"></a-box>
@@ -574,9 +592,9 @@
                     <a-text value="2" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
                 </a-entity>
                 
-                <!-- Del Pilar Shrine -->
+                <!-- Del Pilar Shrine (Center) -->
                 <a-entity class="menu-option" 
-                         position="0 0.5 -2.5" 
+                         position="0 0.5 -2.2" 
                          data-project="del-pilar-shrine"
                          data-color="#FFD700">
                     <a-box width="1.2" height="1.4" depth="0.15" color="#FFD700"></a-box>
@@ -586,9 +604,9 @@
                     <a-text value="3" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
                 </a-entity>
                 
-                <!-- Barasoain Museum -->
+                <!-- Barasoain Museum (Right) -->
                 <a-entity class="menu-option" 
-                         position="1.4 0.5 -2.5" 
+                         position="1.6 0.5 -2.5" 
                          data-project="barasoain-museum"
                          data-color="#FF8E53">
                     <a-box width="1.2" height="1.4" depth="0.15" color="#FF8E53"></a-box>
@@ -598,9 +616,9 @@
                     <a-text value="4" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
                 </a-entity>
                 
-                <!-- Casa Real Shrine -->
+                <!-- Casa Real Shrine (Far Right) -->
                 <a-entity class="menu-option" 
-                         position="2.8 0.5 -2.5" 
+                         position="3.2 0.5 -3" 
                          data-project="casa-real-shrine"
                          data-color="#9B59B6">
                     <a-box width="1.2" height="1.4" depth="0.15" color="#9B59B6"></a-box>
@@ -621,14 +639,11 @@
             <!-- Floor grid with glow -->
             <a-grid position="0 -0.5 -5" width="15" height="15" color="#4ECDC4" opacity="0.1"></a-grid>
             
-            <!-- Camera and Cursor -->
-            <a-entity camera look-controls position="0 1.6 0" id="main-camera">
-                <a-cursor 
-                    fuse="true"
-                    fuse-timeout="2000"
-                    material="color: #FF6B6B"
-                    position="0 0 -1">
-                </a-cursor>
+            <!-- Camera - WITHOUT cursor initially -->
+            <a-entity id="camera-rig" position="0 1.6 0">
+                <a-entity id="main-camera" camera look-controls wasd-controls>
+                    <!-- No cursor here - we'll add it dynamically after user interaction -->
+                </a-entity>
             </a-entity>
             
             <!-- Ambient and point lights -->
@@ -684,12 +699,12 @@
         let frameTimes = [];
         let stableFrames = 0;
         let totalFrames = 0;
-        let metricsInterval;
         let sceneLoaded = false;
+        let userInteracted = false;
+        let aframeCursor = null;
         
         // Performance tracking
         function updatePerformanceMetrics() {
-            // FPS Calculation
             const now = performance.now();
             const delta = now - lastFpsUpdate;
             frameCount++;
@@ -728,7 +743,6 @@
                     fpsEl.className = 'metric-value warning';
                 }
                 
-                // Reset counters
                 frameCount = 0;
                 lastFpsUpdate = now;
             }
@@ -760,7 +774,6 @@
             
             lastFrameTime = now;
             
-            // Continue the loop
             if (sceneLoaded) {
                 requestAnimationFrame(updatePerformanceMetrics);
             }
@@ -806,10 +819,91 @@
             }
             
             // Start performance monitoring
-            if (!metricsInterval) {
+            if (!sceneLoaded) {
                 sceneLoaded = true;
                 updatePerformanceMetrics();
             }
+            
+            // Add cursor only after user interaction
+            setupDelayedCursor();
+        }
+
+        // ========== DELAYED CURSOR SETUP ==========
+        function setupDelayedCursor() {
+            console.log("Setting up delayed cursor - will activate after user interaction");
+            
+            // Add a message that gaze selection is disabled
+            const debugPanel = document.getElementById('debug-panel');
+            debugPanel.style.display = 'block';
+            debugPanel.innerHTML = '⚠️ Gaze selection disabled. Use ESP32 cursor or click.';
+            
+            // Listen for first user interaction to enable cursor
+            const enableCursor = function() {
+                if (!userInteracted) {
+                    userInteracted = true;
+                    console.log("User interaction detected - enabling cursor");
+                    
+                    // Add cursor to camera
+                    const camera = document.getElementById('main-camera');
+                    if (camera) {
+                        // Remove existing cursor if any
+                        const existingCursor = camera.querySelector('a-cursor');
+                        if (existingCursor) {
+                            existingCursor.remove();
+                        }
+                        
+                        // Create new cursor
+                        const cursor = document.createElement('a-cursor');
+                        cursor.setAttribute('fuse', 'true');
+                        cursor.setAttribute('fuse-timeout', '2000');
+                        cursor.setAttribute('material', 'color: #FF6B6B');
+                        cursor.setAttribute('position', '0 0 -1');
+                        camera.appendChild(cursor);
+                        
+                        aframeCursor = cursor;
+                        
+                        // Add event listener for fusing
+                        cursor.addEventListener('fusing', function(evt) {
+                            if (!userInteracted) return; // Extra safety
+                            
+                            const intersectedEl = evt.detail.intersectedEl;
+                            let el = intersectedEl;
+                            while (el && !el.classList?.contains('menu-option') && el !== document.documentElement) {
+                                el = el.parentElement;
+                            }
+                            if (el && el.classList.contains('menu-option')) {
+                                const projectId = el.getAttribute('data-project');
+                                recordSelection(true);
+                                showSelectionFeedback(projects[projectId].name);
+                                launchProject(projectId);
+                            }
+                        });
+                        
+                        debugPanel.innerHTML = '✅ Gaze selection enabled';
+                        setTimeout(() => {
+                            debugPanel.style.display = 'none';
+                        }, 2000);
+                    }
+                    
+                    // Remove listeners
+                    document.removeEventListener('click', enableCursor);
+                    document.removeEventListener('keydown', enableCursor);
+                    document.removeEventListener('mousemove', enableCursor);
+                }
+            };
+            
+            // Wait for user interaction
+            document.addEventListener('click', enableCursor);
+            document.addEventListener('keydown', enableCursor);
+            document.addEventListener('mousemove', enableCursor);
+            
+            // Also enable on ESP32 cursor movement
+            const checkESPInteraction = setInterval(() => {
+                if (espCursor.style.display === 'block' && !userInteracted) {
+                    enableCursor();
+                    clearInterval(checkESPInteraction);
+                }
+            }, 1000);
         }
 
         // ========== ESP32 CAM CONTROLLER ==========
@@ -817,15 +911,13 @@
         let socket = null;
         let espConnected = false;
         
-        // Create visual cursor (already in DOM)
         const espCursor = document.getElementById('esp-cursor');
         
-        // Dwell time configuration (as per thesis: 1 second)
-        const DWELL_TIME = 8000; // milliseconds
+        // Dwell time configuration
+        const DWELL_TIME = 1000;
         let activeDwellTimer = null;
         let currentHoverTarget = null;
         
-        // ESP32 Connection
         function initESP32Cursor() {
             const espStatus = document.getElementById('esp-status');
             
@@ -839,8 +931,6 @@
                     espCursor.style.display = 'block';
                     espCursor.style.left = e.clientX + 'px';
                     espCursor.style.top = e.clientY + 'px';
-                    
-                    // Check for hover targets (simplified)
                     checkHoverTarget(e.clientX, e.clientY);
                 });
                 return;
@@ -855,31 +945,22 @@
                     espConnected = true;
                     espStatus.style.color = '#4ECDC4';
                     espStatus.textContent = '●';
-                    
-                    // Update badge
                     document.getElementById('metrics-badge').textContent = 'ESP32 • ONLINE';
                 };
 
                 socket.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
-                        
-                        // Map ESP32 coordinates (assumed 320x240) to screen
                         const screenX = (data.x / 320) * window.innerWidth;
                         const screenY = (data.y / 240) * window.innerHeight;
                         
-                        // Update cursor position
                         espCursor.style.left = screenX + 'px';
                         espCursor.style.top = screenY + 'px';
-                        
-                        // Check for hover targets
                         checkHoverTarget(screenX, screenY);
                         
-                        // Record tracking for latency (simulated)
-                        const now = performance.now();
                         if (data.timestamp) {
-                            const latency = now - data.timestamp;
-                            if (latency < 500) { // Sanity check
+                            const latency = performance.now() - data.timestamp;
+                            if (latency < 500) {
                                 latencyHistory.push(latency);
                                 if (latencyHistory.length > 30) latencyHistory.shift();
                             }
@@ -909,24 +990,19 @@
             }
         }
 
-        // Check hover targets for dwell selection
         function checkHoverTarget(x, y) {
-            // Temporarily hide cursor to get element behind
             espCursor.style.display = 'none';
             const hoveredElement = document.elementFromPoint(x, y);
             espCursor.style.display = 'block';
             
-            // Find closest menu option
             let targetEl = hoveredElement;
             while (targetEl && !targetEl.classList?.contains('menu-option') && targetEl !== document.body) {
                 targetEl = targetEl.parentElement;
             }
             
-            // Clear cursor hover state if not hovering any menu option
             if (!targetEl || !targetEl.classList.contains('menu-option')) {
                 espCursor.classList.remove('hovering');
                 
-                // Clear dwell timer if active
                 if (activeDwellTimer) {
                     clearTimeout(activeDwellTimer);
                     activeDwellTimer = null;
@@ -935,10 +1011,8 @@
                 return;
             }
             
-            // We're hovering a menu option
             espCursor.classList.add('hovering');
             
-            // If this is a new target, clear previous timer and start new one
             if (currentHoverTarget !== targetEl) {
                 if (activeDwellTimer) {
                     clearTimeout(activeDwellTimer);
@@ -947,11 +1021,9 @@
                 
                 currentHoverTarget = targetEl;
                 
-                // Start dwell timer
                 activeDwellTimer = setTimeout(() => {
                     const projectId = targetEl.getAttribute('data-project');
                     if (projectId) {
-                        // Visual feedback on the option
                         const box = targetEl.querySelector('a-box');
                         if (box) {
                             const originalColor = box.getAttribute('color');
@@ -961,13 +1033,8 @@
                             }, 200);
                         }
                         
-                        // Record successful selection
                         recordSelection(true);
-                        
-                        // Show feedback
                         showSelectionFeedback(projects[projectId].name);
-                        
-                        // Launch the project
                         launchProject(projectId);
                     }
                     activeDwellTimer = null;
@@ -1001,10 +1068,8 @@
                 if (progress >= 100) {
                     clearInterval(loadingInterval);
                     
-                    // Don't hide immediately, wait for scene or force start
                     setTimeout(() => {
                         if (!sceneLoaded) {
-                            // Show force start button if scene takes too long
                             forceStartBtn.style.display = 'block';
                         }
                     }, 2000);
@@ -1024,7 +1089,6 @@
             // Check if A-Frame scene is loaded
             const scene = document.querySelector('a-scene');
             if (scene) {
-                // Multiple ways to detect scene load
                 scene.addEventListener('loaded', function() {
                     console.log("A-Frame scene loaded event");
                     sceneLoaded = true;
@@ -1038,7 +1102,7 @@
                 });
             }
             
-            // Fallback: hide loading screen after 5 seconds regardless
+            // Fallback: hide loading screen after 5 seconds
             setTimeout(() => {
                 if (document.getElementById('loading-screen').style.display !== 'none') {
                     console.log("Fallback timer: forcing loading screen hide");
@@ -1077,28 +1141,16 @@
                     }
                 });
             });
-            
-            // A-Frame cursor fusion
-            const cursor = document.querySelector('a-cursor');
-            if (cursor) {
-                cursor.addEventListener('fusing', function(evt) {
-                    const intersectedEl = evt.detail.intersectedEl;
-                    let el = intersectedEl;
-                    while (el && !el.classList?.contains('menu-option') && el !== document.documentElement) {
-                        el = el.parentElement;
-                    }
-                    if (el && el.classList.contains('menu-option')) {
-                        const projectId = el.getAttribute('data-project');
-                        recordSelection(true);
-                        showSelectionFeedback(projects[projectId].name);
-                        launchProject(projectId);
-                    }
-                });
-            }
         }
 
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function(e) {
+                // Prevent accidental selection with number keys before user interaction
+                if (!userInteracted && (e.key >= '1' && e.key <= '5')) {
+                    console.log("Keyboard shortcut ignored - waiting for user interaction");
+                    return;
+                }
+                
                 if (e.key === '1') {
                     recordSelection(true);
                     showSelectionFeedback(projects['battle-of-quinga'].name);
@@ -1130,7 +1182,6 @@
                 }
                 
                 if (e.key === 'd' || e.key === 'D') {
-                    // Debug toggle
                     const metrics = document.getElementById('performance-metrics');
                     metrics.style.display = metrics.style.display === 'none' ? 'block' : 'none';
                 }
@@ -1144,13 +1195,11 @@
                 return;
             }
             
-            // Clear any pending dwell timers
             if (activeDwellTimer) {
                 clearTimeout(activeDwellTimer);
                 activeDwellTimer = null;
             }
             
-            // Show enhanced loading screen
             const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.display = 'flex';
             loadingScreen.style.opacity = '1';
@@ -1165,7 +1214,6 @@
                 </div>
             `;
             
-            // Navigate after delay
             setTimeout(() => {
                 window.location.href = project.path;
             }, 1500);
@@ -1185,7 +1233,8 @@
                 '- Dwell Time: ' + (DWELL_TIME/1000) + ' seconds\n' +
                 '- Status: ' + (espConnected ? 'Connected' : 'Disconnected') + '\n' +
                 '- Tracking: Vision-based fingertip\n' +
-                '- Target Latency: <150ms'
+                '- Target Latency: <150ms\n\n' +
+                '⚠️ Gaze selection disabled until first interaction'
             );
         }
 
@@ -1199,7 +1248,7 @@
             espCursor.classList.remove('hovering');
         });
 
-        console.log('VR Heritage Hub with Performance Monitoring ready');
+        console.log('VR Heritage Hub - Fixed auto-selection issue');
     </script>
 </body>
 </html>
