@@ -35,7 +35,6 @@
             align-items: center;
             z-index: 10000;
             color: white;
-            font-family: 'Segoe UI', sans-serif;
             transition: opacity 0.5s ease;
         }
         
@@ -69,7 +68,6 @@
             background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
         }
         
         .loading-progress {
@@ -86,7 +84,6 @@
             height: 100%;
             background: linear-gradient(90deg, #FF6B6B, #4ECDC4);
             transition: width 0.3s ease;
-            border-radius: 2px;
         }
         
         /* ===== PERFORMANCE METRICS OVERLAY ===== */
@@ -100,18 +97,11 @@
             border-radius: 16px;
             padding: 15px 20px;
             color: #fff;
-            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 13px;
             z-index: 1000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             min-width: 260px;
             border-left: 4px solid #FF6B6B;
-            transition: transform 0.3s ease;
-        }
-        
-        #performance-metrics:hover {
-            transform: translateY(2px);
-            background: rgba(10, 25, 41, 0.95);
         }
         
         .metrics-header {
@@ -126,7 +116,6 @@
         .metrics-title {
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
             color: #FF6B6B;
             font-size: 12px;
         }
@@ -137,7 +126,6 @@
             padding: 4px 8px;
             border-radius: 20px;
             font-size: 11px;
-            border: 1px solid rgba(78, 205, 196, 0.3);
         }
         
         .metric-item {
@@ -162,18 +150,18 @@
             display: inline-block;
         }
         
-        .dot-fps { background: #4ECDC4; box-shadow: 0 0 10px #4ECDC4; }
-        .dot-latency { background: #FF6B6B; box-shadow: 0 0 10px #FF6B6B; }
-        .dot-accuracy { background: #FFD700; box-shadow: 0 0 10px #FFD700; }
-        .dot-stability { background: #9B59B6; box-shadow: 0 0 10px #9B59B6; }
+        .dot-fps { background: #4ECDC4; }
+        .dot-latency { background: #FF6B6B; }
+        .dot-accuracy { background: #FFD700; }
+        .dot-stability { background: #9B59B6; }
         
         .metric-value {
             font-weight: 600;
             font-size: 14px;
         }
         
-        .metric-value.warning { color: #FF6B6B; }
         .metric-value.success { color: #4ECDC4; }
+        .metric-value.warning { color: #FF6B6B; }
         .metric-value.normal { color: #FFD700; }
         
         .metrics-footer {
@@ -188,18 +176,17 @@
         /* ===== ESP32 CURSOR ===== */
         #esp-cursor {
             position: fixed;
-            width: 28px;
-            height: 28px;
-            background: rgba(255, 107, 107, 0.2);
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 107, 107, 0.3);
             border: 3px solid #FF6B6B;
             border-radius: 50%;
-            box-shadow: 0 0 30px rgba(255,107,107,0.5), 0 0 0 2px rgba(255,255,255,0.5);
+            box-shadow: 0 0 20px rgba(255,107,107,0.8);
             pointer-events: none;
             z-index: 99999;
             transform: translate(-50%, -50%);
             display: none;
             transition: all 0.1s ease;
-            backdrop-filter: blur(2px);
         }
         
         #esp-cursor::before {
@@ -212,16 +199,15 @@
             background: white;
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            box-shadow: 0 0 10px white;
         }
         
         #esp-cursor::after {
             content: '';
             position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
             border: 2px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             animation: pulse 1.5s ease infinite;
@@ -233,45 +219,37 @@
         }
         
         #esp-cursor.hovering {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 215, 0, 0.3);
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 215, 0, 0.4);
             border-color: #FFD700;
-            box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 0 0 3px rgba(255,215,0,0.3);
+            box-shadow: 0 0 30px #FFD700;
         }
         
-        #esp-cursor.hovering::before {
-            background: #FFD700;
-            box-shadow: 0 0 15px #FFD700;
-        }
-        
-        /* ===== INSTRUCTIONS PANEL ===== */
+        /* ===== INSTRUCTION PANEL ===== */
         #instructions {
             position: fixed;
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(10, 25, 41, 0.8);
+            background: rgba(10, 25, 41, 0.9);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 50px;
             color: white;
-            padding: 12px 24px;
-            font-family: 'Segoe UI', sans-serif;
+            padding: 15px 30px;
             font-size: 14px;
             z-index: 100;
             display: flex;
             gap: 30px;
-            letter-spacing: 0.5px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             border-bottom: 3px solid #FF6B6B;
-            white-space: nowrap;
         }
         
         .instruction-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
         .instruction-icon {
@@ -284,16 +262,6 @@
             justify-content: center;
             color: #FF6B6B;
             font-weight: bold;
-        }
-        
-        .instruction-text {
-            color: rgba(255,255,255,0.9);
-        }
-        
-        .instruction-text small {
-            color: #4ECDC4;
-            font-size: 11px;
-            margin-left: 5px;
         }
         
         /* ===== VR SCENE ===== */
@@ -310,7 +278,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(10, 25, 41, 0.8);
+            background: rgba(10, 25, 41, 0.9);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 50px;
@@ -322,12 +290,6 @@
             font-size: 13px;
             border-left: 3px solid #4ECDC4;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        #control-toggle:hover {
-            background: rgba(10, 25, 41, 0.95);
-            transform: translateY(-2px);
         }
         
         .toggle-indicator {
@@ -338,61 +300,6 @@
             box-shadow: 0 0 15px #4ECDC4;
             margin-right: 8px;
         }
-        
-        /* ===== MOBILE RESPONSIVENESS ===== */
-        @media (max-width: 768px) {
-            #performance-metrics {
-                top: 10px;
-                left: 10px;
-                padding: 10px;
-                min-width: 200px;
-                font-size: 11px;
-            }
-            
-            #instructions {
-                bottom: 20px;
-                padding: 8px 16px;
-                font-size: 12px;
-                gap: 15px;
-                flex-wrap: wrap;
-                white-space: normal;
-                border-radius: 20px;
-                max-width: 90%;
-            }
-            
-            .instruction-icon {
-                width: 24px;
-                height: 24px;
-                font-size: 12px;
-            }
-            
-            #control-toggle {
-                top: 10px;
-                right: 10px;
-                padding: 8px 15px;
-                font-size: 12px;
-            }
-            
-            .loading-title {
-                font-size: 1.5rem;
-            }
-            
-            .loading-progress {
-                width: 250px;
-            }
-        }
-        
-        /* ===== ANIMATIONS ===== */
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px #FF6B6B; }
-            50% { box-shadow: 0 0 20px #FF6B6B; }
-            100% { box-shadow: 0 0 5px #FF6B6B; }
-        }
-        
-        /* ===== FPS COUNTER SPECIAL STYLES ===== */
-        .fps-high { color: #4ECDC4; }
-        .fps-medium { color: #FFD700; }
-        .fps-low { color: #FF6B6B; }
         
         /* ===== SELECTION FEEDBACK ===== */
         #selection-feedback {
@@ -407,107 +314,80 @@
             font-size: 18px;
             z-index: 10000;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s;
             pointer-events: none;
-            white-space: nowrap;
-            backdrop-filter: blur(5px);
             border: 2px solid white;
         }
         
         #selection-feedback.show {
             opacity: 1;
-            animation: slideUp 0.5s ease;
         }
         
-        @keyframes slideUp {
-            0% { transform: translate(-50%, 100%); opacity: 0; }
-            100% { transform: translate(-50%, -50%); opacity: 1; }
-        }
-
-        /* ===== FORCE HIDE LOADING SCREEN (FALLBACK) ===== */
-        .loading-hidden {
-            display: none !important;
-        }
-
-        /* ===== DEBUG PANEL ===== */
-        #debug-panel {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            color: #0f0;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            z-index: 1001;
-            display: none;
+        /* ===== MOBILE RESPONSIVENESS ===== */
+        @media (max-width: 768px) {
+            #performance-metrics {
+                top: 10px;
+                left: 10px;
+                padding: 10px;
+                min-width: 200px;
+                font-size: 11px;
+            }
+            
+            #instructions {
+                bottom: 20px;
+                padding: 10px 20px;
+                font-size: 12px;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Enhanced Loading Screen -->
+    <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="loading-content">
             <div class="spinner"></div>
             <h1 class="loading-title">VR Heritage Bulacan</h1>
-            <p style="color: rgba(255,255,255,0.7); margin-bottom: 2rem;">Experience history in immersive virtual reality</p>
+            <p style="color: rgba(255,255,255,0.7);">ESP32 Finger-Tracking VR System</p>
             <div class="loading-progress">
                 <div class="loading-bar" id="loading-bar"></div>
             </div>
-            <p id="loading-status" style="color: rgba(255,255,255,0.5); font-size: 14px;">Initializing VR environment...</p>
-            <button id="force-start-btn" style="margin-top: 20px; background: transparent; border: 1px solid #4ECDC4; color: white; padding: 8px 20px; border-radius: 20px; cursor: pointer; display: none;">Force Start Experience</button>
+            <p id="loading-status">Initializing...</p>
         </div>
     </div>
 
-    <!-- Performance Metrics Overlay -->
+    <!-- Performance Metrics -->
     <div id="performance-metrics">
         <div class="metrics-header">
             <span class="metrics-title">📊 SYSTEM PERFORMANCE</span>
-            <span class="metrics-badge" id="metrics-badge">ISO/IEC 25010</span>
+            <span class="metrics-badge" id="metrics-badge">ESP32 • CONNECTING</span>
         </div>
         
-        <!-- FPS Counter -->
         <div class="metric-item">
-            <span class="metric-label">
-                <span class="metric-dot dot-fps"></span>
-                Frame Rate (FPS)
-            </span>
-            <span class="metric-value" id="fps-value">--</span>
+            <span class="metric-label"><span class="metric-dot dot-fps"></span>Frame Rate</span>
+            <span class="metric-value" id="fps-value">-- FPS</span>
         </div>
         
-        <!-- Latency Monitor -->
         <div class="metric-item">
-            <span class="metric-label">
-                <span class="metric-dot dot-latency"></span>
-                Tracking Latency
-            </span>
+            <span class="metric-label"><span class="metric-dot dot-latency"></span>Tracking Latency</span>
             <span class="metric-value" id="latency-value">-- ms</span>
         </div>
         
-        <!-- Selection Accuracy -->
         <div class="metric-item">
-            <span class="metric-label">
-                <span class="metric-dot dot-accuracy"></span>
-                Selection Accuracy
-            </span>
+            <span class="metric-label"><span class="metric-dot dot-accuracy"></span>Selection Accuracy</span>
             <span class="metric-value" id="accuracy-value">--%</span>
         </div>
         
-        <!-- Stability Indicator -->
         <div class="metric-item">
-            <span class="metric-label">
-                <span class="metric-dot dot-stability"></span>
-                Stability (≥30 FPS)
-            </span>
+            <span class="metric-label"><span class="metric-dot dot-stability"></span>Stability (≥30 FPS)</span>
             <span class="metric-value" id="stability-value">--%</span>
         </div>
         
-        <!-- Live Stats Footer -->
         <div class="metrics-footer">
-            <span id="session-time">Session: 00:00</span> · 
-            <span id="selection-count">Selections: 0</span> · 
-            <span id="target-msg">Target: 30 FPS</span>
+            <span id="session-time">00:00</span> · 
+            <span id="selection-count">0 selections</span> · 
+            <span>Target: 30 FPS</span>
         </div>
     </div>
 
@@ -515,142 +395,124 @@
     <div id="control-toggle" onclick="toggleControlInfo()">
         <div style="display: flex; align-items: center;">
             <span class="toggle-indicator"></span>
-            <span>ESP32-CAM <span style="color: #4ECDC4;" id="esp-status">○</span></span>
+            <span>ESP32-CAM <span id="esp-status">○</span></span>
         </div>
         <div style="color: rgba(255,255,255,0.5);">|</div>
-        <div style="color: rgba(255,255,255,0.8);">dwell: <span id="dwell-time">1.0</span>s</div>
+        <div>dwell: <span id="dwell-time">1.0</span>s</div>
     </div>
 
     <!-- Instructions -->
-    <div id="instructions" style="display: none;">
+    <div id="instructions">
         <div class="instruction-item">
             <span class="instruction-icon">👆</span>
-            <span class="instruction-text">ESP32 cursor <small>finger tracking</small></span>
+            <span>Move finger to control cursor</span>
         </div>
         <div class="instruction-item">
             <span class="instruction-icon">⏱️</span>
-            <span class="instruction-text">Hover 1s to select <small>dwell-time</small></span>
+            <span>Hover 1s to select</span>
         </div>
         <div class="instruction-item">
             <span class="instruction-icon">⌨️</span>
-            <span class="instruction-text">1-5 keys <small>quick tour</small></span>
+            <span>Press 1-5 for quick access</span>
         </div>
     </div>
 
     <!-- Selection Feedback -->
     <div id="selection-feedback"></div>
 
-    <!-- Debug Panel -->
-    <div id="debug-panel"></div>
-
     <!-- VR Scene -->
     <div id="vr-scene">
-        <a-scene embedded vr-mode-ui="enabled: true" id="main-scene" stats="false">
-            <!-- Background with gradient sky -->
+        <a-scene embedded vr-mode-ui="enabled: true" id="main-scene">
+            <!-- Background -->
             <a-sky color="#0a1929"></a-sky>
             
-            <!-- Main Title with 3D text effect -->
+            <!-- Title -->
             <a-entity position="0 3.5 -5">
                 <a-text value="HISTORICAL SITES OF BULACAN" 
                        align="center" 
                        color="#FF6B6B" 
                        width="8"
-                       scale="1.5 1.5 1"
-                       position="0 0 0"></a-text>
-                <a-text value="Virtual Reality Heritage Tour" 
+                       scale="1.5 1.5 1"></a-text>
+                <a-text value="ESP32 Finger-Tracking VR System" 
                        align="center" 
-                       color="#FFFFFF" 
+                       color="#4ECDC4" 
                        width="6"
                        scale="1 1 1"
-                       opacity="0.8"
-                       position="0 -0.8 0.1"></a-text>
+                       position="0 -0.8 0"></a-text>
             </a-entity>
             
-            <!-- Menu Options - Arranged in a wider arc -->
+            <!-- Menu Options -->
             <a-entity id="menu-options" position="0 1.2 0">
-                <!-- Battle of Quinga (Far Left) -->
+                <!-- Battle of Quinga -->
                 <a-entity class="menu-option" 
                          position="-3.2 0.5 -3" 
                          data-project="battle-of-quinga"
                          data-color="#FF6B6B">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF6B6B"></a-box>
-                    <a-text value="⚔️" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
-                    <a-text value="Battle of" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="Quinga" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="1" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF6B6B" data-original-color="#FF6B6B"></a-box>
+                    <a-text value="⚔️" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
+                    <a-text value="Battle of" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="Quinga" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="1" position="0 -0.65 0.1" align="center" color="white" opacity="0.5"></a-text>
                 </a-entity>
                 
-                <!-- Hiyas ng Bulacan Museum (Left) -->
+                <!-- Hiyas ng Bulacan -->
                 <a-entity class="menu-option" 
                          position="-1.6 0.5 -2.5" 
                          data-project="bulacan-museum"
                          data-color="#4ECDC4">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#4ECDC4"></a-box>
-                    <a-text value="🏛️" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
-                    <a-text value="Hiyas ng" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="Bulacan" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="2" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#4ECDC4" data-original-color="#4ECDC4"></a-box>
+                    <a-text value="🏛️" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
+                    <a-text value="Hiyas ng" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="Bulacan" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="2" position="0 -0.65 0.1" align="center" color="white" opacity="0.5"></a-text>
                 </a-entity>
                 
-                <!-- Del Pilar Shrine (Center) -->
+                <!-- Del Pilar Shrine -->
                 <a-entity class="menu-option" 
                          position="0 0.5 -2.2" 
                          data-project="del-pilar-shrine"
                          data-color="#FFD700">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#FFD700"></a-box>
-                    <a-text value="🗽" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
-                    <a-text value="Del Pilar" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="Shrine" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="3" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FFD700" data-original-color="#FFD700"></a-box>
+                    <a-text value="🗽" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
+                    <a-text value="Del Pilar" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="Shrine" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="3" position="0 -0.65 0.1" align="center" color="white" opacity="0.5"></a-text>
                 </a-entity>
                 
-                <!-- Barasoain Museum (Right) -->
+                <!-- Barasoain Museum -->
                 <a-entity class="menu-option" 
                          position="1.6 0.5 -2.5" 
                          data-project="barasoain-museum"
                          data-color="#FF8E53">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF8E53"></a-box>
-                    <a-text value="⛪" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
-                    <a-text value="Barasoain" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="Museum" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="4" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF8E53" data-original-color="#FF8E53"></a-box>
+                    <a-text value="⛪" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
+                    <a-text value="Barasoain" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="Museum" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="4" position="0 -0.65 0.1" align="center" color="white" opacity="0.5"></a-text>
                 </a-entity>
                 
-                <!-- Casa Real Shrine (Far Right) -->
+                <!-- Casa Real -->
                 <a-entity class="menu-option" 
                          position="3.2 0.5 -3" 
                          data-project="casa-real-shrine"
                          data-color="#9B59B6">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#9B59B6"></a-box>
-                    <a-text value="🏰" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
-                    <a-text value="Casa Real" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="Shrine" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
-                    <a-text value="5" position="0 -0.65 0.1" align="center" color="white" width="1" opacity="0.5"></a-text>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#9B59B6" data-original-color="#9B59B6"></a-box>
+                    <a-text value="🏰" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
+                    <a-text value="Casa Real" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="Shrine" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
+                    <a-text value="5" position="0 -0.65 0.1" align="center" color="white" opacity="0.5"></a-text>
                 </a-entity>
             </a-entity>
             
-            <!-- Decorative floating particles -->
-            <a-entity position="0 2 -5">
-                <a-sphere radius="0.05" color="#FF6B6B" position="1 1 0"></a-sphere>
-                <a-sphere radius="0.05" color="#4ECDC4" position="-1 0.5 1"></a-sphere>
-                <a-sphere radius="0.05" color="#FFD700" position="0.5 -0.5 2"></a-sphere>
-            </a-entity>
-            
-            <!-- Floor grid with glow -->
+            <!-- Floor grid -->
             <a-grid position="0 -0.5 -5" width="15" height="15" color="#4ECDC4" opacity="0.1"></a-grid>
             
-            <!-- Camera - WITHOUT cursor initially -->
-            <a-entity id="camera-rig" position="0 1.6 0">
-                <a-entity id="main-camera" camera look-controls wasd-controls>
-                    <!-- No cursor here - we'll add it dynamically after user interaction -->
-                </a-entity>
-            </a-entity>
+            <!-- Camera - NO cursor/gaze at all! -->
+            <a-entity camera look-controls position="0 1.6 0" id="main-camera"></a-entity>
             
-            <!-- Ambient and point lights -->
+            <!-- Lighting -->
             <a-light type="ambient" color="#fff" intensity="0.5"></a-light>
             <a-light type="point" intensity="1" position="5 5 5" color="#FF6B6B"></a-light>
-            <a-light type="point" intensity="0.8" position="-5 5 5" color="#4ECDC4"></a-light>
-            <a-light type="point" intensity="0.6" position="5 5 -5" color="#9B59B6"></a-light>
         </a-scene>
     </div>
 
@@ -660,34 +522,26 @@
     <script>
         // ================= PROJECT CONFIG =================
         const projects = {
-            'battle-of-quinga': {
-                name: 'Battle of Quinga',
-                path: 'battle-of-quinga/index.html',
-                color: '#FF6B6B'
-            },
-            'bulacan-museum': {
-                name: 'Hiyas ng Bulacan Museum',
-                path: 'hiyas-ng-bulacan-museum/index.html',
-                color: '#4ECDC4'
-            },
-            'del-pilar-shrine': {
-                name: 'Marcelo H. Del Pilar Shrine',
-                path: 'del-pilar-shrine/index.html',
-                color: '#FFD700'
-            },
-            'barasoain-museum': {
-                name: 'Barasoain Museum',
-                path: 'barasoain-museum/index.html',
-                color: '#FF8E53'
-            },
-            'casa-real-shrine': {
-                name: 'Casa Real Shrine',
-                path: 'casa-real-shrine/index.html',
-                color: '#9B59B6'
-            }
+            'battle-of-quinga': { name: 'Battle of Quinga', path: 'battle-of-quinga/index.html', color: '#FF6B6B' },
+            'bulacan-museum': { name: 'Hiyas ng Bulacan Museum', path: 'hiyas-ng-bulacan-museum/index.html', color: '#4ECDC4' },
+            'del-pilar-shrine': { name: 'Marcelo H. Del Pilar Shrine', path: 'del-pilar-shrine/index.html', color: '#FFD700' },
+            'barasoain-museum': { name: 'Barasoain Museum', path: 'barasoain-museum/index.html', color: '#FF8E53' },
+            'casa-real-shrine': { name: 'Casa Real Shrine', path: 'casa-real-shrine/index.html', color: '#9B59B6' }
         };
 
-        // ========== PERFORMANCE METRICS SYSTEM ==========
+        // ========== ESP32 CONFIG ==========
+        const ESP32_IP = "192.168.4.1"; // CHANGE THIS TO YOUR ESP32's IP
+        let socket = null;
+        let espConnected = false;
+        const DWELL_TIME = 1000; // 1 second as per thesis
+        
+        // ESP32 Cursor
+        const espCursor = document.getElementById('esp-cursor');
+        let activeDwellTimer = null;
+        let currentHoverTarget = null;
+        let lastESPData = { x: 160, y: 120 }; // Default center
+
+        // ========== PERFORMANCE METRICS ==========
         let frameCount = 0;
         let lastFpsUpdate = performance.now();
         let fps = 0;
@@ -699,234 +553,18 @@
         let frameTimes = [];
         let stableFrames = 0;
         let totalFrames = 0;
-        let sceneLoaded = false;
-        let userInteracted = false;
-        let aframeCursor = null;
-        
-        // Performance tracking
-        function updatePerformanceMetrics() {
-            const now = performance.now();
-            const delta = now - lastFpsUpdate;
-            frameCount++;
-            
-            if (delta >= 1000) {
-                fps = Math.round((frameCount * 1000) / delta);
-                document.getElementById('fps-value').textContent = fps;
-                
-                // Track frame stability (≥30 FPS)
-                totalFrames += frameCount;
-                if (fps >= 30) {
-                    stableFrames += frameCount;
-                }
-                
-                // Update stability percentage
-                const stability = totalFrames > 0 ? Math.round((stableFrames / totalFrames) * 100) : 100;
-                document.getElementById('stability-value').textContent = stability + '%';
-                
-                // Update session time
-                const sessionSeconds = Math.floor((now - sessionStartTime) / 1000);
-                const mins = Math.floor(sessionSeconds / 60);
-                const secs = sessionSeconds % 60;
-                document.getElementById('session-time').textContent = `Session: ${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-                
-                // Update accuracy
-                const accuracy = selectionAttempts > 0 ? Math.round((selectionSuccess / selectionAttempts) * 100) : 100;
-                document.getElementById('accuracy-value').textContent = accuracy + '%';
-                
-                // Color code FPS
-                const fpsEl = document.getElementById('fps-value');
-                if (fps >= 30) {
-                    fpsEl.className = 'metric-value success';
-                } else if (fps >= 20) {
-                    fpsEl.className = 'metric-value normal';
-                } else {
-                    fpsEl.className = 'metric-value warning';
-                }
-                
-                frameCount = 0;
-                lastFpsUpdate = now;
-            }
-            
-            // Track frame time for latency simulation
-            const frameTime = performance.now() - lastFrameTime;
-            frameTimes.push(frameTime);
-            if (frameTimes.length > 60) frameTimes.shift();
-            
-            // Calculate average frame time and simulate tracking latency
-            const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
-            const simulatedLatency = Math.round(avgFrameTime * 2 + 10 + Math.random() * 5);
-            
-            latencyHistory.push(simulatedLatency);
-            if (latencyHistory.length > 30) latencyHistory.shift();
-            
-            const avgLatency = Math.round(latencyHistory.reduce((a, b) => a + b, 0) / latencyHistory.length);
-            document.getElementById('latency-value').textContent = avgLatency + ' ms';
-            
-            // Color code latency (target <150ms)
-            const latencyEl = document.getElementById('latency-value');
-            if (avgLatency < 150) {
-                latencyEl.className = 'metric-value success';
-            } else if (avgLatency < 200) {
-                latencyEl.className = 'metric-value normal';
-            } else {
-                latencyEl.className = 'metric-value warning';
-            }
-            
-            lastFrameTime = now;
-            
-            if (sceneLoaded) {
-                requestAnimationFrame(updatePerformanceMetrics);
-            }
-        }
 
-        // Record selection attempt
-        function recordSelection(success) {
-            selectionAttempts++;
-            if (success) {
-                selectionSuccess++;
-                document.getElementById('selection-count').textContent = `Selections: ${selectionSuccess}`;
-            }
-        }
-
-        // Show selection feedback
-        function showSelectionFeedback(projectName) {
-            const feedback = document.getElementById('selection-feedback');
-            feedback.textContent = `📍 Selected: ${projectName}`;
-            feedback.style.background = 'rgba(78, 205, 196, 0.9)';
-            feedback.classList.add('show');
-            
-            setTimeout(() => {
-                feedback.classList.remove('show');
-            }, 1500);
-        }
-
-        // ========== LOADING SCREEN HANDLER ==========
-        function hideLoadingScreen() {
-            console.log("Hiding loading screen");
-            const loadingScreen = document.getElementById('loading-screen');
-            const instructions = document.getElementById('instructions');
-            
-            if (loadingScreen) {
-                loadingScreen.style.opacity = '0';
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                    loadingScreen.classList.add('loading-hidden');
-                }, 500);
-            }
-            
-            if (instructions) {
-                instructions.style.display = 'flex';
-            }
-            
-            // Start performance monitoring
-            if (!sceneLoaded) {
-                sceneLoaded = true;
-                updatePerformanceMetrics();
-            }
-            
-            // Add cursor only after user interaction
-            setupDelayedCursor();
-        }
-
-        // ========== DELAYED CURSOR SETUP ==========
-        function setupDelayedCursor() {
-            console.log("Setting up delayed cursor - will activate after user interaction");
-            
-            // Add a message that gaze selection is disabled
-            const debugPanel = document.getElementById('debug-panel');
-            debugPanel.style.display = 'block';
-            debugPanel.innerHTML = '⚠️ Gaze selection disabled. Use ESP32 cursor or click.';
-            
-            // Listen for first user interaction to enable cursor
-            const enableCursor = function() {
-                if (!userInteracted) {
-                    userInteracted = true;
-                    console.log("User interaction detected - enabling cursor");
-                    
-                    // Add cursor to camera
-                    const camera = document.getElementById('main-camera');
-                    if (camera) {
-                        // Remove existing cursor if any
-                        const existingCursor = camera.querySelector('a-cursor');
-                        if (existingCursor) {
-                            existingCursor.remove();
-                        }
-                        
-                        // Create new cursor
-                        const cursor = document.createElement('a-cursor');
-                        cursor.setAttribute('fuse', 'true');
-                        cursor.setAttribute('fuse-timeout', '2000');
-                        cursor.setAttribute('material', 'color: #FF6B6B');
-                        cursor.setAttribute('position', '0 0 -1');
-                        camera.appendChild(cursor);
-                        
-                        aframeCursor = cursor;
-                        
-                        // Add event listener for fusing
-                        cursor.addEventListener('fusing', function(evt) {
-                            if (!userInteracted) return; // Extra safety
-                            
-                            const intersectedEl = evt.detail.intersectedEl;
-                            let el = intersectedEl;
-                            while (el && !el.classList?.contains('menu-option') && el !== document.documentElement) {
-                                el = el.parentElement;
-                            }
-                            if (el && el.classList.contains('menu-option')) {
-                                const projectId = el.getAttribute('data-project');
-                                recordSelection(true);
-                                showSelectionFeedback(projects[projectId].name);
-                                launchProject(projectId);
-                            }
-                        });
-                        
-                        debugPanel.innerHTML = '✅ Gaze selection enabled';
-                        setTimeout(() => {
-                            debugPanel.style.display = 'none';
-                        }, 2000);
-                    }
-                    
-                    // Remove listeners
-                    document.removeEventListener('click', enableCursor);
-                    document.removeEventListener('keydown', enableCursor);
-                    document.removeEventListener('mousemove', enableCursor);
-                }
-            };
-            
-            // Wait for user interaction
-            document.addEventListener('click', enableCursor);
-            document.addEventListener('keydown', enableCursor);
-            document.addEventListener('mousemove', enableCursor);
-            
-            // Also enable on ESP32 cursor movement
-            const checkESPInteraction = setInterval(() => {
-                if (espCursor.style.display === 'block' && !userInteracted) {
-                    enableCursor();
-                    clearInterval(checkESPInteraction);
-                }
-            }, 1000);
-        }
-
-        // ========== ESP32 CAM CONTROLLER ==========
-        const ESP32_IP = "192.168.1.12"; // Change to actual ESP32 IP
-        let socket = null;
-        let espConnected = false;
-        
-        const espCursor = document.getElementById('esp-cursor');
-        
-        // Dwell time configuration
-        const DWELL_TIME = 1000;
-        let activeDwellTimer = null;
-        let currentHoverTarget = null;
-        
-        function initESP32Cursor() {
+        // ========== INITIALIZE ESP32 CONNECTION ==========
+        function initESP32() {
             const espStatus = document.getElementById('esp-status');
             
-            if (ESP32_IP === "192.168.1.12") {
-                console.warn("⚠️ ESP32 IP not set. Using fallback mouse simulation.");
-                espStatus.style.color = '#FF6B6B';
-                espStatus.textContent = '○';
+            if (ESP32_IP === "192.168.4.1" && !window.location.hostname.includes('192.168')) {
+                console.log("Using mouse simulation mode");
+                espStatus.style.color = '#FFA500';
+                espStatus.textContent = '◑';
+                document.getElementById('metrics-badge').textContent = 'SIMULATION • MOUSE';
                 
-                // Fallback: mouse simulation
+                // Mouse simulation
                 document.addEventListener('mousemove', (e) => {
                     espCursor.style.display = 'block';
                     espCursor.style.left = e.clientX + 'px';
@@ -936,11 +574,12 @@
                 return;
             }
 
+            // Real ESP32 WebSocket connection
             try {
                 socket = new WebSocket(`ws://${ESP32_IP}:81`);
 
                 socket.onopen = () => {
-                    console.log("✅ Connected to ESP32-CAM");
+                    console.log("✅ ESP32 Connected");
                     espCursor.style.display = "block";
                     espConnected = true;
                     espStatus.style.color = '#4ECDC4';
@@ -951,13 +590,19 @@
                 socket.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
+                        
+                        // Map ESP32 coordinates (320x240) to screen
                         const screenX = (data.x / 320) * window.innerWidth;
                         const screenY = (data.y / 240) * window.innerHeight;
                         
+                        // Update cursor position
                         espCursor.style.left = screenX + 'px';
                         espCursor.style.top = screenY + 'px';
+                        
+                        // Check for hover targets
                         checkHoverTarget(screenX, screenY);
                         
+                        // Calculate latency if timestamp provided
                         if (data.timestamp) {
                             const latency = performance.now() - data.timestamp;
                             if (latency < 500) {
@@ -966,43 +611,48 @@
                             }
                         }
                     } catch (e) {
-                        console.warn("Error parsing ESP message", e);
+                        console.warn("Error parsing ESP data:", e);
                     }
                 };
 
                 socket.onerror = (error) => {
-                    console.log("WebSocket Error: ", error);
+                    console.log("ESP32 Error:", error);
+                    espStatus.style.color = '#FF6B6B';
+                    espStatus.textContent = '○';
+                    document.getElementById('metrics-badge').textContent = 'ESP32 • ERROR';
+                };
+                
+                socket.onclose = () => {
+                    console.log("ESP32 Disconnected");
                     espStatus.style.color = '#FF6B6B';
                     espStatus.textContent = '○';
                     document.getElementById('metrics-badge').textContent = 'ESP32 • OFFLINE';
                 };
-                
-                socket.onclose = () => {
-                    console.log("ESP socket closed");
-                    espStatus.style.color = '#FF6B6B';
-                    espStatus.textContent = '○';
-                    document.getElementById('metrics-badge').textContent = 'ESP32 • DISCONNECTED';
-                };
             } catch (e) {
-                console.warn("Failed to connect ESP, using fallback mouse");
+                console.warn("Failed to connect ESP32:", e);
                 espStatus.style.color = '#FF6B6B';
                 espStatus.textContent = '○';
             }
         }
 
+        // ========== CHECK HOVER TARGETS ==========
         function checkHoverTarget(x, y) {
+            // Temporarily hide cursor to get element behind
             espCursor.style.display = 'none';
             const hoveredElement = document.elementFromPoint(x, y);
             espCursor.style.display = 'block';
             
+            // Find closest menu option (A-Frame elements)
             let targetEl = hoveredElement;
             while (targetEl && !targetEl.classList?.contains('menu-option') && targetEl !== document.body) {
                 targetEl = targetEl.parentElement;
             }
             
+            // If not hovering a menu option
             if (!targetEl || !targetEl.classList.contains('menu-option')) {
                 espCursor.classList.remove('hovering');
                 
+                // Clear dwell timer
                 if (activeDwellTimer) {
                     clearTimeout(activeDwellTimer);
                     activeDwellTimer = null;
@@ -1011,8 +661,10 @@
                 return;
             }
             
+            // Hovering a menu option
             espCursor.classList.add('hovering');
             
+            // If new target, start dwell timer
             if (currentHoverTarget !== targetEl) {
                 if (activeDwellTimer) {
                     clearTimeout(activeDwellTimer);
@@ -1021,18 +673,20 @@
                 
                 currentHoverTarget = targetEl;
                 
+                // Start dwell timer (1 second)
                 activeDwellTimer = setTimeout(() => {
                     const projectId = targetEl.getAttribute('data-project');
                     if (projectId) {
+                        // Visual feedback flash
                         const box = targetEl.querySelector('a-box');
                         if (box) {
-                            const originalColor = box.getAttribute('color');
                             box.setAttribute('color', '#FFFFFF');
                             setTimeout(() => {
-                                box.setAttribute('color', originalColor);
+                                box.setAttribute('color', targetEl.getAttribute('data-color'));
                             }, 200);
                         }
                         
+                        // Record and launch
                         recordSelection(true);
                         showSelectionFeedback(projects[projectId].name);
                         launchProject(projectId);
@@ -1043,163 +697,35 @@
             }
         }
 
-        // ========== HUB FUNCTIONS ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log("DOM Content Loaded");
-            
-            const loadingScreen = document.getElementById('loading-screen');
-            const loadingBar = document.getElementById('loading-bar');
-            const loadingStatus = document.getElementById('loading-status');
-            const forceStartBtn = document.getElementById('force-start-btn');
-            
-            // Simulate loading progress
-            let progress = 0;
-            const loadingInterval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 100) progress = 100;
-                
-                if (loadingBar) loadingBar.style.width = progress + '%';
-                
-                if (progress < 30) loadingStatus.textContent = 'Loading A-Frame resources...';
-                else if (progress < 60) loadingStatus.textContent = 'Initializing 3D environment...';
-                else if (progress < 90) loadingStatus.textContent = 'Preparing virtual tours...';
-                else loadingStatus.textContent = 'Almost ready!';
-                
-                if (progress >= 100) {
-                    clearInterval(loadingInterval);
-                    
-                    setTimeout(() => {
-                        if (!sceneLoaded) {
-                            forceStartBtn.style.display = 'block';
-                        }
-                    }, 2000);
-                }
-            }, 200);
-            
-            // Force start button
-            forceStartBtn.addEventListener('click', function() {
-                console.log("Force start clicked");
-                hideLoadingScreen();
-            });
-            
-            // Setup interactions
-            setupMenuInteractions();
-            setupKeyboardShortcuts();
-            
-            // Check if A-Frame scene is loaded
-            const scene = document.querySelector('a-scene');
-            if (scene) {
-                scene.addEventListener('loaded', function() {
-                    console.log("A-Frame scene loaded event");
-                    sceneLoaded = true;
-                    hideLoadingScreen();
-                });
-                
-                scene.addEventListener('renderstart', function() {
-                    console.log("A-Frame render start");
-                    sceneLoaded = true;
-                    hideLoadingScreen();
-                });
+        // ========== RECORD SELECTION ==========
+        function recordSelection(success) {
+            selectionAttempts++;
+            if (success) {
+                selectionSuccess++;
+                document.getElementById('selection-count').textContent = `${selectionSuccess} selections`;
             }
-            
-            // Fallback: hide loading screen after 5 seconds
-            setTimeout(() => {
-                if (document.getElementById('loading-screen').style.display !== 'none') {
-                    console.log("Fallback timer: forcing loading screen hide");
-                    hideLoadingScreen();
-                }
-            }, 5000);
-            
-            // Initialize ESP32 cursor after a delay
-            setTimeout(initESP32Cursor, 2000);
-        });
-
-        function setupMenuInteractions() {
-            const menuOptions = document.querySelectorAll('.menu-option');
-            
-            menuOptions.forEach(option => {
-                // Click event (for mouse/touch)
-                option.addEventListener('click', function(ev) {
-                    const projectId = this.getAttribute('data-project');
-                    recordSelection(true);
-                    showSelectionFeedback(projects[projectId].name);
-                    launchProject(projectId);
-                });
-                
-                // Hover effects
-                option.addEventListener('mouseenter', function() {
-                    const box = this.querySelector('a-box');
-                    if (box) {
-                        box.setAttribute('scale', '1.1 1.1 1.1');
-                    }
-                });
-                
-                option.addEventListener('mouseleave', function() {
-                    const box = this.querySelector('a-box');
-                    if (box) {
-                        box.setAttribute('scale', '1 1 1');
-                    }
-                });
-            });
         }
 
-        function setupKeyboardShortcuts() {
-            document.addEventListener('keydown', function(e) {
-                // Prevent accidental selection with number keys before user interaction
-                if (!userInteracted && (e.key >= '1' && e.key <= '5')) {
-                    console.log("Keyboard shortcut ignored - waiting for user interaction");
-                    return;
-                }
-                
-                if (e.key === '1') {
-                    recordSelection(true);
-                    showSelectionFeedback(projects['battle-of-quinga'].name);
-                    launchProject('battle-of-quinga');
-                }
-                if (e.key === '2') {
-                    recordSelection(true);
-                    showSelectionFeedback(projects['bulacan-museum'].name);
-                    launchProject('bulacan-museum');
-                }
-                if (e.key === '3') {
-                    recordSelection(true);
-                    showSelectionFeedback(projects['del-pilar-shrine'].name);
-                    launchProject('del-pilar-shrine');
-                }
-                if (e.key === '4') {
-                    recordSelection(true);
-                    showSelectionFeedback(projects['barasoain-museum'].name);
-                    launchProject('barasoain-museum');
-                }
-                if (e.key === '5') {
-                    recordSelection(true);
-                    showSelectionFeedback(projects['casa-real-shrine'].name);
-                    launchProject('casa-real-shrine');
-                }
-                
-                if (e.key === 'f' || e.key === 'F') {
-                    toggleFullscreen();
-                }
-                
-                if (e.key === 'd' || e.key === 'D') {
-                    const metrics = document.getElementById('performance-metrics');
-                    metrics.style.display = metrics.style.display === 'none' ? 'block' : 'none';
-                }
-            });
+        // ========== SHOW FEEDBACK ==========
+        function showSelectionFeedback(projectName) {
+            const feedback = document.getElementById('selection-feedback');
+            feedback.textContent = `📍 Selected: ${projectName}`;
+            feedback.classList.add('show');
+            setTimeout(() => feedback.classList.remove('show'), 1500);
         }
 
+        // ========== LAUNCH PROJECT ==========
         function launchProject(projectId) {
             const project = projects[projectId];
-            if (!project) {
-                console.error('Project not found:', projectId);
-                return;
-            }
+            if (!project) return;
             
+            // Clear any pending timers
             if (activeDwellTimer) {
                 clearTimeout(activeDwellTimer);
                 activeDwellTimer = null;
             }
             
+            // Show loading
             const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.display = 'flex';
             loadingScreen.style.opacity = '1';
@@ -1207,38 +733,153 @@
                 <div class="loading-content">
                     <div class="spinner" style="border-top-color: ${project.color}"></div>
                     <h1 class="loading-title" style="background: linear-gradient(45deg, ${project.color}, #4ECDC4); -webkit-background-clip: text;">${project.name}</h1>
-                    <p style="color: rgba(255,255,255,0.7); margin-bottom: 2rem;">Preparing your virtual heritage experience...</p>
-                    <div class="loading-progress">
-                        <div class="loading-bar" id="loading-bar" style="width: 100%; background: linear-gradient(90deg, ${project.color}, #4ECDC4);"></div>
-                    </div>
+                    <p>Loading virtual tour...</p>
                 </div>
             `;
             
+            // Navigate
             setTimeout(() => {
                 window.location.href = project.path;
             }, 1500);
         }
 
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                document.exitFullscreen();
+        // ========== PERFORMANCE MONITORING ==========
+        function updatePerformanceMetrics() {
+            const now = performance.now();
+            frameCount++;
+            
+            // Update FPS every second
+            if (now - lastFpsUpdate >= 1000) {
+                fps = Math.round((frameCount * 1000) / (now - lastFpsUpdate));
+                document.getElementById('fps-value').textContent = fps + ' FPS';
+                
+                // Track stability
+                totalFrames += frameCount;
+                if (fps >= 30) stableFrames += frameCount;
+                
+                const stability = totalFrames > 0 ? Math.round((stableFrames / totalFrames) * 100) : 100;
+                document.getElementById('stability-value').textContent = stability + '%';
+                
+                // Session time
+                const sessionSeconds = Math.floor((now - sessionStartTime) / 1000);
+                const mins = Math.floor(sessionSeconds / 60);
+                const secs = sessionSeconds % 60;
+                document.getElementById('session-time').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+                
+                // Accuracy
+                const accuracy = selectionAttempts > 0 ? Math.round((selectionSuccess / selectionAttempts) * 100) : 100;
+                document.getElementById('accuracy-value').textContent = accuracy + '%';
+                
+                // Color code FPS
+                const fpsEl = document.getElementById('fps-value');
+                if (fps >= 30) fpsEl.className = 'metric-value success';
+                else if (fps >= 20) fpsEl.className = 'metric-value normal';
+                else fpsEl.className = 'metric-value warning';
+                
+                frameCount = 0;
+                lastFpsUpdate = now;
             }
+            
+            // Calculate latency
+            const frameTime = performance.now() - lastFrameTime;
+            frameTimes.push(frameTime);
+            if (frameTimes.length > 60) frameTimes.shift();
+            
+            const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+            
+            // If ESP connected, use real latency, otherwise simulate
+            if (latencyHistory.length > 0) {
+                const avgLatency = Math.round(latencyHistory.reduce((a, b) => a + b, 0) / latencyHistory.length);
+                document.getElementById('latency-value').textContent = avgLatency + ' ms';
+                
+                const latencyEl = document.getElementById('latency-value');
+                if (avgLatency < 150) latencyEl.className = 'metric-value success';
+                else if (avgLatency < 200) latencyEl.className = 'metric-value normal';
+                else latencyEl.className = 'metric-value warning';
+            } else {
+                // Simulated latency for demo
+                const simLatency = Math.round(avgFrameTime * 2 + 20);
+                document.getElementById('latency-value').textContent = simLatency + ' ms';
+            }
+            
+            lastFrameTime = now;
+            requestAnimationFrame(updatePerformanceMetrics);
         }
 
+        // ========== KEYBOARD SHORTCUTS ==========
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                const key = e.key;
+                const projectMap = {
+                    '1': 'battle-of-quinga',
+                    '2': 'bulacan-museum',
+                    '3': 'del-pilar-shrine',
+                    '4': 'barasoain-museum',
+                    '5': 'casa-real-shrine'
+                };
+                
+                if (projectMap[key]) {
+                    recordSelection(true);
+                    showSelectionFeedback(projects[projectMap[key]].name);
+                    launchProject(projectMap[key]);
+                }
+            });
+        }
+
+        // ========== TOGGLE INFO ==========
         function toggleControlInfo() {
             alert(
-                'ESP32-CAM Control Info:\n' +
-                '- Dwell Time: ' + (DWELL_TIME/1000) + ' seconds\n' +
-                '- Status: ' + (espConnected ? 'Connected' : 'Disconnected') + '\n' +
-                '- Tracking: Vision-based fingertip\n' +
-                '- Target Latency: <150ms\n\n' +
-                '⚠️ Gaze selection disabled until first interaction'
+                '🎮 ESP32 FINGER-TRACKING VR SYSTEM\n\n' +
+                `ESP32 Status: ${espConnected ? '✅ CONNECTED' : '❌ DISCONNECTED'}\n` +
+                `Dwell Time: ${DWELL_TIME/1000} second\n` +
+                `Selection Accuracy: ${selectionAttempts > 0 ? Math.round((selectionSuccess/selectionAttempts)*100) : 100}%\n\n` +
+                'HOW TO USE:\n' +
+                '• Move your finger to control the red cursor\n' +
+                '• Hover over a site for 1 second to select\n' +
+                '• The cursor turns gold when hovering\n' +
+                '• Press 1-5 keys for quick access'
             );
         }
 
-        // Clean up on window leave
+        // ========== INITIALIZATION ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("VR Heritage System Starting...");
+            
+            // Loading animation
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('loading-bar').style.width = progress + '%';
+                
+                if (progress < 30) document.getElementById('loading-status').textContent = 'Loading A-Frame...';
+                else if (progress < 60) document.getElementById('loading-status').textContent = 'Initializing 3D...';
+                else if (progress < 90) document.getElementById('loading-status').textContent = 'Connecting to ESP32...';
+                else document.getElementById('loading-status').textContent = 'Ready!';
+                
+                if (progress >= 100) {
+                    clearInterval(loadingInterval);
+                    setTimeout(() => {
+                        document.getElementById('loading-screen').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('loading-screen').style.display = 'none';
+                        }, 500);
+                    }, 500);
+                }
+            }, 200);
+            
+            // Initialize ESP32
+            setTimeout(initESP32, 2000);
+            
+            // Setup keyboard
+            setupKeyboardShortcuts();
+            
+            // Start performance monitoring
+            updatePerformanceMetrics();
+        });
+
+        // Clean up timers
         window.addEventListener('mouseleave', () => {
             if (activeDwellTimer) {
                 clearTimeout(activeDwellTimer);
@@ -1247,8 +888,6 @@
             }
             espCursor.classList.remove('hovering');
         });
-
-        console.log('VR Heritage Hub - Fixed auto-selection issue');
     </script>
 </body>
 </html>
