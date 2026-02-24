@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Virtual Tours VR Hub</title>
+    <title>Virtual Tours VR Hub · ESP32 Control</title>
     <!-- A-Frame for VR -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     
@@ -34,6 +34,7 @@
             z-index: 10000;
             color: white;
             font-family: Arial, sans-serif;
+            transition: opacity 0.5s;
         }
         
         .spinner {
@@ -72,6 +73,43 @@
             text-align: center;
             z-index: 100;
             backdrop-filter: blur(5px);
+            pointer-events: none; /* so ESP cursor can click through */
+        }
+
+        /* ---------- ESP32 VISUAL CUSTOM CURSOR ---------- */
+        #esp-cursor {
+            position: fixed;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 70, 70, 0.9);
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255,100,100,0.8);
+            pointer-events: none;      /* absolutely crucial: lets clicks/events pass to A-Frame elements */
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            display: none;
+            transition: width 0.1s, height 0.1s, background 0.1s;
+            mix-blend-mode: difference; /* makes it visible on any background */
+        }
+        /* small inner dot for precision */
+        #esp-cursor::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+        /* highlight state when hovering a clickable object */
+        #esp-cursor.hovering {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 215, 0, 0.9); /* gold */
+            border-color: #FF6B6B;
         }
     </style>
 </head>
@@ -85,13 +123,13 @@
 
     <!-- Instructions -->
     <div id="instructions" style="display: none;">
-        <p>Look at a location and click or gaze to select</p>
-        <p>Press 1-5 for quick selection</p>
+        <p>👆 ESP32‑CAM moves cursor · gaze/hover to select (dwell‑time simulated)</p>
+        <p>⌨️ Press 1‑5 for quick selection · F for fullscreen</p>
     </div>
 
     <!-- VR Scene -->
     <div id="vr-scene">
-        <a-scene embedded vr-mode-ui="enabled: true">
+        <a-scene embedded vr-mode-ui="enabled: true" id="main-scene">
             <!-- Background -->
             <a-sky color="#0a1929"></a-sky>
             
@@ -266,8 +304,8 @@
             <!-- Floor Grid for reference -->
             <a-grid position="0 0 -4" width="10" height="10" color="#FFFFFF" opacity="0.2"></a-grid>
             
-            <!-- Camera and Cursor -->
-            <a-entity camera look-controls position="0 1.6 0">
+            <!-- Camera and Cursor (original A-Frame cursor remains for VR gaze, but ESP cursor will also trigger) -->
+            <a-entity camera look-controls position="0 1.6 0" id="main-camera">
                 <a-cursor 
                     fuse="true"
                     fuse-timeout="2000"
@@ -284,8 +322,11 @@
         </a-scene>
     </div>
 
+    <!-- ESP32 Cursor element (will be populated by script) -->
+    <!-- defined in style, actual div created in script but we already have it in style, let's create programmatically -->
+    
     <script>
-        // Project configuration - ADDED CASA REAL SHRINE
+        // ================= PROJECT CONFIG =================
         const projects = {
             'battle-of-quinga': {
                 name: 'Battle of Quinga',
@@ -307,20 +348,111 @@
                 path: 'barasoain-museum/index.html',
                 color: '#FF8E53'
             },
-            // NEW: Casa Real Shrine
             'casa-real-shrine': {
                 name: 'Casa Real Shrine',
                 path: 'casa-real-shrine/index.html',
-                color: '#9B59B6' // Purple color
+                color: '#9B59B6'
             }
         };
+
+        // ========== ESP32 CAM CONTROLLER CODE ==========
+        // 1. SET YOUR ESP32-CAM IP HERE (REPLACE WITH YOUR ACTUAL IP)
+        const ESP32_IP = "192.168.1.XX"; // 🔴 CHANGE THIS TO THE IP FROM SERIAL MONITOR
+        let socket = null;
         
-        // Wait for DOM to load
+        // Create visual cursor (we'll append it now)
+        const espCursor = document.createElement('div');
+        espCursor.id = "esp-cursor";
+        // styling already in head, but set any missing
+        document.body.appendChild(espCursor);
+
+        // attempt WebSocket connection (if IP is not default placeholder)
+        function initESP32Cursor() {
+            if (ESP32_IP === "192.168.1.XX") {
+                console.warn("⚠️ ESP32 IP not set. Using fallback mouse simulation (for demo).");
+                // fallback: use mouse to move cursor for testing (simulate ESP)
+                document.addEventListener('mousemove', (e) => {
+                    espCursor.style.display = 'block';
+                    espCursor.style.left = e.clientX + 'px';
+                    espCursor.style.top = e.clientY + 'px';
+                });
+                return;
+            }
+
+            try {
+                socket = new WebSocket(`ws://${ESP32_IP}:81`);
+
+                socket.onopen = () => {
+                    console.log("✅ Connected to ESP32-CAM Controller");
+                    espCursor.style.display = "block";
+                };
+
+                socket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        // Map 320x240 ESP32 coordinates to screen resolution
+                        const screenX = (data.x / 320) * window.innerWidth;
+                        const screenY = (data.y / 240) * window.innerHeight;
+
+                        // Move the visual cursor
+                        espCursor.style.left = screenX + 'px';
+                        espCursor.style.top = screenY + 'px';
+
+                        // Dwell-Time Interaction: check element under cursor
+                        // temporarily hide cursor so elementFromPoint gets the element behind
+                        espCursor.style.display = 'none';
+                        const hoveredElement = document.elementFromPoint(screenX, screenY);
+                        espCursor.style.display = 'block';
+
+                        // Find the closest A-Frame entity that is a menu-option (or any clickable)
+                        // We need to traverse shadow DOM? A-Frame elements are in light DOM.
+                        let targetEl = hoveredElement;
+                        while (targetEl && !targetEl.classList?.contains('menu-option') && targetEl !== document.body) {
+                            targetEl = targetEl.parentElement;
+                        }
+
+                        if (targetEl && targetEl.classList.contains('menu-option')) {
+                            espCursor.classList.add('hovering');
+                            // Simulate dwell: we can either click after a delay or trigger immediately.
+                            // For simplicity and responsiveness, we click immediately (you can later add delay)
+                            // But your thesis uses dwell‑time; we can add a timer. However for demo, we click.
+                            // To mimic dwell, we could start a timer. Let's implement a basic 1s dwell.
+                            if (!targetEl._dwellTimer) {
+                                targetEl._dwellTimer = setTimeout(() => {
+                                    const projectId = targetEl.getAttribute('data-project');
+                                    if (projectId) {
+                                        launchProject(projectId);
+                                    }
+                                    targetEl._dwellTimer = null;
+                                }, 800); // 0.8 sec dwell
+                            }
+                        } else {
+                            espCursor.classList.remove('hovering');
+                            // clear any pending timers on all options (simple approach: clear all)
+                            document.querySelectorAll('.menu-option').forEach(opt => {
+                                if (opt._dwellTimer) {
+                                    clearTimeout(opt._dwellTimer);
+                                    opt._dwellTimer = null;
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.warn("Error parsing ESP message", e);
+                    }
+                };
+
+                socket.onerror = (error) => console.log("WebSocket Error: ", error);
+                socket.onclose = () => console.log("ESP socket closed");
+            } catch (e) {
+                console.warn("Failed to connect ESP, using fallback mouse");
+            }
+        }
+
+        // ========== ORIGINAL HUB FUNCTIONS ==========
         document.addEventListener('DOMContentLoaded', function() {
             const loadingScreen = document.getElementById('loading-screen');
             const instructions = document.getElementById('instructions');
             
-            // Hide loading screen when A-Frame is ready
             const scene = document.querySelector('a-scene');
             scene.addEventListener('loaded', function() {
                 setTimeout(() => {
@@ -332,19 +464,22 @@
                 }, 1000);
             });
             
-            // Setup click events for menu options
             setupMenuInteractions();
-            
-            // Setup keyboard shortcuts
             setupKeyboardShortcuts();
+
+            // Initialize ESP32 cursor AFTER page fully loads
+            setTimeout(() => {
+                initESP32Cursor();
+            }, 2000); // small delay to ensure A-Frame is stable
         });
-        
+
         function setupMenuInteractions() {
             const menuOptions = document.querySelectorAll('.menu-option');
             
             menuOptions.forEach(option => {
-                // Click event
-                option.addEventListener('click', function() {
+                // Click event (for mouse/touch)
+                option.addEventListener('click', function(ev) {
+                    // prevent if triggered by cursor dwell? but we want it.
                     const projectId = this.getAttribute('data-project');
                     launchProject(projectId);
                 });
@@ -369,40 +504,42 @@
                 });
             });
             
-            // Setup cursor fusion events
+            // A-Frame cursor fusion (original) - also triggers launch
             const cursor = document.querySelector('a-cursor');
             if (cursor) {
                 cursor.addEventListener('fusing', function(evt) {
                     const intersectedEl = evt.detail.intersectedEl;
-                    if (intersectedEl && intersectedEl.classList.contains('menu-option')) {
-                        const projectId = intersectedEl.getAttribute('data-project');
+                    // traversing up to find .menu-option
+                    let el = intersectedEl;
+                    while (el && !el.classList?.contains('menu-option') && el !== document.documentElement) {
+                        el = el.parentElement;
+                    }
+                    if (el && el.classList.contains('menu-option')) {
+                        const projectId = el.getAttribute('data-project');
                         launchProject(projectId);
                     }
                 });
             }
         }
-        
+
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', function(e) {
-                // Number keys 1-5
                 if (e.key === '1') launchProject('battle-of-quinga');
                 if (e.key === '2') launchProject('bulacan-museum');
                 if (e.key === '3') launchProject('del-pilar-shrine');
                 if (e.key === '4') launchProject('barasoain-museum');
-                if (e.key === '5') launchProject('casa-real-shrine'); // NEW
+                if (e.key === '5') launchProject('casa-real-shrine');
                 
-                // Spacebar for testing
                 if (e.key === ' ') {
-                    alert('Available tours: 1-5 keys or click on colored boxes');
+                    alert('Available tours: 1-5 keys, gaze, or ESP32 cursor hover');
                 }
                 
-                // F for fullscreen
                 if (e.key === 'f' || e.key === 'F') {
                     toggleFullscreen();
                 }
             });
         }
-        
+
         function launchProject(projectId) {
             const project = projects[projectId];
             if (!project) {
@@ -410,6 +547,14 @@
                 return;
             }
             
+            // clear any pending dwell timers
+            document.querySelectorAll('.menu-option').forEach(opt => {
+                if (opt._dwellTimer) {
+                    clearTimeout(opt._dwellTimer);
+                    opt._dwellTimer = null;
+                }
+            });
+
             // Show loading
             const loadingScreen = document.getElementById('loading-screen');
             loadingScreen.style.display = 'flex';
@@ -425,7 +570,7 @@
                 window.location.href = project.path;
             }, 1500);
         }
-        
+
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
@@ -435,14 +580,21 @@
                 document.exitFullscreen();
             }
         }
-        
-        // Add click sound for feedback
-        function playClickSound() {
-            const audio = new Audio();
-            audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
-            audio.volume = 0.3;
-            audio.play().catch(() => {});
-        }
+
+        // Clean up dwell timers if cursor leaves window
+        window.addEventListener('mouseleave', () => {
+            document.querySelectorAll('.menu-option').forEach(opt => {
+                if (opt._dwellTimer) {
+                    clearTimeout(opt._dwellTimer);
+                    opt._dwellTimer = null;
+                }
+            });
+        });
+
+        // Also handle when ESP cursor leaves menu
+        // But we already handle in onmessage
+
+        console.log('VR Hub with ESP32-CAM integration ready');
     </script>
 </body>
 </html>
