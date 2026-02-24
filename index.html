@@ -357,7 +357,7 @@
 
         // ========== ESP32 CAM CONTROLLER CODE ==========
         // 1. SET YOUR ESP32-CAM IP HERE (REPLACE WITH YOUR ACTUAL IP)
-        const ESP32_IP = "192.168.1.XX"; // 🔴 CHANGE THIS TO THE IP FROM SERIAL MONITOR
+        const ESP32_IP = "192.168.1.12"; // 🔴 CHANGE THIS TO THE IP FROM SERIAL MONITOR
         let socket = null;
         
         // Create visual cursor (we'll append it now)
@@ -368,7 +368,7 @@
 
         // attempt WebSocket connection (if IP is not default placeholder)
         function initESP32Cursor() {
-            if (ESP32_IP === "192.168.1.XX") {
+            if (ESP32_IP === "192.168.1.12") {
                 console.warn("⚠️ ESP32 IP not set. Using fallback mouse simulation (for demo).");
                 // fallback: use mouse to move cursor for testing (simulate ESP)
                 document.addEventListener('mousemove', (e) => {
