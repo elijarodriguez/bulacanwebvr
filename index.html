@@ -36,7 +36,7 @@
             z-index: 10000;
             color: white;
             font-family: 'Segoe UI', sans-serif;
-            transition: opacity 0.5s;
+            transition: opacity 0.5s ease;
         }
         
         .loading-content {
@@ -389,10 +389,6 @@
             100% { box-shadow: 0 0 5px #FF6B6B; }
         }
         
-        .menu-option:hover {
-            animation: glow 1.5s ease infinite;
-        }
-        
         /* ===== FPS COUNTER SPECIAL STYLES ===== */
         .fps-high { color: #4ECDC4; }
         .fps-medium { color: #FFD700; }
@@ -427,6 +423,11 @@
             0% { transform: translate(-50%, 100%); opacity: 0; }
             100% { transform: translate(-50%, -50%); opacity: 1; }
         }
+
+        /* ===== FORCE HIDE LOADING SCREEN (FALLBACK) ===== */
+        .loading-hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -440,6 +441,7 @@
                 <div class="loading-bar" id="loading-bar"></div>
             </div>
             <p id="loading-status" style="color: rgba(255,255,255,0.5); font-size: 14px;">Initializing VR environment...</p>
+            <button id="force-start-btn" style="margin-top: 20px; background: transparent; border: 1px solid #4ECDC4; color: white; padding: 8px 20px; border-radius: 20px; cursor: pointer; display: none;">Force Start Experience</button>
         </div>
     </div>
 
@@ -498,14 +500,14 @@
     <div id="control-toggle" onclick="toggleControlInfo()">
         <div style="display: flex; align-items: center;">
             <span class="toggle-indicator"></span>
-            <span>ESP32-CAM <span style="color: #4ECDC4;" id="esp-status">●</span></span>
+            <span>ESP32-CAM <span style="color: #4ECDC4;" id="esp-status">○</span></span>
         </div>
         <div style="color: rgba(255,255,255,0.5);">|</div>
         <div style="color: rgba(255,255,255,0.8);">dwell: <span id="dwell-time">1.0</span>s</div>
     </div>
 
     <!-- Instructions -->
-    <div id="instructions">
+    <div id="instructions" style="display: none;">
         <div class="instruction-item">
             <span class="instruction-icon">👆</span>
             <span class="instruction-text">ESP32 cursor <small>finger tracking</small></span>
@@ -527,23 +529,21 @@
     <div id="vr-scene">
         <a-scene embedded vr-mode-ui="enabled: true" id="main-scene" stats="false">
             <!-- Background with gradient sky -->
-            <a-sky color="#0a1929" material="shader: gradient; topColor: #1a2f3f; bottomColor: #0a1929"></a-sky>
+            <a-sky color="#0a1929"></a-sky>
             
             <!-- Main Title with 3D text effect -->
-            <a-entity position="0 4 -5">
+            <a-entity position="0 3.5 -5">
                 <a-text value="HISTORICAL SITES OF BULACAN" 
                        align="center" 
                        color="#FF6B6B" 
                        width="8"
-                       scale="2 2 1"
-                       material="shader: flat"
-                       geometry="primitive: plane; width: 8; height: 1.5"
+                       scale="1.5 1.5 1"
                        position="0 0 0"></a-text>
                 <a-text value="Virtual Reality Heritage Tour" 
                        align="center" 
                        color="#FFFFFF" 
                        width="6"
-                       scale="1.2 1.2 1"
+                       scale="1 1 1"
                        opacity="0.8"
                        position="0 -0.8 0.1"></a-text>
             </a-entity>
@@ -555,7 +555,7 @@
                          position="-2.8 0.5 -2.5" 
                          data-project="battle-of-quinga"
                          data-color="#FF6B6B">
-                    <a-rounded width="1.2" height="1.4" depth="0.15" color="#FF6B6B" radius="0.1" flat-shading="false"></a-rounded>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF6B6B"></a-box>
                     <a-text value="⚔️" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
                     <a-text value="Battle of" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
                     <a-text value="Quinga" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
@@ -567,7 +567,7 @@
                          position="-1.4 0.5 -2.5" 
                          data-project="bulacan-museum"
                          data-color="#4ECDC4">
-                    <a-rounded width="1.2" height="1.4" depth="0.15" color="#4ECDC4" radius="0.1" flat-shading="false"></a-rounded>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#4ECDC4"></a-box>
                     <a-text value="🏛️" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
                     <a-text value="Hiyas ng" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
                     <a-text value="Bulacan" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
@@ -579,7 +579,7 @@
                          position="0 0.5 -2.5" 
                          data-project="del-pilar-shrine"
                          data-color="#FFD700">
-                    <a-rounded width="1.2" height="1.4" depth="0.15" color="#FFD700" radius="0.1" flat-shading="false"></a-rounded>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FFD700"></a-box>
                     <a-text value="🗽" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
                     <a-text value="Del Pilar" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
                     <a-text value="Shrine" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
@@ -591,7 +591,7 @@
                          position="1.4 0.5 -2.5" 
                          data-project="barasoain-museum"
                          data-color="#FF8E53">
-                    <a-rounded width="1.2" height="1.4" depth="0.15" color="#FF8E53" radius="0.1" flat-shading="false"></a-rounded>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF8E53"></a-box>
                     <a-text value="⛪" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
                     <a-text value="Barasoain" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
                     <a-text value="Museum" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
@@ -603,7 +603,7 @@
                          position="2.8 0.5 -2.5" 
                          data-project="casa-real-shrine"
                          data-color="#9B59B6">
-                    <a-rounded width="1.2" height="1.4" depth="0.15" color="#9B59B6" radius="0.1" flat-shading="false"></a-rounded>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#9B59B6"></a-box>
                     <a-text value="🏰" position="0 0.35 0.1" align="center" color="white" width="2" scale="1.2 1.2 1"></a-text>
                     <a-text value="Casa Real" position="0 0 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
                     <a-text value="Shrine" position="0 -0.25 0.1" align="center" color="white" width="2" scale="0.8 0.8 1"></a-text>
@@ -616,7 +616,6 @@
                 <a-sphere radius="0.05" color="#FF6B6B" position="1 1 0"></a-sphere>
                 <a-sphere radius="0.05" color="#4ECDC4" position="-1 0.5 1"></a-sphere>
                 <a-sphere radius="0.05" color="#FFD700" position="0.5 -0.5 2"></a-sphere>
-                <a-animation attribute="position" dur="3000" direction="alternate" repeat="indefinite" to="0 3 -5"></a-animation>
             </a-entity>
             
             <!-- Floor grid with glow -->
@@ -685,6 +684,8 @@
         let frameTimes = [];
         let stableFrames = 0;
         let totalFrames = 0;
+        let metricsInterval;
+        let sceneLoaded = false;
         
         // Performance tracking
         function updatePerformanceMetrics() {
@@ -695,17 +696,13 @@
             
             if (delta >= 1000) {
                 fps = Math.round((frameCount * 1000) / delta);
-                updateFPSDisplay(fps);
+                document.getElementById('fps-value').textContent = fps;
                 
                 // Track frame stability (≥30 FPS)
                 totalFrames += frameCount;
                 if (fps >= 30) {
                     stableFrames += frameCount;
                 }
-                
-                // Reset counters
-                frameCount = 0;
-                lastFpsUpdate = now;
                 
                 // Update stability percentage
                 const stability = totalFrames > 0 ? Math.round((stableFrames / totalFrames) * 100) : 100;
@@ -730,6 +727,10 @@
                 } else {
                     fpsEl.className = 'metric-value warning';
                 }
+                
+                // Reset counters
+                frameCount = 0;
+                lastFpsUpdate = now;
             }
             
             // Track frame time for latency simulation
@@ -739,7 +740,7 @@
             
             // Calculate average frame time and simulate tracking latency
             const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
-            const simulatedLatency = Math.round(avgFrameTime * 2 + 10 + Math.random() * 5); // Base latency + variation
+            const simulatedLatency = Math.round(avgFrameTime * 2 + 10 + Math.random() * 5);
             
             latencyHistory.push(simulatedLatency);
             if (latencyHistory.length > 30) latencyHistory.shift();
@@ -758,11 +759,11 @@
             }
             
             lastFrameTime = now;
-            requestAnimationFrame(updatePerformanceMetrics);
-        }
-
-        function updateFPSDisplay(fps) {
-            document.getElementById('fps-value').textContent = fps;
+            
+            // Continue the loop
+            if (sceneLoaded) {
+                requestAnimationFrame(updatePerformanceMetrics);
+            }
         }
 
         // Record selection attempt
@@ -784,6 +785,31 @@
             setTimeout(() => {
                 feedback.classList.remove('show');
             }, 1500);
+        }
+
+        // ========== LOADING SCREEN HANDLER ==========
+        function hideLoadingScreen() {
+            console.log("Hiding loading screen");
+            const loadingScreen = document.getElementById('loading-screen');
+            const instructions = document.getElementById('instructions');
+            
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    loadingScreen.classList.add('loading-hidden');
+                }, 500);
+            }
+            
+            if (instructions) {
+                instructions.style.display = 'flex';
+            }
+            
+            // Start performance monitoring
+            if (!metricsInterval) {
+                sceneLoaded = true;
+                updatePerformanceMetrics();
+            }
         }
 
         // ========== ESP32 CAM CONTROLLER ==========
@@ -926,7 +952,7 @@
                     const projectId = targetEl.getAttribute('data-project');
                     if (projectId) {
                         // Visual feedback on the option
-                        const box = targetEl.querySelector('a-rounded, a-box');
+                        const box = targetEl.querySelector('a-box');
                         if (box) {
                             const originalColor = box.getAttribute('color');
                             box.setAttribute('color', '#FFFFFF');
@@ -952,9 +978,12 @@
 
         // ========== HUB FUNCTIONS ==========
         document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM Content Loaded");
+            
             const loadingScreen = document.getElementById('loading-screen');
             const loadingBar = document.getElementById('loading-bar');
             const loadingStatus = document.getElementById('loading-status');
+            const forceStartBtn = document.getElementById('force-start-btn');
             
             // Simulate loading progress
             let progress = 0;
@@ -962,40 +991,63 @@
                 progress += Math.random() * 15;
                 if (progress > 100) progress = 100;
                 
-                loadingBar.style.width = progress + '%';
+                if (loadingBar) loadingBar.style.width = progress + '%';
                 
                 if (progress < 30) loadingStatus.textContent = 'Loading A-Frame resources...';
                 else if (progress < 60) loadingStatus.textContent = 'Initializing 3D environment...';
-                else if (progress < 90) loadingStatus.textContent = 'Connecting to ESP32-CAM...';
-                else loadingStatus.textContent = 'Ready!';
+                else if (progress < 90) loadingStatus.textContent = 'Preparing virtual tours...';
+                else loadingStatus.textContent = 'Almost ready!';
                 
                 if (progress >= 100) {
                     clearInterval(loadingInterval);
                     
-                    // Hide loading screen after scene loads
-                    const scene = document.querySelector('a-scene');
-                    scene.addEventListener('loaded', function() {
-                        setTimeout(() => {
-                            loadingScreen.style.opacity = '0';
-                            setTimeout(() => {
-                                loadingScreen.style.display = 'none';
-                            }, 500);
-                        }, 500);
-                    });
+                    // Don't hide immediately, wait for scene or force start
+                    setTimeout(() => {
+                        if (!sceneLoaded) {
+                            // Show force start button if scene takes too long
+                            forceStartBtn.style.display = 'block';
+                        }
+                    }, 2000);
                 }
             }, 200);
+            
+            // Force start button
+            forceStartBtn.addEventListener('click', function() {
+                console.log("Force start clicked");
+                hideLoadingScreen();
+            });
             
             // Setup interactions
             setupMenuInteractions();
             setupKeyboardShortcuts();
             
-            // Initialize ESP32 cursor
-            setTimeout(initESP32Cursor, 2000);
+            // Check if A-Frame scene is loaded
+            const scene = document.querySelector('a-scene');
+            if (scene) {
+                // Multiple ways to detect scene load
+                scene.addEventListener('loaded', function() {
+                    console.log("A-Frame scene loaded event");
+                    sceneLoaded = true;
+                    hideLoadingScreen();
+                });
+                
+                scene.addEventListener('renderstart', function() {
+                    console.log("A-Frame render start");
+                    sceneLoaded = true;
+                    hideLoadingScreen();
+                });
+            }
             
-            // Start performance monitoring
+            // Fallback: hide loading screen after 5 seconds regardless
             setTimeout(() => {
-                updatePerformanceMetrics();
-            }, 1000);
+                if (document.getElementById('loading-screen').style.display !== 'none') {
+                    console.log("Fallback timer: forcing loading screen hide");
+                    hideLoadingScreen();
+                }
+            }, 5000);
+            
+            // Initialize ESP32 cursor after a delay
+            setTimeout(initESP32Cursor, 2000);
         });
 
         function setupMenuInteractions() {
@@ -1012,26 +1064,16 @@
                 
                 // Hover effects
                 option.addEventListener('mouseenter', function() {
-                    const box = this.querySelector('a-rounded, a-box');
+                    const box = this.querySelector('a-box');
                     if (box) {
                         box.setAttribute('scale', '1.1 1.1 1.1');
-                        this.setAttribute('position', {
-                            x: this.getAttribute('position').x,
-                            y: 0.7,
-                            z: this.getAttribute('position').z
-                        });
                     }
                 });
                 
                 option.addEventListener('mouseleave', function() {
-                    const box = this.querySelector('a-rounded, a-box');
+                    const box = this.querySelector('a-box');
                     if (box) {
                         box.setAttribute('scale', '1 1 1');
-                        this.setAttribute('position', {
-                            x: this.getAttribute('position').x,
-                            y: 0.5,
-                            z: this.getAttribute('position').z
-                        });
                     }
                 });
             });
@@ -1089,8 +1131,8 @@
                 
                 if (e.key === 'd' || e.key === 'D') {
                     // Debug toggle
-                    document.getElementById('performance-metrics').style.display = 
-                        document.getElementById('performance-metrics').style.display === 'none' ? 'block' : 'none';
+                    const metrics = document.getElementById('performance-metrics');
+                    metrics.style.display = metrics.style.display === 'none' ? 'block' : 'none';
                 }
             });
         }
