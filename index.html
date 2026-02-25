@@ -530,7 +530,7 @@
         };
 
         // ========== ESP32 CONFIG ==========
-        const ESP32_IP = "192.168.1.10"; // CHANGE THIS TO YOUR ESP32's IP
+        const ESP32_IP = "192.168.4.1"; // CHANGE THIS TO YOUR ESP32's IP
         let socket = null;
         let espConnected = false;
         const DWELL_TIME = 1000; // 1 second as per thesis
@@ -558,7 +558,7 @@
         function initESP32() {
             const espStatus = document.getElementById('esp-status');
             
-            if (ESP32_IP === "192.168.1.10" && !window.location.hostname.includes('192.168')) {
+        if (ESP32_IP === "192.168.4.1" && !window.location.hostname.includes('192.168')) {
                 console.log("Using mouse simulation mode");
                 espStatus.style.color = '#FFA500';
                 espStatus.textContent = '◑';
