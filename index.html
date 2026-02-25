@@ -448,7 +448,7 @@
                          position="-3.2 0.5 -3" 
                          data-project="battle-of-quinga"
                          data-color="#FF6B6B">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF6B6B" data-original-color="#FF6B6B"></a-box>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF6B6B"></a-box>
                     <a-text value="⚔️" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
                     <a-text value="Battle of" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
                     <a-text value="Quinga" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
@@ -460,7 +460,7 @@
                          position="-1.6 0.5 -2.5" 
                          data-project="bulacan-museum"
                          data-color="#4ECDC4">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#4ECDC4" data-original-color="#4ECDC4"></a-box>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#4ECDC4"></a-box>
                     <a-text value="🏛️" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
                     <a-text value="Hiyas ng" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
                     <a-text value="Bulacan" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
@@ -472,7 +472,7 @@
                          position="0 0.5 -2.2" 
                          data-project="del-pilar-shrine"
                          data-color="#FFD700">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#FFD700" data-original-color="#FFD700"></a-box>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FFD700"></a-box>
                     <a-text value="🗽" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
                     <a-text value="Del Pilar" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
                     <a-text value="Shrine" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
@@ -484,7 +484,7 @@
                          position="1.6 0.5 -2.5" 
                          data-project="barasoain-museum"
                          data-color="#FF8E53">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF8E53" data-original-color="#FF8E53"></a-box>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#FF8E53"></a-box>
                     <a-text value="⛪" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
                     <a-text value="Barasoain" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
                     <a-text value="Museum" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
@@ -496,7 +496,7 @@
                          position="3.2 0.5 -3" 
                          data-project="casa-real-shrine"
                          data-color="#9B59B6">
-                    <a-box width="1.2" height="1.4" depth="0.15" color="#9B59B6" data-original-color="#9B59B6"></a-box>
+                    <a-box width="1.2" height="1.4" depth="0.15" color="#9B59B6"></a-box>
                     <a-text value="🏰" position="0 0.35 0.1" align="center" color="white" scale="1.2 1.2 1"></a-text>
                     <a-text value="Casa Real" position="0 0 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
                     <a-text value="Shrine" position="0 -0.25 0.1" align="center" color="white" scale="0.8 0.8 1"></a-text>
@@ -530,7 +530,9 @@
         };
 
         // ========== ESP32 CONFIG ==========
-        const ESP32_IP = "192.168.4.1"; // CHANGE THIS TO YOUR ESP32's IP
+        // 🔴 IMPORTANT: CHANGE THIS TO YOUR ESP32's IP ADDRESS
+        // Get it from Serial Monitor after ESP32 connects to WiFi
+        const ESP32_IP = "192.168.1.15"; // Replace with your ESP32's IP
         let socket = null;
         let espConnected = false;
         const DWELL_TIME = 1000; // 1 second as per thesis
@@ -539,7 +541,7 @@
         const espCursor = document.getElementById('esp-cursor');
         let activeDwellTimer = null;
         let currentHoverTarget = null;
-        let lastESPData = { x: 160, y: 120 }; // Default center
+        let lastESPData = { x: 160, y: 120, timestamp: 0 };
 
         // ========== PERFORMANCE METRICS ==========
         let frameCount = 0;
@@ -558,8 +560,9 @@
         function initESP32() {
             const espStatus = document.getElementById('esp-status');
             
-        if (ESP32_IP === "192.168.4.1" && !window.location.hostname.includes('192.168')) {
-                console.log("Using mouse simulation mode");
+            // For testing without ESP32 (mouse simulation)
+            if (ESP32_IP === "192.168.1.15" && !window.location.hostname.includes('192.168')) {
+                console.log("Using mouse simulation mode for testing");
                 espStatus.style.color = '#FFA500';
                 espStatus.textContent = '◑';
                 document.getElementById('metrics-badge').textContent = 'SIMULATION • MOUSE';
@@ -576,6 +579,7 @@
 
             // Real ESP32 WebSocket connection
             try {
+                console.log(`Connecting to ESP32 at ws://${ESP32_IP}:81`);
                 socket = new WebSocket(`ws://${ESP32_IP}:81`);
 
                 socket.onopen = () => {
@@ -587,31 +591,45 @@
                     document.getElementById('metrics-badge').textContent = 'ESP32 • ONLINE';
                 };
 
+                // 🔴 FIXED: Handle CSV format from ESP32
                 socket.onmessage = (event) => {
                     try {
-                        const data = JSON.parse(event.data);
+                        // ESP32 sends: "x,y" (CSV format)
+                        const data = event.data;
                         
-                        // Map ESP32 coordinates (320x240) to screen
-                        const screenX = (data.x / 320) * window.innerWidth;
-                        const screenY = (data.y / 240) * window.innerHeight;
-                        
-                        // Update cursor position
-                        espCursor.style.left = screenX + 'px';
-                        espCursor.style.top = screenY + 'px';
-                        
-                        // Check for hover targets
-                        checkHoverTarget(screenX, screenY);
-                        
-                        // Calculate latency if timestamp provided
-                        if (data.timestamp) {
-                            const latency = performance.now() - data.timestamp;
-                            if (latency < 500) {
-                                latencyHistory.push(latency);
-                                if (latencyHistory.length > 30) latencyHistory.shift();
+                        // Split the CSV string
+                        const parts = data.split(',');
+                        if (parts.length >= 2) {
+                            const x = parseInt(parts[0]);
+                            const y = parseInt(parts[1]);
+                            
+                            // Check if values are valid numbers
+                            if (!isNaN(x) && !isNaN(y)) {
+                                // Map ESP32 coordinates (320x240) to screen
+                                const screenX = (x / 320) * window.innerWidth;
+                                const screenY = (y / 240) * window.innerHeight;
+                                
+                                // Update cursor position
+                                espCursor.style.left = screenX + 'px';
+                                espCursor.style.top = screenY + 'px';
+                                
+                                // Check for hover targets
+                                checkHoverTarget(screenX, screenY);
+                                
+                                // Calculate latency
+                                const now = performance.now();
+                                if (lastESPData.timestamp > 0) {
+                                    const latency = now - lastESPData.timestamp;
+                                    if (latency < 500) {
+                                        latencyHistory.push(latency);
+                                        if (latencyHistory.length > 30) latencyHistory.shift();
+                                    }
+                                }
+                                lastESPData = { x, y, timestamp: now };
                             }
                         }
                     } catch (e) {
-                        console.warn("Error parsing ESP data:", e);
+                        console.warn("Error parsing ESP data:", e, "Raw data:", event.data);
                     }
                 };
 
@@ -627,6 +645,14 @@
                     espStatus.style.color = '#FF6B6B';
                     espStatus.textContent = '○';
                     document.getElementById('metrics-badge').textContent = 'ESP32 • OFFLINE';
+                    
+                    // Try to reconnect after 3 seconds
+                    setTimeout(() => {
+                        if (!socket || socket.readyState === WebSocket.CLOSED) {
+                            console.log("Reconnecting to ESP32...");
+                            initESP32();
+                        }
+                    }, 3000);
                 };
             } catch (e) {
                 console.warn("Failed to connect ESP32:", e);
@@ -680,9 +706,10 @@
                         // Visual feedback flash
                         const box = targetEl.querySelector('a-box');
                         if (box) {
+                            const originalColor = box.getAttribute('color');
                             box.setAttribute('color', '#FFFFFF');
                             setTimeout(() => {
-                                box.setAttribute('color', targetEl.getAttribute('data-color'));
+                                box.setAttribute('color', originalColor);
                             }, 200);
                         }
                         
@@ -785,9 +812,6 @@
             frameTimes.push(frameTime);
             if (frameTimes.length > 60) frameTimes.shift();
             
-            const avgFrameTime = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
-            
-            // If ESP connected, use real latency, otherwise simulate
             if (latencyHistory.length > 0) {
                 const avgLatency = Math.round(latencyHistory.reduce((a, b) => a + b, 0) / latencyHistory.length);
                 document.getElementById('latency-value').textContent = avgLatency + ' ms';
@@ -796,10 +820,6 @@
                 if (avgLatency < 150) latencyEl.className = 'metric-value success';
                 else if (avgLatency < 200) latencyEl.className = 'metric-value normal';
                 else latencyEl.className = 'metric-value warning';
-            } else {
-                // Simulated latency for demo
-                const simLatency = Math.round(avgFrameTime * 2 + 20);
-                document.getElementById('latency-value').textContent = simLatency + ' ms';
             }
             
             lastFrameTime = now;
