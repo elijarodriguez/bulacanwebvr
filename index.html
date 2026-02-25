@@ -532,7 +532,7 @@
         // ========== ESP32 CONFIG ==========
         // 🔴 IMPORTANT: CHANGE THIS TO YOUR ESP32's IP ADDRESS
         // Get it from Serial Monitor after ESP32 connects to WiFi
-        const ESP32_IP = "192.168.1.15"; // Replace with your ESP32's IP
+        const ESP32_IP = "192.168.4.1"; // Replace with your ESP32's IP
         let socket = null;
         let espConnected = false;
         const DWELL_TIME = 1000; // 1 second as per thesis
@@ -561,7 +561,7 @@
             const espStatus = document.getElementById('esp-status');
             
             // For testing without ESP32 (mouse simulation)
-            if (ESP32_IP === "192.168.1.15" && !window.location.hostname.includes('192.168')) {
+            if (ESP32_IP === "192.168.4.1" && !window.location.hostname.includes('192.168')) {
                 console.log("Using mouse simulation mode for testing");
                 espStatus.style.color = '#FFA500';
                 espStatus.textContent = '◑';
