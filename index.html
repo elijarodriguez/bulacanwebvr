@@ -3,21 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VR Heritage · Cardboard Fisheye</title>
+    <title>VR Heritage · Bulacan Historical Sites</title>
     
-    <!-- A-Frame -->
+    <!-- A-Frame 1.6.0 -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     
-    <!-- THREE.js StereoEffect for fisheye -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/effects/StereoEffect.js"></script>
-    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { overflow: hidden; background: #000; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* ===== LOADING SCREEN ===== */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a1929, #1a2f3f);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            transition: opacity 0.5s;
+        }
+        
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255,107,107,0.2);
+            border-top: 5px solid #FF6B6B;
+            border-right: 5px solid #4ECDC4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* ===== ESP32 CURSOR ===== */
         #esp-cursor {
             position: fixed;
-            width: 40px; height: 40px;
+            width: 40px;
+            height: 40px;
             background: rgba(255, 107, 107, 0.7);
             border: 4px solid #FF6B6B;
             border-radius: 50%;
@@ -26,32 +68,93 @@
             z-index: 99999;
             transform: translate(-50%, -50%);
             display: none;
-            transition: all 0.1s;
+            transition: all 0.1s ease;
         }
         
         #esp-cursor::before {
             content: '';
             position: absolute;
-            top: 50%; left: 50%;
-            width: 8px; height: 8px;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
             background: white;
             border-radius: 50%;
             transform: translate(-50%, -50%);
         }
         
+        #esp-cursor::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
         #esp-cursor.hovering {
-            width: 60px; height: 60px;
+            width: 60px;
+            height: 60px;
             background: rgba(255, 215, 0, 0.7);
             border-color: #FFD700;
             box-shadow: 0 0 40px #FFD700;
         }
         
-        #cardboard-toggle {
+        /* ===== UI ELEMENTS ===== */
+        #status-panel {
             position: fixed;
-            bottom: 100px; right: 20px;
-            width: 70px; height: 70px;
-            border-radius: 35px;
+            top: 20px;
+            right: 20px;
+            background: rgba(10, 25, 41, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 30px;
+            padding: 12px 24px;
+            color: white;
+            z-index: 1000;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border-left: 3px solid #4ECDC4;
+        }
+        
+        .status-led {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #666;
+            box-shadow: 0 0 10px currentColor;
+            margin-right: 8px;
+        }
+        
+        .status-led.online {
             background: #4ECDC4;
+            box-shadow: 0 0 15px #4ECDC4;
+        }
+        
+        .status-led.error {
+            background: #FF6B6B;
+            box-shadow: 0 0 15px #FF6B6B;
+        }
+        
+        #vr-toggle {
+            position: fixed;
+            bottom: 120px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            border-radius: 40px;
+            background: linear-gradient(145deg, #4ECDC4, #45b7b0);
             border: 3px solid white;
             box-shadow: 0 0 30px #4ECDC4;
             z-index: 10000;
@@ -61,173 +164,373 @@
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 10px;
+            font-size: 12px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        #cardboard-toggle.active {
-            background: #FF6B6B;
+        #vr-toggle.active {
+            background: linear-gradient(145deg, #FF6B6B, #ff5252);
+            box-shadow: 0 0 30px #FF6B6B;
         }
         
-        #status {
-            position: fixed;
-            top: 20px; right: 20px;
-            background: rgba(0,0,0,0.8);
-            color: #4ECDC4;
-            padding: 8px 16px;
-            border-radius: 20px;
-            z-index: 1000;
+        #vr-toggle span:first-child {
+            font-size: 32px;
+            margin-bottom: 2px;
         }
         
         #instructions {
             position: fixed;
-            bottom: 30px; left: 50%;
+            bottom: 30px;
+            left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
+            background: rgba(10, 25, 41, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            padding: 15px 30px;
             color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
+            font-size: 14px;
             z-index: 100;
+            display: flex;
+            gap: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             border-bottom: 3px solid #FF6B6B;
-            white-space: nowrap;
+            letter-spacing: 0.5px;
+        }
+        
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instruction-icon {
+            font-size: 20px;
         }
         
         #selection-feedback {
             position: fixed;
-            top: 50%; left: 50%;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
             background: #4ECDC4;
             color: white;
             padding: 20px 40px;
             border-radius: 50px;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: bold;
             z-index: 10000;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
-            border: 3px solid white;
+            border: 4px solid white;
+            box-shadow: 0 0 50px #4ECDC4;
+            white-space: nowrap;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
-        #selection-feedback.show { opacity: 1; }
-        
-        /* Fisheye canvas styling */
-        .stereo-mode canvas {
-            width: 50% !important;
-            height: 100% !important;
-            position: absolute !important;
-            top: 0 !important;
-            filter: distort(0.5, 0.5); /* Fisheye effect */
+        #selection-feedback.show {
+            opacity: 1;
         }
         
-        .stereo-mode canvas:first-child {
-            left: 0 !important;
+        #progress-bar {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            width: 200px;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            z-index: 1000;
+            display: none;
         }
         
-        .stereo-mode canvas:last-child {
-            right: 0 !important;
+        #progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #FFD700;
+            transition: width 0.1s linear;
+        }
+        
+        /* VR mode hide UI */
+        body.vr-mode #instructions,
+        body.vr-mode #progress-bar {
+            display: none !important;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            #instructions {
+                bottom: 20px;
+                padding: 10px 20px;
+                font-size: 12px;
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+            
+            #vr-toggle {
+                bottom: 100px;
+                width: 70px;
+                height: 70px;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="status">ESP32: <span id="esp-status">○</span></div>
-    <div id="cardboard-toggle" onclick="toggleCardboard()">
-        <span style="font-size: 24px;">🥽</span>
-        <span>FISHEYE</span>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div style="text-align: center;">
+            <div class="spinner"></div>
+            <h1 style="color: #FF6B6B; margin-bottom: 10px;">VR Heritage Bulacan</h1>
+            <p style="color: #4ECDC4; margin-bottom: 20px;">ESP32 Finger-Tracking System</p>
+            <div id="loading-details" style="color: rgba(255,255,255,0.6); font-size: 14px;">
+                Initializing...
+            </div>
+        </div>
     </div>
-    <div id="instructions">👆 Move finger · Hover 1s to select</div>
+
+    <!-- Status Panel -->
+    <div id="status-panel">
+        <div style="display: flex; align-items: center;">
+            <div class="status-led" id="esp-led"></div>
+            <span>ESP32 <span id="esp-status-text">Connecting</span></span>
+        </div>
+        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <span>📍</span>
+            <span id="selection-counter">0</span>
+        </div>
+    </div>
+
+    <!-- VR Toggle Button -->
+    <div id="vr-toggle" onclick="toggleVR()">
+        <span>🥽</span>
+        <span>VR</span>
+    </div>
+
+    <!-- Progress Bar for Dwell Time -->
+    <div id="progress-bar">
+        <div id="progress-fill"></div>
+    </div>
+
+    <!-- Instructions -->
+    <div id="instructions">
+        <div class="instruction-item">
+            <span class="instruction-icon">👆</span>
+            <span>Move finger to control cursor</span>
+        </div>
+        <div class="instruction-item">
+            <span class="instruction-icon">⏱️</span>
+            <span>Hover 1s to select</span>
+        </div>
+        <div class="instruction-item">
+            <span class="instruction-icon">⌨️</span>
+            <span>Press 1-5</span>
+        </div>
+    </div>
+
+    <!-- Selection Feedback -->
     <div id="selection-feedback"></div>
+
+    <!-- ESP32 Cursor -->
     <div id="esp-cursor"></div>
 
     <!-- A-Frame Scene -->
-    <a-scene id="scene" embedded background="color: #0a1929" vr-mode-ui="enabled: false">
+    <a-scene id="scene" 
+             embedded 
+             background="color: #0a1929"
+             vr-mode-ui="enabled: false"
+             renderer="antialias: true; colorManagement: true;"
+             physics="enabled: false"
+             fog="type: exponential; color: #0a1929">
         
-        <!-- Camera -->
-        <a-entity camera look-controls position="0 1.6 0" id="camera"></a-entity>
+        <!-- Camera with look controls -->
+        <a-entity id="camera" camera look-controls position="0 1.6 0" wasd-controls="enabled: false"></a-entity>
         
-        <!-- Title -->
-        <a-text value="HISTORICAL SITES OF BULACAN" 
-               position="0 2.5 -4" 
-               color="#FF6B6B" 
-               align="center"
-               width="6"></a-text>
+        <!-- Title with glow effect -->
+        <a-entity position="0 2.8 -4">
+            <a-text value="HISTORICAL SITES" 
+                   color="#FF6B6B" 
+                   align="center" 
+                   width="8"
+                   material="shader: flat"
+                   scale="1.5 1.5 1"></a-text>
+            <a-text value="OF BULACAN" 
+                   color="#FF6B6B" 
+                   align="center" 
+                   width="8"
+                   material="shader: flat"
+                   position="0 -0.5 0"
+                   scale="1.5 1.5 1"></a-text>
+        </a-entity>
         
-        <!-- Menu Items -->
-        <a-entity position="0 1 -3">
-            <!-- 1 -->
+        <!-- Subtitle -->
+        <a-text value="ESP32 Finger-Tracking VR" 
+               position="0 1.8 -4" 
+               color="#4ECDC4" 
+               align="center" 
+               width="6"
+               opacity="0.8"></a-text>
+        
+        <!-- Menu Items - Arranged in a semi-circle for better VR viewing -->
+        <a-entity id="menu-container" position="0 1 -2.5">
+            <!-- Battle of Quinga -->
             <a-entity class="menu-item" 
-                     position="-2 0.5 0" 
-                     data-name="Battle of Quinga">
-                <a-box width="0.8" height="0.8" depth="0.2" color="#FF6B6B"></a-box>
-                <a-text value="⚔️" position="0 0.2 0.2" color="white" align="center"></a-text>
-                <a-text value="1" position="0 -0.3 0.2" color="white" align="center"></a-text>
+                     position="-2.2 0.5 -0.5" 
+                     data-site="1"
+                     data-name="Battle of Quinga"
+                     data-color="#FF6B6B"
+                     data-desc="Site of the 1896 battle">
+                <a-box width="0.9" height="0.9" depth="0.2" color="#FF6B6B" 
+                       material="emissive: #330000; emissiveIntensity: 0.3"></a-box>
+                <a-text value="⚔️" position="0 0.25 0.2" color="white" align="center" scale="1.2"></a-text>
+                <a-text value="Battle of" position="0 -0.1 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="Quinga" position="0 -0.4 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="1" position="0 -0.8 0.2" color="white" align="center" opacity="0.5"></a-text>
             </a-entity>
             
-            <!-- 2 -->
+            <!-- Hiyas ng Bulacan -->
             <a-entity class="menu-item" 
-                     position="-1 0.5 0" 
-                     data-name="Hiyas ng Bulacan">
-                <a-box width="0.8" height="0.8" depth="0.2" color="#4ECDC4"></a-box>
-                <a-text value="🏛️" position="0 0.2 0.2" color="white" align="center"></a-text>
-                <a-text value="2" position="0 -0.3 0.2" color="white" align="center"></a-text>
+                     position="-1.1 0.5 -0.2" 
+                     data-site="2"
+                     data-name="Hiyas ng Bulacan"
+                     data-color="#4ECDC4"
+                     data-desc="Provincial Museum">
+                <a-box width="0.9" height="0.9" depth="0.2" color="#4ECDC4"
+                       material="emissive: #004d4d; emissiveIntensity: 0.3"></a-box>
+                <a-text value="🏛️" position="0 0.25 0.2" color="white" align="center" scale="1.2"></a-text>
+                <a-text value="Hiyas ng" position="0 -0.1 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="Bulacan" position="0 -0.4 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="2" position="0 -0.8 0.2" color="white" align="center" opacity="0.5"></a-text>
             </a-entity>
             
-            <!-- 3 -->
+            <!-- Del Pilar Shrine -->
             <a-entity class="menu-item" 
                      position="0 0.5 0" 
-                     data-name="Del Pilar Shrine">
-                <a-box width="0.8" height="0.8" depth="0.2" color="#FFD700"></a-box>
-                <a-text value="🗽" position="0 0.2 0.2" color="white" align="center"></a-text>
-                <a-text value="3" position="0 -0.3 0.2" color="white" align="center"></a-text>
+                     data-site="3"
+                     data-name="Del Pilar Shrine"
+                     data-color="#FFD700"
+                     data-desc="Marcelo H. Del Pilar Shrine">
+                <a-box width="0.9" height="0.9" depth="0.2" color="#FFD700"
+                       material="emissive: #332200; emissiveIntensity: 0.3"></a-box>
+                <a-text value="🗽" position="0 0.25 0.2" color="white" align="center" scale="1.2"></a-text>
+                <a-text value="Del Pilar" position="0 -0.1 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="Shrine" position="0 -0.4 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="3" position="0 -0.8 0.2" color="white" align="center" opacity="0.5"></a-text>
             </a-entity>
             
-            <!-- 4 -->
+            <!-- Barasoain Museum -->
             <a-entity class="menu-item" 
-                     position="1 0.5 0" 
-                     data-name="Barasoain Museum">
-                <a-box width="0.8" height="0.8" depth="0.2" color="#FF8E53"></a-box>
-                <a-text value="⛪" position="0 0.2 0.2" color="white" align="center"></a-text>
-                <a-text value="4" position="0 -0.3 0.2" color="white" align="center"></a-text>
+                     position="1.1 0.5 -0.2" 
+                     data-site="4"
+                     data-name="Barasoain Museum"
+                     data-color="#FF8E53"
+                     data-desc="Ecclesiastical Museum">
+                <a-box width="0.9" height="0.9" depth="0.2" color="#FF8E53"
+                       material="emissive: #332200; emissiveIntensity: 0.3"></a-box>
+                <a-text value="⛪" position="0 0.25 0.2" color="white" align="center" scale="1.2"></a-text>
+                <a-text value="Barasoain" position="0 -0.1 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="Museum" position="0 -0.4 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="4" position="0 -0.8 0.2" color="white" align="center" opacity="0.5"></a-text>
             </a-entity>
             
-            <!-- 5 -->
+            <!-- Casa Real -->
             <a-entity class="menu-item" 
-                     position="2 0.5 0" 
-                     data-name="Casa Real">
-                <a-box width="0.8" height="0.8" depth="0.2" color="#9B59B6"></a-box>
-                <a-text value="🏰" position="0 0.2 0.2" color="white" align="center"></a-text>
-                <a-text value="5" position="0 -0.3 0.2" color="white" align="center"></a-text>
+                     position="2.2 0.5 -0.5" 
+                     data-site="5"
+                     data-name="Casa Real Shrine"
+                     data-color="#9B59B6"
+                     data-desc="Historic Government House">
+                <a-box width="0.9" height="0.9" depth="0.2" color="#9B59B6"
+                       material="emissive: #1a0033; emissiveIntensity: 0.3"></a-box>
+                <a-text value="🏰" position="0 0.25 0.2" color="white" align="center" scale="1.2"></a-text>
+                <a-text value="Casa Real" position="0 -0.1 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="Shrine" position="0 -0.4 0.2" color="white" align="center" scale="0.6"></a-text>
+                <a-text value="5" position="0 -0.8 0.2" color="white" align="center" opacity="0.5"></a-text>
             </a-entity>
         </a-entity>
         
-        <!-- Floor -->
-        <a-grid position="0 -0.5 -3" width="8" height="8" color="#4ECDC4" opacity="0.3"></a-grid>
+        <!-- Decorative floor grid -->
+        <a-grid position="0 -0.5 -2.5" 
+                width="10" 
+                height="10" 
+                color="#4ECDC4" 
+                opacity="0.2"></a-grid>
         
-        <!-- Lights -->
+        <!-- Ambient and directional lights -->
         <a-light type="ambient" intensity="1.2"></a-light>
-        <a-light type="directional" position="2 4 3"></a-light>
+        <a-light type="directional" position="5 5 5" intensity="0.8"></a-light>
+        <a-light type="directional" position="-5 3 5" intensity="0.4" color="#FF6B6B"></a-light>
+        
+        <!-- Floating particles for ambiance -->
+        <a-entity position="0 2 -3">
+            <a-sphere radius="0.1" color="#FF6B6B" 
+                      animation="property: position; to: 1 2 -2; dur: 4000; loop: true; dir: alternate"></a-sphere>
+            <a-sphere radius="0.1" color="#4ECDC4" 
+                      animation="property: position; to: -1 3 -3; dur: 5000; loop: true; dir: alternate"></a-sphere>
+        </a-entity>
     </a-scene>
 
     <script>
-        // ========== ESP32 CONNECTION ==========
-        const ESP32_IP = "192.168.1.10";
-        let socket;
+        // ========== CONFIGURATION ==========
+        const ESP32_IP = "192.168.137.97";
+        const DWELL_TIME = 1000; // 1 second
+        
+        // Site data
+        const sites = {
+            '1': { name: 'Battle of Quinga', path: 'battle-of-quinga/index.html', color: '#FF6B6B' },
+            '2': { name: 'Hiyas ng Bulacan Museum', path: 'hiyas-ng-bulacan-museum/index.html', color: '#4ECDC4' },
+            '3': { name: 'Del Pilar Shrine', path: 'del-pilar-shrine/index.html', color: '#FFD700' },
+            '4': { name: 'Barasoain Museum', path: 'barasoain-museum/index.html', color: '#FF8E53' },
+            '5': { name: 'Casa Real Shrine', path: 'casa-real-shrine/index.html', color: '#9B59B6' }
+        };
+
+        // ========== STATE ==========
+        let socket = null;
         let espConnected = false;
-        let hoverTimer;
+        let hoverTimer = null;
         let currentTarget = null;
+        let hoverStartTime = 0;
+        let selectionCount = 0;
+        let vrMode = false;
         
+        // ========== DOM ELEMENTS ==========
         const cursor = document.getElementById('esp-cursor');
-        const espStatus = document.getElementById('esp-status');
+        const espLed = document.getElementById('esp-led');
+        const espStatusText = document.getElementById('esp-status-text');
+        const loadingScreen = document.getElementById('loading-screen');
+        const loadingDetails = document.getElementById('loading-details');
+        const selectionFeedback = document.getElementById('selection-feedback');
+        const selectionCounter = document.getElementById('selection-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const progressFill = document.getElementById('progress-fill');
+        const vrToggle = document.getElementById('vr-toggle');
         
+        // ========== ESP32 CONNECTION ==========
         function connectESP32() {
+            loadingDetails.textContent = 'Connecting to ESP32...';
+            
             try {
-                socket = new WebSocket("ws://" + ESP32_IP + ":81");
+                socket = new WebSocket(`ws://${ESP32_IP}:81`);
                 
                 socket.onopen = () => {
-                    console.log("ESP32 Connected");
-                    cursor.style.display = 'block';
+                    console.log('✅ ESP32 Connected');
                     espConnected = true;
-                    espStatus.innerHTML = '●';
-                    espStatus.style.color = '#4ECDC4';
+                    updateESPStatus(true);
+                    cursor.style.display = 'block';
+                    loadingDetails.textContent = 'ESP32 Connected!';
+                    
+                    // Hide loading screen after 1 second
+                    setTimeout(() => {
+                        loadingScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                        }, 500);
+                    }, 1000);
                 };
                 
                 socket.onmessage = (event) => {
@@ -242,140 +545,201 @@
                             
                             checkHover(screenX, screenY);
                         }
-                    } catch(e) {}
+                    } catch(e) {
+                        console.warn('Error parsing ESP32 data:', e);
+                    }
+                };
+                
+                socket.onerror = () => {
+                    console.log('❌ ESP32 Error');
+                    updateESPStatus(false);
                 };
                 
                 socket.onclose = () => {
-                    espStatus.innerHTML = '○';
-                    espStatus.style.color = '#FF6B6B';
+                    console.log('🔴 ESP32 Disconnected');
                     espConnected = false;
+                    updateESPStatus(false);
+                    cursor.style.display = 'none';
+                    
+                    // Try to reconnect
                     setTimeout(connectESP32, 3000);
                 };
+                
             } catch(e) {
+                console.warn('Connection failed:', e);
                 setTimeout(connectESP32, 3000);
             }
         }
         
+        function updateESPStatus(connected) {
+            if (connected) {
+                espLed.className = 'status-led online';
+                espStatusText.textContent = 'Online';
+                espStatusText.style.color = '#4ECDC4';
+            } else {
+                espLed.className = 'status-led error';
+                espStatusText.textContent = 'Offline';
+                espStatusText.style.color = '#FF6B6B';
+            }
+        }
+        
+        // ========== HOVER DETECTION ==========
         function checkHover(x, y) {
+            // Hide cursor temporarily to detect element behind
             cursor.style.display = 'none';
-            const elem = document.elementFromPoint(x, y);
+            const element = document.elementFromPoint(x, y);
             cursor.style.display = 'block';
             
-            let target = elem;
+            // Find menu item
+            let target = element;
             while (target && !target.classList?.contains('menu-item')) {
                 target = target.parentElement;
             }
             
             if (!target) {
+                // Not hovering a menu item
                 cursor.classList.remove('hovering');
-                if (hoverTimer) clearTimeout(hoverTimer);
-                currentTarget = null;
+                resetHover();
                 return;
             }
             
             cursor.classList.add('hovering');
             
             if (currentTarget !== target) {
-                if (hoverTimer) clearTimeout(hoverTimer);
+                // New target - start hover timer
+                resetHover();
                 currentTarget = target;
+                hoverStartTime = Date.now();
                 
-                hoverTimer = setTimeout(() => {
-                    const name = target.getAttribute('data-name');
-                    if (name) {
-                        showFeedback(name);
-                    }
-                    hoverTimer = null;
-                    currentTarget = null;
-                }, 1000);
-            }
-        }
-        
-        function showFeedback(name) {
-            const feedback = document.getElementById('selection-feedback');
-            feedback.textContent = "📍 " + name;
-            feedback.classList.add('show');
-            setTimeout(() => feedback.classList.remove('show'), 1500);
-        }
-        
-        // ========== CARDBOARD FISHEYE MODE ==========
-        let stereoActive = false;
-        let stereoEffect;
-        let renderer;
-        let scene;
-        let camera;
-        
-        function initStereo() {
-            // Get THREE.js objects from A-Frame
-            const aframeScene = document.querySelector('a-scene');
-            if (!aframeScene) return;
-            
-            aframeScene.addEventListener('loaded', () => {
-                scene = aframeScene.object3D;
-                camera = aframeScene.camera;
-                renderer = aframeScene.renderer;
+                // Show progress bar
+                progressBar.style.display = 'block';
                 
-                if (renderer && camera) {
-                    stereoEffect = new THREE.StereoEffect(renderer);
-                    stereoEffect.setSize(window.innerWidth, window.innerHeight);
+                // Start hover timer
+                hoverTimer = setInterval(() => {
+                    const elapsed = Date.now() - hoverStartTime;
+                    const progress = Math.min((elapsed / DWELL_TIME) * 100, 100);
+                    progressFill.style.width = progress + '%';
                     
-                    // Override render loop for fisheye
-                    const originalRender = aframeScene.render;
-                    aframeScene.render = function() {
-                        if (stereoActive && stereoEffect) {
-                            stereoEffect.render(scene, camera);
-                        } else {
-                            originalRender.call(aframeScene);
+                    if (elapsed >= DWELL_TIME) {
+                        // Hover complete - select
+                        const siteId = target.getAttribute('data-site');
+                        const siteName = target.getAttribute('data-name');
+                        
+                        if (siteId && siteName) {
+                            selectSite(siteId, siteName);
                         }
-                    };
+                        
+                        resetHover();
+                    }
+                }, 50);
+            }
+        }
+        
+        function resetHover() {
+            if (hoverTimer) {
+                clearInterval(hoverTimer);
+                hoverTimer = null;
+            }
+            progressBar.style.display = 'none';
+            progressFill.style.width = '0%';
+            currentTarget = null;
+            cursor.classList.remove('hovering');
+        }
+        
+        function selectSite(siteId, siteName) {
+            // Update counter
+            selectionCount++;
+            selectionCounter.textContent = selectionCount;
+            
+            // Show feedback
+            selectionFeedback.textContent = `📍 ${siteName}`;
+            selectionFeedback.classList.add('show');
+            
+            // Flash the selected box
+            if (currentTarget) {
+                const box = currentTarget.querySelector('a-box');
+                if (box) {
+                    box.setAttribute('material', 'emissive', '#FFFFFF');
+                    setTimeout(() => {
+                        box.setAttribute('material', 'emissive', '#000000');
+                    }, 200);
                 }
-            });
-        }
-        
-        function toggleCardboard() {
-            const btn = document.getElementById('cardboard-toggle');
-            stereoActive = !stereoActive;
-            
-            if (stereoActive) {
-                btn.classList.add('active');
-                btn.innerHTML = '<span style="font-size:24px;">◀▶</span><span>EXIT</span>';
-                document.body.classList.add('stereo-mode');
-                
-                // Force resize for stereo
-                window.dispatchEvent(new Event('resize'));
-            } else {
-                btn.classList.remove('active');
-                btn.innerHTML = '<span style="font-size:24px;">🥽</span><span>FISHEYE</span>';
-                document.body.classList.remove('stereo-mode');
-                
-                window.dispatchEvent(new Event('resize'));
             }
-        }
-        
-        // ========== INIT ==========
-        window.onload = () => {
-            setTimeout(connectESP32, 2000);
-            initStereo();
             
-            // Hide loading (simple)
             setTimeout(() => {
-                const loading = document.createElement('div');
-                // Add if you want loading screen
-            }, 2000);
-        };
+                selectionFeedback.classList.remove('show');
+            }, 1500);
+            
+            // Navigate to site
+            setTimeout(() => {
+                window.location.href = sites[siteId].path;
+            }, 500);
+        }
         
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            const num = parseInt(e.key);
-            const names = [
-                'Battle of Quinga',
-                'Hiyas ng Bulacan',
-                'Del Pilar Shrine',
-                'Barasoain Museum',
-                'Casa Real'
-            ];
-            if (num >= 1 && num <= 5) {
-                showFeedback(names[num-1]);
+        // ========== VR MODE TOGGLE ==========
+        function toggleVR() {
+            vrMode = !vrMode;
+            
+            if (vrMode) {
+                // Enter VR mode
+                vrToggle.classList.add('active');
+                vrToggle.innerHTML = '<span>◀▶</span><span>EXIT</span>';
+                document.body.classList.add('vr-mode');
+                
+                // Request VR mode from A-Frame
+                const scene = document.getElementById('scene');
+                if (scene) {
+                    scene.enterVR();
+                }
+            } else {
+                // Exit VR mode
+                vrToggle.classList.remove('active');
+                vrToggle.innerHTML = '<span>🥽</span><span>VR</span>';
+                document.body.classList.remove('vr-mode');
+                
+                // Exit VR mode
+                const scene = document.getElementById('scene');
+                if (scene) {
+                    scene.exitVR();
+                }
             }
+        }
+        
+        // ========== KEYBOARD SHORTCUTS ==========
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+            if (key >= '1' && key <= '5') {
+                const siteId = key;
+                const site = sites[siteId];
+                if (site) {
+                    selectSite(siteId, site.name);
+                }
+            }
+        });
+        
+        // ========== INITIALIZATION ==========
+        window.addEventListener('load', () => {
+            // Start ESP32 connection
+            setTimeout(connectESP32, 2000);
+            
+            // Handle VR mode events
+            const scene = document.getElementById('scene');
+            scene.addEventListener('enter-vr', () => {
+                vrMode = true;
+                vrToggle.classList.add('active');
+                vrToggle.innerHTML = '<span>◀▶</span><span>EXIT</span>';
+                document.body.classList.add('vr-mode');
+            });
+            
+            scene.addEventListener('exit-vr', () => {
+                vrMode = false;
+                vrToggle.classList.remove('active');
+                vrToggle.innerHTML = '<span>🥽</span><span>VR</span>';
+                document.body.classList.remove('vr-mode');
+            });
+            
+            // Clean up on window leave
+            window.addEventListener('mouseleave', resetHover);
         });
     </script>
 </body>
