@@ -585,67 +585,7 @@
                 });
             }
 
-            createSceneDots() {
-                const sceneSelector = document.getElementById('scene-selector');
-                this.scenes.forEach((scene, index) => {
-                    const dot = document.createElement('div');
-                    dot.className = `scene-dot ${index === 0 ? 'active' : ''}`;
-                    dot.dataset.index = index;
-                    dot.title = scene.title;
-                    
-                    dot.addEventListener('click', () => {
-                        this.changeScene(index, true);
-                    });
-                    
-                    sceneSelector.appendChild(dot);
-                });
-            }
-
-            setupNavigationControls() {
-                // Previous button
-                document.getElementById('prev-btn').addEventListener('click', () => {
-                    if (this.currentSceneIndex > 0) {
-                        this.changeScene(this.currentSceneIndex - 1, true);
-                    }
-                });
-
-                // Next button
-                document.getElementById('next-btn').addEventListener('click', () => {
-                    if (this.currentSceneIndex < this.scenes.length - 1) {
-                        this.changeScene(this.currentSceneIndex + 1, true);
-                    }
-                });
-
-                // Keyboard navigation
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'ArrowLeft' && this.currentSceneIndex > 0) {
-                        this.changeScene(this.currentSceneIndex - 1, true);
-                    }
-                    if (e.key === 'ArrowRight' && this.currentSceneIndex < this.scenes.length - 1) {
-                        this.changeScene(this.currentSceneIndex + 1, true);
-                    }
-                });
-
-                // Mobile swipe
-                let touchStartX = 0;
-                document.addEventListener('touchstart', (e) => {
-                    touchStartX = e.touches[0].clientX;
-                });
-                
-                document.addEventListener('touchend', (e) => {
-                    const touchEndX = e.changedTouches[0].clientX;
-                    const diff = touchStartX - touchEndX;
-                    
-                    if (Math.abs(diff) > 60) {
-                        if (diff > 0 && this.currentSceneIndex < this.scenes.length - 1) {
-                            this.changeScene(this.currentSceneIndex + 1, true);
-                        } else if (diff < 0 && this.currentSceneIndex > 0) {
-                            this.changeScene(this.currentSceneIndex - 1, true);
-                        }
-                    }
-                });
-            }
-
+    
             changeScene(index, recordVisit = true) {
                 if (index < 0 || index >= this.scenes.length) return;
                 
