@@ -3,1099 +3,597 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VR Heritage · Bulacan Historical Sites · Main Menu</title>
-    <!-- A-Frame for VR -->
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-
+    
+    <!-- Cache Prevention -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <title>VR Heritage · Bulacan Historical Sites</title>
+    
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* RESET & BASE - SAME SIMPLE STYLE AS DEL PILAR SHRINE */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden; 
+            background: #000;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* METRICS PANEL - SIMPLE STYLE */
+        #metrics-panel {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+            width: 280px;
+            border: 1px solid #444;
+            backdrop-filter: blur(5px);
         }
 
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #000;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #333;
         }
 
-        /* ===== LOADING SCREEN ===== */
-        #loading-screen {
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #aaa;
+        }
+
+        .metric-value {
+            color: white;
+            font-weight: bold;
+        }
+        
+        /* SITE INFO - SIMPLE STYLE */
+        #site-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: gold;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10000;
+            border: 1px solid gold;
+            backdrop-filter: blur(5px);
+        }
+        
+        /* BACK BUTTON - SIMPLE STYLE */
+        #back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            z-index: 10000;
+            border: 1px solid #444;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        #back-button:hover {
+            background: rgba(30, 30, 30, 0.9);
+            border-color: gold;
+        }
+        
+        /* SITE SELECTOR - SIMPLE DOTS LIKE DEL PILAR */
+        .site-selector {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .site-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .site-dot.active {
+            background: #FFD700;
+            transform: scale(1.3);
+            box-shadow: 0 0 10px gold;
+        }
+        
+        .site-dot:hover {
+            background: rgba(255, 215, 0, 0.7);
+            transform: scale(1.2);
+        }
+        
+        /* LOADING - SIMPLE STYLE */
+        #loading {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at center, #1a2f3f 0%, #0a1929 100%);
+            background: #000;
+            color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
-            color: white;
-            transition: opacity 0.8s ease;
-        }
-
-        .loading-content {
-            text-align: center;
-            max-width: 500px;
-            padding: 2rem;
-            animation: fadeInUp 1s ease;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .spinner {
-            width: 80px;
-            height: 80px;
-            border: 4px solid rgba(255, 107, 107, 0.2);
-            border-top: 4px solid #FF6B6B;
-            border-right: 4px solid #4ECDC4;
-            border-bottom: 4px solid #FFD700;
-            border-left: 4px solid #9B59B6;
-            border-radius: 50%;
-            animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-            margin: 0 auto 2rem;
-            box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+            z-index: 10001;
+            transition: opacity 0.5s;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
-        .loading-title {
-            font-size: 2.2rem;
-            font-weight: 300;
-            margin-bottom: 1rem;
-            background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #FFD700, #9B59B6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(255,107,107,0.3);
-        }
-
-        /* ===== PERFORMANCE METRICS ===== */
-        #metrics-panel {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(10, 25, 41, 0.85);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 15px 20px;
-            color: #fff;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-            z-index: 1000;
-            min-width: 260px;
-            border-left: 4px solid #FF6B6B;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: slideInLeft 0.5s ease;
-        }
-
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .metrics-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .metrics-title {
-            color: #FF6B6B;
-            font-size: 14px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .metrics-badge {
-            background: rgba(78,205,196,0.2);
-            color: #4ECDC4;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-        }
-
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-
-        .metric-label {
-            color: rgba(255,255,255,0.7);
-        }
-
-        .metric-value {
-            color: #FFD700;
-            font-weight: bold;
-        }
-
-        .progress-container {
-            margin-bottom: 8px;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #FFD700, #FF6B6B);
-            transition: width 0.1s linear;
-        }
-
-        .metrics-footer {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 8px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.5);
-            font-size: 11px;
-        }
-
-        /* ===== 2D CURSOR ===== */
-        #esp-cursor-2d {
-            position: fixed;
-            width: 70px;
-            height: 70px;
-            pointer-events: none;
-            z-index: 99999;
-            transform: translate(-50%, -50%);
-            display: none;
-            filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8));
-        }
-
-        #cursor-ring-2d {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 4px solid #FF6B6B;
-            border-radius: 50%;
-            box-shadow: 0 0 40px rgba(255, 107, 107, 0.9);
-            animation: cursorPulse 2s infinite;
-        }
-
-        @keyframes cursorPulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.15); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        #cursor-dot-2d {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 30px white;
-            animation: dotGlow 1.5s infinite;
-        }
-
-        @keyframes dotGlow {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-        #cursor-progress-2d {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 4px solid transparent;
-            border-top-color: #FFD700;
-            border-right-color: #FFD700;
-            transform: rotate(0deg);
-            filter: drop-shadow(0 0 15px #FFD700);
-            transition: transform 0.1s linear;
-        }
-
-        #esp-cursor-2d.hovering #cursor-ring-2d {
-            border-color: #FFD700;
-            box-shadow: 0 0 50px #FFD700;
-        }
-
-        /* ===== UI ELEMENTS ===== */
-        #instructions {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(10, 25, 41, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 60px;
-            color: white;
-            padding: 15px 30px;
-            font-size: 15px;
-            z-index: 100;
-            display: flex;
-            gap: 40px;
-            border-bottom: 4px solid #FF6B6B;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            animation: slideInUp 0.5s ease;
-        }
-
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translate(-50%, 30px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
-        }
-
-        .instruction-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .instruction-icon {
-            font-size: 24px;
-            filter: drop-shadow(0 0 10px #FF6B6B);
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
-        #control-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(10, 25, 41, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 60px;
-            padding: 12px 24px;
-            color: white;
-            z-index: 1000;
-            display: flex;
-            gap: 20px;
-            font-size: 14px;
-            border-right: 4px solid #4ECDC4;
-            cursor: pointer;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
-            animation: slideInRight 0.5s ease;
-        }
-
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        #control-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(78, 205, 196, 0.4);
-            background: rgba(10, 25, 41, 0.95);
-        }
-
-        .toggle-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #4ECDC4;
-            box-shadow: 0 0 20px #4ECDC4;
-            margin-right: 8px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        #selection-feedback {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(135deg, #4ECDC4, #45b7b0);
-            color: white;
-            padding: 20px 40px;
-            border-radius: 50px;
-            font-size: 22px;
-            font-weight: bold;
-            z-index: 10000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            border: 3px solid white;
-            box-shadow: 0 0 60px rgba(78, 205, 196, 0.8);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            white-space: nowrap;
-        }
-
-        #selection-feedback.show { 
-            opacity: 1;
-            animation: feedbackPop 0.3s ease;
-        }
-
-        @keyframes feedbackPop {
-            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
-        /* Hide UI in VR mode */
-        body.vr-mode #instructions,
-        body.vr-mode #control-toggle,
-        body.vr-mode #metrics-panel,
-        body.vr-mode #esp-cursor-2d {
-            display: none !important;
-        }
-
-        .a-enter-vr-button {
-            bottom: 120px !important;
-            right: 20px !important;
-            background: linear-gradient(135deg, #4ECDC4, #45b7b0) !important;
-            border: 3px solid white !important;
-            width: 70px !important;
-            height: 70px !important;
-            border-radius: 35px !important;
-            z-index: 10000 !important;
-            box-shadow: 0 0 30px #4ECDC4 !important;
-            transition: all 0.3s ease !important;
-            animation: pulse 2s infinite !important;
-        }
-
-        .a-enter-vr-button:hover {
-            transform: scale(1.1) !important;
-            box-shadow: 0 0 40px #4ECDC4 !important;
-        }
-
-        .a-enter-vr-button::after {
-            content: "VR" !important;
-            color: white !important;
-            font-size: 14px !important;
-            font-weight: bold !important;
-        }
-
+        
+        /* MOBILE OPTIMIZATION */
         @media (max-width: 768px) {
             #metrics-panel {
-                top: 10px;
-                left: 10px;
+                width: 250px;
+                font-size: 11px;
                 padding: 12px;
-                min-width: 220px;
-            }
-
-            #instructions {
-                bottom: 20px;
-                padding: 12px 20px;
-                font-size: 13px;
-                gap: 20px;
-                flex-wrap: wrap;
             }
             
-            .a-enter-vr-button {
-                bottom: 100px !important;
-                width: 60px !important;
-                height: 60px !important;
+            #site-info {
+                top: 15px;
+                font-size: 13px;
+                padding: 8px 16px;
             }
+            
+            .site-selector {
+                bottom: 80px;
+            }
+            
+            .site-dot {
+                width: 8px;
+                height: 8px;
+            }
+            
+            #back-button {
+                bottom: 15px;
+                left: 15px;
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+        
+        /* CURSOR STYLING */
+        a-cursor {
+            cursor: pointer;
+        }
+        
+        /* MENU OPTION STYLES - SIMPLE AND CLEAN */
+        .menu-option text {
+            text-shadow: 1px 1px 2px black;
+        }
+        
+        .menu-option:hover {
+            cursor: pointer;
         }
     </style>
 </head>
-
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <h1 class="loading-title">VR Heritage Bulacan</h1>
-            <p style="font-size: 1.2rem; opacity: 0.9; color: #4ECDC4;">Historical Sites of the Philippines</p>
-            <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 20px;">Hover 1 second to explore</p>
-        </div>
-    </div>
-
-    <!-- Metrics Panel -->
+    <!-- METRICS PANEL - SIMPLE LIKE DEL PILAR -->
     <div id="metrics-panel">
-        <div class="metrics-header">
-            <span class="metrics-title">📍 EXPLORER</span>
-            <span class="metrics-badge" id="esp-badge">ESP32 • CONNECTING</span>
+        <h3 style="color: gold; margin-top: 0; margin-bottom: 5px;">📊 Session Data</h3>
+
+        <div class="metric">
+            <span class="metric-label">FPS:</span>
+            <span id="fps-value" class="metric-value">--</span>
         </div>
-        
-        <div class="progress-container">
-            <div class="progress-header">
-                <span class="metric-label">Dwell Progress</span>
-                <span id="dwell-progress" class="metric-value">0%</span>
-            </div>
-            <div class="progress-bar">
-                <div id="progress-fill" class="progress-fill"></div>
-            </div>
+
+        <div class="metric">
+            <span class="metric-label">Session:</span>
+            <span id="session-time" class="metric-value">00:00</span>
         </div>
-        
-        <div class="metric-row">
-            <span class="metric-label">Hover Target</span>
-            <span id="hover-target" class="metric-value" style="color: #4ECDC4;">None</span>
+
+        <div class="metric">
+            <span class="metric-label">Selections:</span>
+            <span id="selection-count" class="metric-value">0</span>
         </div>
-        
-        <div class="metric-row">
-            <span class="metric-label">Selections</span>
-            <span id="selection-count" class="metric-value" style="color: #FFD700;">0</span>
+
+        <div class="metric">
+            <span class="metric-label">Current:</span>
+            <span id="current-site" class="metric-value">Del Pilar</span>
         </div>
-        
-        <div class="metrics-footer">
-            <span id="session-time">00:00</span>
-            <span>⚡ Dwell: 1.0s</span>
-        </div>
+
+        <button onclick="exportData()" style="
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        ">
+            📥 Export Data
+        </button>
     </div>
-
-    <!-- Control Toggle -->
-    <div id="control-toggle" onclick="toggleControlInfo()">
-        <div style="display: flex; align-items: center;">
-            <span class="toggle-indicator"></span>
-            <span style="font-weight: 500;">ESP32 <span id="esp-status" style="font-weight: bold;">○</span></span>
-        </div>
-        <div style="color: #FFD700;">⚡ 1.0s</div>
+    
+    <!-- SITE INFO - SIMPLE LIKE DEL PILAR -->
+    <div id="site-info">
+        <span id="site-name">📍 Marcelo H. Del Pilar Shrine</span>
     </div>
-
-    <!-- Instructions -->
-    <div id="instructions">
-        <div class="instruction-item">
-            <span class="instruction-icon">👆</span>
-            <span>Move finger to control cursor</span>
-        </div>
-        <div class="instruction-item">
-            <span class="instruction-icon">⏱️</span>
-            <span>Hover 1s to select</span>
-        </div>
+    
+    <!-- BACK BUTTON - SIMPLE LIKE DEL PILAR -->
+    <button id="back-button" onclick="goToMenu()">
+        ↩ Back
+    </button>
+    
+    <!-- LOADING - SIMPLE LIKE DEL PILAR -->
+    <div id="loading">
+        <div style="
+            width: 50px; 
+            height: 50px; 
+            border: 3px solid gold; 
+            border-top: 3px solid transparent; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite;
+        "></div>
+        <div style="margin-top: 20px;">Loading VR Heritage Main Menu...</div>
+        <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Select a historical site to explore</div>
     </div>
-
-    <!-- Selection Feedback -->
-    <div id="selection-feedback"></div>
-
-    <!-- 2D Cursor -->
-    <div id="esp-cursor-2d">
-        <div id="cursor-ring-2d"></div>
-        <div id="cursor-progress-2d"></div>
-        <div id="cursor-dot-2d"></div>
-    </div>
-
-    <!-- VR Scene -->
-    <a-scene id="scene" 
-             vr-mode-ui="enabled: true"
-             background="color: #0a1929"
-             renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
-             fog="type: exponential; color: #0a1929; density: 0.035">
+    
+    <!-- SITE SELECTOR DOTS - LIKE DEL PILAR SCENE SELECTOR -->
+    <div class="site-selector" id="site-selector"></div>
+    
+    <!-- A-FRAME SCENE -->
+    <a-scene cursor="rayOrigin: mouse">
+        <!-- ASSETS (You'll need to create these images) -->
+        <a-assets timeout="30000">
+            <img id="del-pilar-bg" src="images/del-pilar-bg.jpg" crossorigin="anonymous">
+            <img id="battle-quinga-bg" src="images/battle-quinga-bg.jpg" crossorigin="anonymous">
+            <img id="barasoain-bg" src="images/barasoain-bg.jpg" crossorigin="anonymous">
+            <img id="casa-real-bg" src="images/casa-real-bg.jpg" crossorigin="anonymous">
+            <img id="bulacan-museum-bg" src="images/bulacan-museum-bg.jpg" crossorigin="anonymous">
+        </a-assets>
         
-        <!-- Camera with cursor -->
-        <a-entity id="camera" camera look-controls position="0 1.6 0">
-            <!-- 3D Cursor - Enhanced design -->
-            <a-entity id="vr-cursor" position="0 0 -2">
-                <!-- Outer glow ring with pulsing animation -->
-                <a-torus radius="0.16" radius-tubular="0.018" color="#FF6B6B" rotation="90 0 0"
-                         material="emissive: #FF6B6B; emissiveIntensity: 0.8">
-                    <a-animation attribute="scale" 
-                                 to="1.2 1.2 1" 
-                                 dur="1000" 
-                                 direction="alternate" 
-                                 loop="true"></a-animation>
-                </a-torus>
-                
-                <!-- Inner ring -->
-                <a-torus radius="0.1" radius-tubular="0.01" color="#FFFFFF" rotation="90 0 0"
-                         material="emissive: #FFFFFF; emissiveIntensity: 0.3"></a-torus>
-                
-                <!-- Center dot with glow -->
-                <a-sphere radius="0.05" color="#FFFFFF" position="0 0 0"
-                         material="emissive: #FFFFFF; emissiveIntensity: 0.8"></a-sphere>
-                
-                <!-- Progress ring -->
-                <a-torus id="progress-ring-3d" radius="0.19" radius-tubular="0.02" color="#FFD700" 
-                         rotation="90 0 0" visible="false"
-                         material="emissive: #FFD700; emissiveIntensity: 1.2; transparent: true; opacity: 0.9"></a-torus>
-            </a-entity>
-            
-            <!-- Raycaster -->
-            <a-entity id="raycaster" raycaster="objects: .menu-option; far: 10; interval: 50"></a-entity>
+        <!-- SKY - Will be set by JavaScript -->
+        <a-sky id="scene-sky" src="#del-pilar-bg"></a-sky>
+        
+        <!-- CAMERA WITH CURSOR -->
+        <a-entity camera look-controls>
+            <a-cursor 
+                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                fuse="true"
+                fuse-timeout="500">
+            </a-cursor>
         </a-entity>
-
-        <!-- Title with elegant design -->
-        <a-entity position="0 3.2 -5">
-            <a-text value="HISTORICAL SITES" 
-                    color="#FF6B6B" 
-                    align="center"
-                    width="12"
-                    material="shader: flat"
-                    scale="2 2 1"
-                    position="0 0 0"></a-text>
-            <a-text value="OF BULACAN" 
-                    color="#4ECDC4" 
-                    align="center"
-                    width="10"
-                    material="shader: flat"
-                    scale="1.8 1.8 1"
-                    position="0 -0.8 0"></a-text>
-            <a-text value="PHILIPPINES" 
-                    color="#FFD700" 
-                    align="center"
-                    width="8"
-                    material="shader: flat"
-                    scale="1.2 1.2 1"
-                    position="0 -1.6 0"></a-text>
-        </a-entity>
-
-        <!-- Main Menu Container - Beautifully designed cards -->
-        <a-entity id="menu-container" position="0 1.5 -3.5">
+        
+        <!-- MENU CONTAINER - SIMPLE 3D CARDS LIKE DEL PILAR HOTSPOTS -->
+        <a-entity id="menu-container" position="0 1.5 -3">
             
-            <!-- Battle of Quinga - Leftmost -->
-            <a-entity class="menu-option" position="-2.8 0 0" data-project="battle-of-quinga" 
-                      data-name="Battle of Quinga"
-                      data-color="#FF6B6B">
-                <!-- Main card with gradient effect -->
-                <a-box width="1.8" height="2.2" depth="0.3" 
-                       color="#FF6B6B"
-                       material="emissive: #FF6B6B; emissiveIntensity: 0.2; opacity: 0.9">
-                </a-box>
-                
-                <!-- Glow edge -->
-                <a-box width="1.9" height="2.3" depth="0.1" 
-                       position="0 0 -0.2"
-                       color="#FF6B6B"
-                       material="emissive: #FF6B6B; emissiveIntensity: 0.5; transparent: true; opacity: 0.3">
-                </a-box>
-                
-                <!-- Icon - Sword -->
-                <a-text value="⚔️" color="#FFFFFF" align="center" 
-                       position="0 0.8 0.16"
-                       scale="2.5 2.5 1"
-                       material="shader: flat"></a-text>
-                
+            <!-- Battle of Quinga -->
+            <a-entity class="menu-option" position="-2.5 0 0" data-site="battle-quinga" data-name="Battle of Quinga">
+                <!-- Simple ring like Del Pilar hotspots -->
+                <a-ring color="#FF6B6B" radius-inner="0.25" radius-outer="0.35" opacity="0.8"
+                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1200">
+                </a-ring>
+                <!-- Icon -->
+                <a-text value="⚔️" position="0 0.2 0.1" color="white" align="center" scale="2"></a-text>
                 <!-- Title -->
-                <a-text value="BATTLE" color="#FFFFFF" align="center" 
-                       position="0 0.35 0.16"
-                       scale="1 1 1"
-                       material="shader: flat"></a-text>
-                <a-text value="OF" color="#FFFFFF" align="center" opacity="0.9"
-                       position="0 0.05 0.16"
-                       scale="0.8 0.8 1"
-                       material="shader: flat"></a-text>
-                <a-text value="QUINGA" color="#FFFFFF" align="center" weight="bold"
-                       position="0 -0.25 0.16"
-                       scale="1.3 1.3 1"
-                       material="shader: flat"></a-text>
-                
-                <!-- Year -->
-                <a-text value="1896" color="#FFD700" align="center" opacity="0.9"
-                       position="0 -0.85 0.16"
-                       scale="0.7 0.7 1"
-                       material="shader: flat"></a-text>
-                
-                <!-- Hover animation -->
-                <a-animation attribute="position" 
-                            to="-2.8 0.2 0" 
-                            dur="300" 
-                            begin="mouseenter" 
-                            fill="forwards"></a-animation>
-                <a-animation attribute="position" 
-                            to="-2.8 0 0" 
-                            dur="300" 
-                            begin="mouseleave" 
-                            fill="forwards"></a-animation>
+                <a-text value="Battle of" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
+                <a-text value="Quinga" position="0 -0.5 0.1" color="#FF6B6B" align="center" width="2" scale="1.2"></a-text>
+                <!-- Hover effect -->
+                <a-circle color="white" radius="0.3" opacity="0" class="hotspot-hover"></a-circle>
             </a-entity>
-
+            
             <!-- Hiyas ng Bulacan Museum -->
-            <a-entity class="menu-option" position="-1.4 0 0" data-project="bulacan-museum"
-                      data-name="Hiyas ng Bulacan"
-                      data-color="#4ECDC4">
-                <a-box width="1.8" height="2.2" depth="0.3" 
-                       color="#4ECDC4"
-                       material="emissive: #4ECDC4; emissiveIntensity: 0.2; opacity: 0.9">
-                </a-box>
-                
-                <a-box width="1.9" height="2.3" depth="0.1" 
-                       position="0 0 -0.2"
-                       color="#4ECDC4"
-                       material="emissive: #4ECDC4; emissiveIntensity: 0.5; transparent: true; opacity: 0.3">
-                </a-box>
-                
-                <a-text value="🏛️" color="#FFFFFF" align="center" 
-                       position="0 0.8 0.16"
-                       scale="2.5 2.5 1"
-                       material="shader: flat"></a-text>
-                
-                <a-text value="HIYAS NG" color="#FFFFFF" align="center" 
-                       position="0 0.35 0.16"
-                       scale="1 1 1"
-                       material="shader: flat"></a-text>
-                <a-text value="BULACAN" color="#FFFFFF" align="center" weight="bold"
-                       position="0 -0.1 0.16"
-                       scale="1.2 1.2 1"
-                       material="shader: flat"></a-text>
-                <a-text value="MUSEUM" color="#FFFFFF" align="center"
-                       position="0 -0.45 0.16"
-                       scale="0.9 0.9 1"
-                       material="shader: flat"></a-text>
-                
-                <a-text value="1998" color="#FFD700" align="center" opacity="0.9"
-                       position="0 -0.85 0.16"
-                       scale="0.7 0.7 1"
-                       material="shader: flat"></a-text>
-                
-                <a-animation attribute="position" 
-                            to="-1.4 0.2 0" 
-                            dur="300" 
-                            begin="mouseenter" 
-                            fill="forwards"></a-animation>
-                <a-animation attribute="position" 
-                            to="-1.4 0 0" 
-                            dur="300" 
-                            begin="mouseleave" 
-                            fill="forwards"></a-animation>
+            <a-entity class="menu-option" position="-1.2 0 0" data-site="bulacan-museum" data-name="Bulacan Museum">
+                <a-ring color="#4ECDC4" radius-inner="0.25" radius-outer="0.35" opacity="0.8"
+                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1200">
+                </a-ring>
+                <a-text value="🏛️" position="0 0.2 0.1" color="white" align="center" scale="2"></a-text>
+                <a-text value="Hiyas ng" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
+                <a-text value="Bulacan" position="0 -0.5 0.1" color="#4ECDC4" align="center" width="2" scale="1.2"></a-text>
+                <a-circle color="white" radius="0.3" opacity="0" class="hotspot-hover"></a-circle>
             </a-entity>
-
-            <!-- Del Pilar Shrine - Center (Featured) -->
-            <a-entity class="menu-option" position="0 0 0" data-project="del-pilar-shrine"
-                      data-name="Del Pilar Shrine"
-                      data-color="#FFD700">
-                <!-- Larger center card -->
-                <a-box width="2" height="2.4" depth="0.35" 
-                       color="#FFD700"
-                       material="emissive: #FFD700; emissiveIntensity: 0.3; opacity: 0.95">
-                </a-box>
-                
-                <a-box width="2.1" height="2.5" depth="0.12" 
-                       position="0 0 -0.22"
-                       color="#FFD700"
-                       material="emissive: #FFD700; emissiveIntensity: 0.6; transparent: true; opacity: 0.4">
-                </a-box>
-                
-                <!-- Star icon for featured site -->
-                <a-entity position="0 1.1 0.18">
-                    <a-sphere radius="0.15" color="#FFD700" 
-                              material="emissive: #FFD700; emissiveIntensity: 0.8"></a-sphere>
-                    <a-text value="★" color="#FFFFFF" align="center" 
-                           position="0 0 0.1"
-                           scale="2 2 1"></a-text>
-                </a-entity>
-                
-                <a-text value="DEL PILAR" color="#FFFFFF" align="center" weight="bold"
-                       position="0 0.55 0.18"
-                       scale="1.2 1.2 1"
-                       material="shader: flat"></a-text>
-                <a-text value="SHRINE" color="#FFFFFF" align="center" weight="bold"
-                       position="0 0.15 0.18"
-                       scale="1.4 1.4 1"
-                       material="shader: flat"></a-text>
-                <a-text value="Marcelo H." color="#FFFFFF" align="center" opacity="0.9"
-                       position="0 -0.25 0.18"
-                       scale="0.9 0.9 1"
-                       material="shader: flat"></a-text>
-                
-                <a-text value="1850" color="#FFFFFF" align="center" opacity="0.9"
-                       position="0 -0.85 0.18"
-                       scale="0.8 0.8 1"
-                       material="shader: flat"></a-text>
-                
-                <!-- Special animation for featured site -->
-                <a-animation attribute="scale" 
-                            to="1.05 1.05 1.05" 
-                            dur="1200" 
-                            direction="alternate" 
-                            loop="true"
-                            easing="easeInOutSine"></a-animation>
+            
+            <!-- Del Pilar Shrine (Center - Highlighted) -->
+            <a-entity class="menu-option" position="0 0 0" data-site="del-pilar-shrine" data-name="Del Pilar Shrine">
+                <a-ring color="gold" radius-inner="0.3" radius-outer="0.4" opacity="1"
+                    animation="property: scale; to: 1.3 1.3 1; dir: alternate; loop: true; dur: 1000">
+                </a-ring>
+                <a-text value="🗽" position="0 0.25 0.1" color="white" align="center" scale="2.5"></a-text>
+                <a-text value="Del Pilar" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.9"></a-text>
+                <a-text value="Shrine" position="0 -0.5 0.1" color="gold" align="center" width="2" scale="1.3"></a-text>
+                <a-circle color="white" radius="0.35" opacity="0" class="hotspot-hover"></a-circle>
             </a-entity>
-
+            
             <!-- Barasoain Museum -->
-            <a-entity class="menu-option" position="1.4 0 0" data-project="barasoain-museum"
-                      data-name="Barasoain Museum"
-                      data-color="#FF8E53">
-                <a-box width="1.8" height="2.2" depth="0.3" 
-                       color="#FF8E53"
-                       material="emissive: #FF8E53; emissiveIntensity: 0.2; opacity: 0.9">
-                </a-box>
-                
-                <a-box width="1.9" height="2.3" depth="0.1" 
-                       position="0 0 -0.2"
-                       color="#FF8E53"
-                       material="emissive: #FF8E53; emissiveIntensity: 0.5; transparent: true; opacity: 0.3">
-                </a-box>
-                
-                <a-text value="⛪" color="#FFFFFF" align="center" 
-                       position="0 0.8 0.16"
-                       scale="2.5 2.5 1"
-                       material="shader: flat"></a-text>
-                
-                <a-text value="BARASOAIN" color="#FFFFFF" align="center" 
-                       position="0 0.35 0.16"
-                       scale="1 1 1"
-                       material="shader: flat"></a-text>
-                <a-text value="MUSEUM" color="#FFFFFF" align="center" weight="bold"
-                       position="0 -0.1 0.16"
-                       scale="1.2 1.2 1"
-                       material="shader: flat"></a-text>
-                <a-text value="ECCLESIASTICAL" color="#FFFFFF" align="center" opacity="0.8"
-                       position="0 -0.45 0.16"
-                       scale="0.8 0.8 1"
-                       material="shader: flat"></a-text>
-                
-                <a-text value="1888" color="#FFD700" align="center" opacity="0.9"
-                       position="0 -0.85 0.16"
-                       scale="0.7 0.7 1"
-                       material="shader: flat"></a-text>
-                
-                <a-animation attribute="position" 
-                            to="1.4 0.2 0" 
-                            dur="300" 
-                            begin="mouseenter" 
-                            fill="forwards"></a-animation>
-                <a-animation attribute="position" 
-                            to="1.4 0 0" 
-                            dur="300" 
-                            begin="mouseleave" 
-                            fill="forwards"></a-animation>
+            <a-entity class="menu-option" position="1.2 0 0" data-site="barasoain-museum" data-name="Barasoain Museum">
+                <a-ring color="#FF8E53" radius-inner="0.25" radius-outer="0.35" opacity="0.8"
+                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1200">
+                </a-ring>
+                <a-text value="⛪" position="0 0.2 0.1" color="white" align="center" scale="2"></a-text>
+                <a-text value="Barasoain" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
+                <a-text value="Museum" position="0 -0.5 0.1" color="#FF8E53" align="center" width="2" scale="1.2"></a-text>
+                <a-circle color="white" radius="0.3" opacity="0" class="hotspot-hover"></a-circle>
             </a-entity>
-
+            
             <!-- Casa Real Shrine -->
-            <a-entity class="menu-option" position="2.8 0 0" data-project="casa-real-shrine"
-                      data-name="Casa Real Shrine"
-                      data-color="#9B59B6">
-                <a-box width="1.8" height="2.2" depth="0.3" 
-                       color="#9B59B6"
-                       material="emissive: #9B59B6; emissiveIntensity: 0.2; opacity: 0.9">
-                </a-box>
-                
-                <a-box width="1.9" height="2.3" depth="0.1" 
-                       position="0 0 -0.2"
-                       color="#9B59B6"
-                       material="emissive: #9B59B6; emissiveIntensity: 0.5; transparent: true; opacity: 0.3">
-                </a-box>
-                
-                <a-text value="🏰" color="#FFFFFF" align="center" 
-                       position="0 0.8 0.16"
-                       scale="2.5 2.5 1"
-                       material="shader: flat"></a-text>
-                
-                <a-text value="CASA REAL" color="#FFFFFF" align="center" 
-                       position="0 0.35 0.16"
-                       scale="1 1 1"
-                       material="shader: flat"></a-text>
-                <a-text value="SHRINE" color="#FFFFFF" align="center" weight="bold"
-                       position="0 -0.1 0.16"
-                       scale="1.2 1.2 1"
-                       material="shader: flat"></a-text>
-                <a-text value="GOVERNMENT" color="#FFFFFF" align="center" opacity="0.8"
-                       position="0 -0.45 0.16"
-                       scale="0.8 0.8 1"
-                       material="shader: flat"></a-text>
-                
-                <a-text value="1800s" color="#FFD700" align="center" opacity="0.9"
-                       position="0 -0.85 0.16"
-                       scale="0.7 0.7 1"
-                       material="shader: flat"></a-text>
-                
-                <a-animation attribute="position" 
-                            to="2.8 0.2 0" 
-                            dur="300" 
-                            begin="mouseenter" 
-                            fill="forwards"></a-animation>
-                <a-animation attribute="position" 
-                            to="2.8 0 0" 
-                            dur="300" 
-                            begin="mouseleave" 
-                            fill="forwards"></a-animation>
+            <a-entity class="menu-option" position="2.5 0 0" data-site="casa-real-shrine" data-name="Casa Real Shrine">
+                <a-ring color="#9B59B6" radius-inner="0.25" radius-outer="0.35" opacity="0.8"
+                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1200">
+                </a-ring>
+                <a-text value="🏰" position="0 0.2 0.1" color="white" align="center" scale="2"></a-text>
+                <a-text value="Casa Real" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
+                <a-text value="Shrine" position="0 -0.5 0.1" color="#9B59B6" align="center" width="2" scale="1.2"></a-text>
+                <a-circle color="white" radius="0.3" opacity="0" class="hotspot-hover"></a-circle>
             </a-entity>
         </a-entity>
-
-        <!-- Decorative floor with grid -->
-        <a-grid position="0 -0.8 -3.5" width="12" height="8" color="#4ECDC4" opacity="0.15"></a-grid>
         
-        <!-- Ambient lighting with warm colors -->
-        <a-light type="ambient" intensity="1.2" color="#CCCCFF"></a-light>
-        <a-light type="directional" position="5 5 5" intensity="1.5" color="#FFFFFF"></a-light>
+        <!-- Simple floor grid -->
+        <a-grid position="0 -0.5 -3" width="10" height="10" color="#444" opacity="0.3"></a-grid>
         
-        <!-- Colored accent lights -->
-        <a-light type="point" intensity="0.8" position="-3 2 2" color="#FF6B6B"></a-light>
-        <a-light type="point" intensity="0.8" position="3 2 2" color="#4ECDC4"></a-light>
-        <a-light type="point" intensity="0.6" position="0 3 -1" color="#FFD700"></a-light>
-        <a-light type="point" intensity="0.5" position="0 1 2" color="#9B59B6"></a-light>
-
-        <!-- Floating particles for ambiance -->
-        <a-entity position="0 2 -2">
-            <a-sphere radius="0.08" color="#FF6B6B" 
-                      animation="property: position; to: 2 3 -1; dur: 6000; loop: true; dir: alternate"></a-sphere>
-            <a-sphere radius="0.08" color="#4ECDC4" 
-                      animation="property: position; to: -2 4 -3; dur: 7000; loop: true; dir: alternate"></a-sphere>
-            <a-sphere radius="0.08" color="#FFD700" 
-                      animation="property: position; to: 1 2 -4; dur: 5000; loop: true; dir: alternate"></a-sphere>
-            <a-sphere radius="0.08" color="#9B59B6" 
-                      animation="property: position; to: -1 3 -5; dur: 6500; loop: true; dir: alternate"></a-sphere>
-        </a-entity>
+        <!-- Ambient light -->
+        <a-light type="ambient" intensity="1.2"></a-light>
+        <a-light type="point" intensity="0.8" position="0 2 2"></a-light>
     </a-scene>
 
     <script>
-        // ==================== CONFIGURATION ====================
-        const ESP32_IP = "192.168.137.8"; // Your ESP32 IP
-        const DWELL_TIME = 1000; // 1 second
+        // ===================== CONFIGURATION =====================
+        const SITES = [
+            { id: "del-pilar-shrine", title: "Marcelo H. Del Pilar Shrine", bg: "#del-pilar-bg" },
+            { id: "battle-quinga", title: "Battle of Quinga", bg: "#battle-quinga-bg" },
+            { id: "bulacan-museum", title: "Hiyas ng Bulacan Museum", bg: "#bulacan-museum-bg" },
+            { id: "barasoain-museum", title: "Barasoain Museum", bg: "#barasoain-bg" },
+            { id: "casa-real-shrine", title: "Casa Real Shrine", bg: "#casa-real-bg" }
+        ];
 
-        let socket;
-        let espConnected = false;
-        
-        // Current intersected entity
-        let currentTarget = null;
-        let dwellStartTime = 0;
-        let dwellProgress = 0;
-        let dwellTimer = null;
-        let isDwelling = false;
+        // ===================== SIMPLE METRICS SYSTEM =====================
+        class SimpleMetrics {
+            constructor() {
+                this.metrics = {
+                    fps: 0,
+                    sessionStart: Date.now(),
+                    selections: 0,
+                    currentSite: 'Del Pilar Shrine'
+                };
 
-        // DOM elements
-        const cursor2D = document.getElementById('esp-cursor-2d');
-        const vrCursor = document.getElementById('vr-cursor');
-        const progressRing3D = document.getElementById('progress-ring-3d');
-        const espStatus = document.getElementById('esp-status');
-        const selectionCount = document.getElementById('selection-count');
-        const selectionFeedback = document.getElementById('selection-feedback');
-        const dwellProgressEl = document.getElementById('dwell-progress');
-        const hoverTargetEl = document.getElementById('hover-target');
-        const progressFill = document.getElementById('progress-fill');
-        const progress2D = document.getElementById('cursor-progress-2d');
-        const espBadge = document.getElementById('esp-badge');
+                this.startMonitoring();
+                this.startSessionTimer();
+                this.setupMenuInteractions();
+                this.createSiteDots();
 
-        let selections = 0;
-        let sessionStartTime = Date.now();
-
-        // ==================== SCENE INIT ====================
-        document.querySelector('a-scene').addEventListener('loaded', function() {
-            console.log('A-Frame scene loaded');
-            
-            const raycaster = document.querySelector('#raycaster');
-            if (raycaster) {
-                raycaster.addEventListener('raycaster-intersection', function(evt) {
-                    const els = evt.detail.els;
-                    if (els && els.length > 0) {
-                        const intersectedEl = els[0];
-                        if (intersectedEl && intersectedEl.classList.contains('menu-option')) {
-                            handleIntersection(intersectedEl);
-                        }
-                    }
-                });
-                
-                raycaster.addEventListener('raycaster-intersection-cleared', function() {
-                    handleIntersectionCleared();
-                });
-            }
-            
-            // Hide loading screen
-            setTimeout(() => {
-                document.getElementById('loading-screen').style.opacity = '0';
+                // Hide loading screen
                 setTimeout(() => {
-                    document.getElementById('loading-screen').style.display = 'none';
-                }, 800);
-            }, 2000);
-        });
-
-        // ==================== WEBSOCKET ====================
-        function connectESP32() {
-            try {
-                socket = new WebSocket(`ws://${ESP32_IP}:81/`);
-                
-                socket.onopen = () => {
-                    console.log("✅ ESP32 Connected");
-                    cursor2D.style.display = 'block';
-                    espConnected = true;
-                    espStatus.style.color = '#4ECDC4';
-                    espStatus.textContent = '●';
-                    espBadge.textContent = 'ESP32 • ONLINE';
-                    espBadge.style.color = '#4ECDC4';
-                };
-                
-                socket.onmessage = (event) => {
-                    try {
-                        const [x, y] = event.data.split(',').map(Number);
-                        if (!isNaN(x) && !isNaN(y)) {
-                            const screenX = (x / 320) * window.innerWidth;
-                            const screenY = (y / 240) * window.innerHeight;
-                            cursor2D.style.left = screenX + 'px';
-                            cursor2D.style.top = screenY + 'px';
-                        }
-                    } catch(e) {
-                        console.warn('Error parsing message', e);
-                    }
-                };
-                
-                socket.onclose = () => {
-                    espStatus.style.color = '#FF6B6B';
-                    espStatus.textContent = '○';
-                    espBadge.textContent = 'ESP32 • OFFLINE';
-                    espBadge.style.color = '#FF6B6B';
-                    espConnected = false;
-                    setTimeout(connectESP32, 3000);
-                };
-                
-                socket.onerror = (error) => {
-                    console.log('WebSocket error:', error);
-                };
-            } catch(e) {
-                console.log('Connection error:', e);
-                setTimeout(connectESP32, 3000);
-            }
-        }
-
-        // ==================== INTERSECTION HANDLERS ====================
-        function handleIntersection(entity) {
-            if (!entity) return;
-            
-            cursor2D.classList.add('hovering');
-            
-            const projectName = entity.getAttribute('data-name') || 'Unknown Site';
-            hoverTargetEl.textContent = projectName;
-
-            if (currentTarget !== entity) {
-                if (dwellTimer) {
-                    clearTimeout(dwellTimer);
-                    dwellTimer = null;
-                }
-                
-                currentTarget = entity;
-                dwellStartTime = Date.now();
-                isDwelling = true;
-                progressRing3D.setAttribute('visible', 'true');
-                
-                updateDwellProgress();
-            }
-        }
-
-        function handleIntersectionCleared() {
-            cursor2D.classList.remove('hovering');
-            hoverTargetEl.textContent = 'None';
-            
-            currentTarget = null;
-            isDwelling = false;
-            progressRing3D.setAttribute('visible', 'false');
-            
-            if (dwellTimer) {
-                clearTimeout(dwellTimer);
-                dwellTimer = null;
-            }
-            
-            dwellProgress = 0;
-            dwellProgressEl.textContent = '0%';
-            progressFill.style.width = '0%';
-            
-            if (progress2D) {
-                progress2D.style.transform = 'rotate(0deg)';
-            }
-            
-            if (progressRing3D) {
-                progressRing3D.setAttribute('rotation', { x: 90, y: 0, z: 0 });
-            }
-        }
-
-        // ==================== DWELL MECHANISM ====================
-        function updateDwellProgress() {
-            if (!isDwelling || !currentTarget) return;
-            
-            const elapsed = Date.now() - dwellStartTime;
-            dwellProgress = Math.min((elapsed / DWELL_TIME) * 100, 100);
-            
-            dwellProgressEl.textContent = Math.round(dwellProgress) + '%';
-            progressFill.style.width = dwellProgress + '%';
-            
-            if (progress2D) {
-                progress2D.style.transform = `rotate(${dwellProgress * 3.6}deg)`;
-            }
-            
-            if (progressRing3D) {
-                progressRing3D.setAttribute('rotation', { x: 90, y: dwellProgress * 3.6, z: 0 });
-            }
-
-            if (dwellProgress >= 100) {
-                const projectId = currentTarget.getAttribute('data-project');
-                const projectName = currentTarget.getAttribute('data-name');
-                
-                if (projectId) {
-                    selections++;
-                    selectionCount.textContent = selections;
-                    
-                    selectionFeedback.textContent = `📍 ${projectName}`;
-                    selectionFeedback.classList.add('show');
-                    setTimeout(() => selectionFeedback.classList.remove('show'), 1500);
-                    
-                    // Visual feedback
-                    const box = currentTarget.querySelector('a-box');
-                    if (box) {
-                        const originalColor = box.getAttribute('color');
-                        box.setAttribute('color', '#FFFFFF');
-                        box.setAttribute('material', 'emissive', '#FFFFFF');
-                        box.setAttribute('material', 'emissiveIntensity', '1');
-                        
-                        setTimeout(() => {
-                            box.setAttribute('color', originalColor);
-                            box.setAttribute('material', 'emissive', originalColor);
-                            box.setAttribute('material', 'emissiveIntensity', '0.2');
-                        }, 300);
-                    }
-                    
-                    // Navigate to the selected site
+                    document.getElementById('loading').style.opacity = '0';
                     setTimeout(() => {
-                        window.location.href = `${projectId}/index.html`;
+                        document.getElementById('loading').style.display = 'none';
                     }, 500);
+                }, 2000);
+            }
+
+            startMonitoring() {
+                let frames = 0;
+                let lastFPSUpdate = Date.now();
+
+                const updateFPS = () => {
+                    frames++;
+                    const now = Date.now();
+
+                    if (now - lastFPSUpdate >= 1000) {
+                        this.metrics.fps = frames;
+                        frames = 0;
+                        lastFPSUpdate = now;
+                        this.updateDisplay();
+                    }
+
+                    requestAnimationFrame(updateFPS);
+                };
+
+                updateFPS();
+            }
+
+            startSessionTimer() {
+                const update = () => {
+                    const elapsed = Date.now() - this.metrics.sessionStart;
+                    const mins = Math.floor(elapsed / 60000);
+                    const secs = Math.floor((elapsed % 60000) / 1000);
+
+                    document.getElementById('session-time').textContent =
+                        `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                    setTimeout(update, 1000);
+                };
+                update();
+            }
+
+            createSiteDots() {
+                const siteSelector = document.getElementById('site-selector');
+                SITES.forEach((site, index) => {
+                    const dot = document.createElement('div');
+                    dot.className = `site-dot ${index === 0 ? 'active' : ''}`;
+                    dot.dataset.index = index;
+                    dot.title = site.title;
+                    
+                    dot.addEventListener('click', () => {
+                        this.selectSite(index);
+                    });
+                    
+                    siteSelector.appendChild(dot);
+                });
+            }
+
+            setupMenuInteractions() {
+                const scene = document.querySelector('a-scene');
+
+                // Hover effects - like Del Pilar hotspots
+                scene.addEventListener('mouseenter', (e) => {
+                    if (e.target.classList.contains('menu-option')) {
+                        const hoverCircle = e.target.querySelector('.hotspot-hover');
+                        if (hoverCircle) {
+                            hoverCircle.setAttribute('opacity', '0.3');
+                        }
+                    }
+                });
+
+                scene.addEventListener('mouseleave', (e) => {
+                    if (e.target.classList.contains('menu-option')) {
+                        const hoverCircle = e.target.querySelector('.hotspot-hover');
+                        if (hoverCircle) {
+                            hoverCircle.setAttribute('opacity', '0');
+                        }
+                    }
+                });
+
+                // Click to select site
+                scene.addEventListener('click', (e) => {
+                    const menuOption = e.target.closest('.menu-option');
+                    if (menuOption) {
+                        const siteId = menuOption.getAttribute('data-site');
+                        const siteName = menuOption.getAttribute('data-name');
+                        
+                        this.metrics.selections++;
+                        this.metrics.currentSite = siteName;
+                        
+                        document.getElementById('site-name').textContent = `📍 ${siteName}`;
+                        document.getElementById('current-site').textContent = siteName;
+                        
+                        this.updateDisplay();
+                        
+                        // Find site index and update dots
+                        const siteIndex = SITES.findIndex(s => s.id === siteId);
+                        if (siteIndex !== -1) {
+                            document.querySelectorAll('.site-dot').forEach((dot, i) => {
+                                dot.classList.toggle('active', i === siteIndex);
+                            });
+                        }
+                        
+                        // Visual feedback - flash the ring
+                        const ring = menuOption.querySelector('a-ring');
+                        if (ring) {
+                            const originalColor = ring.getAttribute('color');
+                            ring.setAttribute('color', 'white');
+                            setTimeout(() => {
+                                ring.setAttribute('color', originalColor);
+                            }, 300);
+                        }
+                        
+                        // In a real implementation, you would navigate to the site
+                        // window.location.href = `${siteId}/index.html`;
+                        alert(`📍 Selected: ${siteName}\n(This would navigate to the site in production)`);
+                    }
+                });
+            }
+
+            selectSite(index) {
+                if (index < 0 || index >= SITES.length) return;
+                
+                const site = SITES[index];
+                
+                // Update sky background if available
+                const sky = document.querySelector('#scene-sky');
+                if (sky && site.bg) {
+                    sky.setAttribute('src', site.bg);
                 }
                 
-                handleIntersectionCleared();
-            } else {
-                dwellTimer = setTimeout(updateDwellProgress, 50);
+                // Update site info
+                this.metrics.currentSite = site.title;
+                document.getElementById('site-name').textContent = `📍 ${site.title}`;
+                document.getElementById('current-site').textContent = site.title;
+                
+                // Update site dots
+                document.querySelectorAll('.site-dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+                
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                document.getElementById('fps-value').textContent = this.metrics.fps;
+                document.getElementById('selection-count').textContent = this.metrics.selections;
             }
         }
 
-        // ==================== UTILITIES ====================
-        // Update session timer
-        setInterval(() => {
-            const now = Date.now();
-            const sessionSeconds = Math.floor((now - sessionStartTime) / 1000);
-            const mins = Math.floor(sessionSeconds / 60);
-            const secs = sessionSeconds % 60;
-            document.getElementById('session-time').textContent = 
-                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }, 1000);
-
-        // VR mode handling
-        const scene = document.getElementById('scene');
-        scene.addEventListener('enter-vr', () => {
-            document.body.classList.add('vr-mode');
-        });
-        
-        scene.addEventListener('exit-vr', () => {
-            document.body.classList.remove('vr-mode');
-        });
-
-        function toggleControlInfo() {
-            alert(`🎮 VR HERITAGE SYSTEM\n\n` +
-                  `ESP32: ${espConnected ? '✅ CONNECTED' : '❌ DISCONNECTED'}\n` +
-                  `Selections: ${selections}\n` +
-                  `Dwell Time: 1.0 second\n` +
-                  `Current Target: ${hoverTargetEl.textContent}`);
+        // ===================== NAVIGATION =====================
+        function goToMenu() {
+            if (confirm("Return to main menu?")) {
+                window.location.href = "index.html";
+            }
         }
 
-        // Initialize connection
-        window.onload = () => {
-            setTimeout(connectESP32, 2000);
+        // ===================== EXPORT FUNCTION =====================
+        window.exportData = function () {
+            if (typeof metrics === 'undefined') {
+                alert('System not initialized yet.');
+                return;
+            }
+
+            const data = {
+                project: "VR Heritage Bulacan",
+                timestamp: new Date().toISOString(),
+                sessionDuration: Date.now() - metrics.metrics.sessionStart,
+                selections: metrics.metrics.selections,
+                currentSite: metrics.metrics.currentSite,
+                performance: {
+                    fps: metrics.metrics.fps
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vr-heritage-session-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            alert('✅ Session data exported!');
         };
+
+        // ===================== INITIALIZE =====================
+        let metrics;
+        document.addEventListener('DOMContentLoaded', function() {
+            metrics = new SimpleMetrics();
+            
+            setTimeout(() => {
+                console.log('📍 VR Heritage Main Menu');
+                console.log('Click on the colored rings to select a historical site');
+            }, 3000);
+        });
     </script>
 </body>
 </html>
