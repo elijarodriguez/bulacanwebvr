@@ -310,6 +310,9 @@
 
                 // Hide loading screen after images load
                 this.preloadImages();
+                
+                // Store instance globally for export function
+                window.metricsInstance = this;
             }
 
             preloadImages() {
@@ -478,9 +481,10 @@
         // =====================
         // INITIALIZE EVERYTHING
         // =====================
+        let metrics;
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize metrics system
-            const metrics = new SimpleMetrics();
+            metrics = new SimpleMetrics();
 
             // Add some guidance for demo
             setTimeout(() => {
@@ -496,25 +500,28 @@
         // EXPORT FUNCTION
         // =====================
         window.exportMetrics = function () {
+            // Use the global instance
+            const instance = window.metricsInstance || metrics;
+            
             // Check if metrics exists
-            if (typeof metrics === 'undefined') {
+            if (!instance) {
                 alert('Metrics system not initialized yet. Please wait a moment.');
                 return;
             }
 
             const data = {
-                thesisProject: "Low-cost VR Viewing Device for Bulacan Historical Sites",
+                thesisProject: "Low-cost VR Viewing Device for Bulacan Historical Sites - Battle of Quinga",
                 timestamp: new Date().toISOString(),
-                sessionDuration: Date.now() - metrics.metrics.sessionStart,
+                sessionDuration: Date.now() - instance.metrics.sessionStart,
                 performanceMetrics: {
-                    averageFPS: metrics.metrics.fps,
-                    averageLatency: Math.round(metrics.metrics.latency),
-                    stability: "Good (>30 FPS maintained)"
+                    averageFPS: instance.metrics.fps,
+                    averageLatency: Math.round(instance.metrics.latency),
+                    stability: instance.metrics.fps >= 30 ? "Good (>30 FPS)" : "Needs Optimization"
                 },
                 usageMetrics: {
-                    hotspotsClicked: metrics.metrics.hotspotsClicked,
-                    scenesVisited: metrics.metrics.scenesVisited,
-                    uniqueScenes: metrics.metrics.scenesVisited.length
+                    hotspotsClicked: instance.metrics.hotspotsClicked,
+                    scenesVisited: instance.metrics.scenesVisited,
+                    uniqueScenes: instance.metrics.scenesVisited.length
                 },
                 deviceInfo: {
                     userAgent: navigator.userAgent,
@@ -523,7 +530,7 @@
                     browser: navigator.appName
                 },
                 iso25010Compliance: {
-                    reliability: "High (No errors detected)",
+                    reliability: instance.metrics.hotspotsClicked > 0 ? "High (No errors detected)" : "Testing in progress",
                     maintainability: "Modular architecture",
                     accuracy: "Precise hotspot targeting",
                     portability: "Web-based, platform independent"
@@ -534,7 +541,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `thesis-metrics-${new Date().toISOString().slice(0, 10)}.json`;
+            a.download = `quinga-metrics-${new Date().toISOString().slice(0, 10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
