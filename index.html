@@ -643,7 +643,7 @@
         </div>
         <div class="instruction-item">
             <span class="instruction-icon">👆</span>
-            <span>Gaze at site to select</span>
+            <span>Gaze at site for 1 second to select</span>
         </div>
         <div class="instruction-item">
             <span class="instruction-icon">🥽</span>
@@ -671,25 +671,31 @@
              fog="type: exponential; color: #2c1810; density: 0.03"
              device-orientation-permission-ui="enabled: false">
         
-        <!-- CAMERA WITH GYROSCOPE -->
-        <a-entity id="camera" camera look-controls="enabled: true; magicWindowTrackingEnabled: true" position="0 1.6 0">
-            <!-- 3D Cursor -->
-            <a-entity id="vr-cursor" position="0 0 -2">
-                <a-torus radius="0.15" radius-tubular="0.02" color="#d4af37" rotation="90 0 0"
+        <!-- CAMERA WITH GYROSCOPE - FIXED: Added look-controls properly -->
+        <a-entity id="camera" camera look-controls="enabled: true; magicWindowTrackingEnabled: true; touchEnabled: false" position="0 1.6 0">
+            <!-- 3D Cursor - FIXED: Positioned correctly -->
+            <a-entity id="vr-cursor" position="0 0 -1.5">
+                <!-- Outer ring -->
+                <a-torus radius="0.12" radius-tubular="0.01" color="#d4af37" rotation="90 0 0"
                          material="emissive: #b8860b; emissiveIntensity: 0.8"></a-torus>
-                <a-sphere radius="0.06" color="#f5e6d3" position="0 0 0"
+                <!-- Inner dot -->
+                <a-sphere radius="0.04" color="#f5e6d3" position="0 0 0"
                          material="emissive: #f5e6d3; emissiveIntensity: 0.5"></a-sphere>
-                <a-torus id="progress-ring-3d" radius="0.18" radius-tubular="0.03" color="#d4af37" 
+                <!-- Progress ring - FIXED: Properly positioned -->
+                <a-torus id="progress-ring-3d" radius="0.14" radius-tubular="0.015" color="#d4af37" 
                          rotation="90 0 0" visible="false"
                          material="emissive: gold; emissiveIntensity: 1; transparent: true; opacity: 0.9"></a-torus>
             </a-entity>
             
-            <!-- Raycaster -->
-            <a-entity id="raycaster" raycaster="objects: .menu-option; far: 10; interval: 50"></a-entity>
+            <!-- Raycaster - FIXED: Added proper configuration -->
+            <a-entity id="raycaster" raycaster="objects: .menu-option; far: 15; interval: 100; showLine: false"></a-entity>
+            
+            <!-- Cursor visual line (optional, can be removed) -->
+            <a-entity circle="radius: 0.005; color: #d4af37" position="0 0 -0.5" scale="0.5 0.5 0.5" material="emissive: #d4af37; emissiveIntensity: 0.3"></a-entity>
         </a-entity>
         
         <!-- Main Title -->
-        <a-entity position="0 3 -5">
+        <a-entity position="0 3.2 -5">
             <a-text value="HISTORICAL SITES" 
                     color="#d4af37" 
                     align="center"
@@ -702,130 +708,182 @@
                     width="8"
                     material="shader: flat"
                     scale="1.8 1.8 1"
-                    position="0 -1 0"></a-text>
+                    position="0 -0.8 0"></a-text>
         </a-entity>
         
-        <!-- Menu Items - Historical Theme -->
-        <a-entity id="menu-container" position="0 1.2 -3">
-            <!-- Battle of Quinga -->
-            <a-entity class="menu-option" position="-2.5 0.5 0" data-project="battle-of-quinga" data-name="Battle of Quinga"
-                      geometry="primitive: box; width: 1.8; height: 2; depth: 0.4"
-                      material="color: #8b4513; emissive: #4a2a1a; emissiveIntensity: 0.5">
-                <a-entity position="0 0.6 0.3">
-                    <a-text value="⚔️" color="#d4af37" align="center" scale="2"></a-text>
+        <!-- Menu Items - ENHANCED: Clean, neat, and readable layout -->
+        <a-entity id="menu-container" position="0 1.5 -4">
+            
+            <!-- Battle of Quinga - ENHANCED design -->
+            <a-entity class="menu-option" position="-2.8 0.3 0" data-project="battle-of-quinga" data-name="Battle of Quinga"
+                      geometry="primitive: box; width: 1.5; height: 2.2; depth: 0.4"
+                      material="color: #8b4513; emissive: #4a2a1a; emissiveIntensity: 0.4; shader: standard; metalness: 0.2; roughness: 0.6">
+                <!-- Gold border effect -->
+                <a-entity geometry="primitive: box; width: 1.55; height: 2.25; depth: 0.45" position="0 0 0" material="color: #d4af37; transparent: true; opacity: 0.3"></a-entity>
+                
+                <!-- Icon -->
+                <a-entity position="0 0.8 0.25">
+                    <a-text value="⚔️" color="#d4af37" align="center" scale="2.5"></a-text>
                 </a-entity>
-                <a-entity position="0 0.2 0.3">
-                    <a-text value="BATTLE" color="#f5e6d3" align="center" scale="0.9"></a-text>
+                
+                <!-- Title text - CLEAN and READABLE -->
+                <a-entity position="0 0.3 0.25">
+                    <a-text value="BATTLE" color="#f5e6d3" align="center" scale="0.9" width="2"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.1 0.3">
-                    <a-text value="OF" color="#f5e6d3" align="center" scale="0.7"></a-text>
+                <a-entity position="0 0.0 0.25">
+                    <a-text value="OF" color="#e6cba0" align="center" scale="0.6" width="2" opacity="0.9"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.4 0.3">
-                    <a-text value="QUINGA" color="#d4af37" align="center" scale="1.2"></a-text>
+                <a-entity position="0 -0.3 0.25">
+                    <a-text value="QUINGA" color="#d4af37" align="center" scale="1.1" width="2" weight="bold"></a-text>
                 </a-entity>
+                
+                <!-- Year/location - Subtle detail -->
+                <a-entity position="0 -0.8 0.25">
+                    <a-text value="1896" color="#e6cba0" align="center" scale="0.6" width="2" opacity="0.8"></a-text>
+                </a-entity>
+                
                 <a-animation attribute="scale" begin="mouseenter" dur="300" to="1.1 1.1 1.1"></a-animation>
                 <a-animation attribute="scale" begin="mouseleave" dur="300" to="1 1 1"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseenter" dur="300" to="0.8"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseleave" dur="300" to="0.4"></a-animation>
             </a-entity>
             
-            <!-- Hiyas ng Bulacan Museum -->
-            <a-entity class="menu-option" position="-1.2 0.5 0" data-project="bulacan-museum" data-name="Hiyas ng Bulacan"
-                      geometry="primitive: box; width: 1.8; height: 2; depth: 0.4"
-                      material="color: #8b5a2b; emissive: #4a2a1a; emissiveIntensity: 0.5">
-                <a-entity position="0 0.6 0.3">
-                    <a-text value="🏛️" color="#d4af37" align="center" scale="2"></a-text>
+            <!-- Hiyas ng Bulacan Museum - ENHANCED design -->
+            <a-entity class="menu-option" position="-1.4 0.3 0" data-project="bulacan-museum" data-name="Hiyas ng Bulacan"
+                      geometry="primitive: box; width: 1.5; height: 2.2; depth: 0.4"
+                      material="color: #8b5a2b; emissive: #4a2a1a; emissiveIntensity: 0.4; shader: standard; metalness: 0.2; roughness: 0.6">
+                <!-- Gold border effect -->
+                <a-entity geometry="primitive: box; width: 1.55; height: 2.25; depth: 0.45" position="0 0 0" material="color: #d4af37; transparent: true; opacity: 0.3"></a-entity>
+                
+                <a-entity position="0 0.8 0.25">
+                    <a-text value="🏛️" color="#d4af37" align="center" scale="2.5"></a-text>
                 </a-entity>
-                <a-entity position="0 0.2 0.3">
-                    <a-text value="HIYAS NG" color="#f5e6d3" align="center" scale="0.9"></a-text>
+                <a-entity position="0 0.3 0.25">
+                    <a-text value="HIYAS NG" color="#f5e6d3" align="center" scale="0.9" width="2"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.1 0.3">
-                    <a-text value="BULACAN" color="#d4af37" align="center" scale="1.2"></a-text>
+                <a-entity position="0 -0.1 0.25">
+                    <a-text value="BULACAN" color="#d4af37" align="center" scale="1.0" width="2" weight="bold"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.4 0.3">
-                    <a-text value="MUSEUM" color="#f5e6d3" align="center" scale="0.9"></a-text>
+                <a-entity position="0 -0.5 0.25">
+                    <a-text value="MUSEUM" color="#f5e6d3" align="center" scale="0.8" width="2"></a-text>
                 </a-entity>
+                <a-entity position="0 -0.9 0.25">
+                    <a-text value="Heritage" color="#e6cba0" align="center" scale="0.5" width="2" opacity="0.7"></a-text>
+                </a-entity>
+                
                 <a-animation attribute="scale" begin="mouseenter" dur="300" to="1.1 1.1 1.1"></a-animation>
                 <a-animation attribute="scale" begin="mouseleave" dur="300" to="1 1 1"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseenter" dur="300" to="0.8"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseleave" dur="300" to="0.4"></a-animation>
             </a-entity>
             
-            <!-- Del Pilar Shrine -->
-            <a-entity class="menu-option" position="0.1 0.5 0" data-project="del-pilar-shrine" data-name="Del Pilar Shrine"
-                      geometry="primitive: box; width: 1.8; height: 2; depth: 0.4"
-                      material="color: #b8860b; emissive: #4a2a1a; emissiveIntensity: 0.5">
-                <a-entity position="0 0.6 0.3">
-                    <a-text value="🗽" color="#d4af37" align="center" scale="2"></a-text>
+            <!-- Del Pilar Shrine - ENHANCED design (CENTER PIECE) -->
+            <a-entity class="menu-option" position="0 0.3 0" data-project="del-pilar-shrine" data-name="Del Pilar Shrine"
+                      geometry="primitive: box; width: 1.6; height: 2.3; depth: 0.4"
+                      material="color: #b8860b; emissive: #4a2a1a; emissiveIntensity: 0.5; shader: standard; metalness: 0.3; roughness: 0.5">
+                <!-- Enhanced gold border for center piece -->
+                <a-entity geometry="primitive: box; width: 1.65; height: 2.35; depth: 0.45" position="0 0 0" material="color: #d4af37; transparent: true; opacity: 0.5"></a-entity>
+                
+                <a-entity position="0 0.85 0.25">
+                    <a-text value="🗽" color="#d4af37" align="center" scale="2.8"></a-text>
                 </a-entity>
-                <a-entity position="0 0.2 0.3">
-                    <a-text value="DEL PILAR" color="#f5e6d3" align="center" scale="0.9"></a-text>
+                <a-entity position="0 0.35 0.25">
+                    <a-text value="DEL PILAR" color="#f5e6d3" align="center" scale="1.0" width="2.2" weight="bold"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.1 0.3">
-                    <a-text value="SHRINE" color="#d4af37" align="center" scale="1.2"></a-text>
+                <a-entity position="0 -0.05 0.25">
+                    <a-text value="SHRINE" color="#d4af37" align="center" scale="1.2" width="2.2" weight="bold"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.4 0.3">
-                    <a-text value="MARCELO H." color="#f5e6d3" align="center" scale="0.8"></a-text>
+                <a-entity position="0 -0.45 0.25">
+                    <a-text value="MARCELO H." color="#f5e6d3" align="center" scale="0.8" width="2.2"></a-text>
                 </a-entity>
-                <a-animation attribute="scale" begin="mouseenter" dur="300" to="1.1 1.1 1.1"></a-animation>
+                <a-entity position="0 -0.85 0.25">
+                    <a-text value="1850-1896" color="#e6cba0" align="center" scale="0.6" width="2.2" opacity="0.8"></a-text>
+                </a-entity>
+                
+                <a-animation attribute="scale" begin="mouseenter" dur="300" to="1.12 1.12 1.12"></a-animation>
                 <a-animation attribute="scale" begin="mouseleave" dur="300" to="1 1 1"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseenter" dur="300" to="0.9"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseleave" dur="300" to="0.5"></a-animation>
             </a-entity>
             
-            <!-- Barasoain Museum -->
-            <a-entity class="menu-option" position="1.4 0.5 0" data-project="barasoain-museum" data-name="Barasoain Museum"
-                      geometry="primitive: box; width: 1.8; height: 2; depth: 0.4"
-                      material="color: #8b4513; emissive: #4a2a1a; emissiveIntensity: 0.5">
-                <a-entity position="0 0.6 0.3">
-                    <a-text value="⛪" color="#d4af37" align="center" scale="2"></a-text>
+            <!-- Barasoain Museum - ENHANCED design -->
+            <a-entity class="menu-option" position="1.4 0.3 0" data-project="barasoain-museum" data-name="Barasoain Museum"
+                      geometry="primitive: box; width: 1.5; height: 2.2; depth: 0.4"
+                      material="color: #8b4513; emissive: #4a2a1a; emissiveIntensity: 0.4; shader: standard; metalness: 0.2; roughness: 0.6">
+                <a-entity geometry="primitive: box; width: 1.55; height: 2.25; depth: 0.45" position="0 0 0" material="color: #d4af37; transparent: true; opacity: 0.3"></a-entity>
+                
+                <a-entity position="0 0.8 0.25">
+                    <a-text value="⛪" color="#d4af37" align="center" scale="2.5"></a-text>
                 </a-entity>
-                <a-entity position="0 0.2 0.3">
-                    <a-text value="BARASOAIN" color="#f5e6d3" align="center" scale="0.9"></a-text>
+                <a-entity position="0 0.3 0.25">
+                    <a-text value="BARASOAIN" color="#f5e6d3" align="center" scale="0.9" width="2.2"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.1 0.3">
-                    <a-text value="MUSEUM" color="#d4af37" align="center" scale="1.2"></a-text>
+                <a-entity position="0 -0.1 0.25">
+                    <a-text value="MUSEUM" color="#d4af37" align="center" scale="1.0" width="2.2" weight="bold"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.4 0.3">
-                    <a-text value="ECCLESIASTICAL" color="#f5e6d3" align="center" scale="0.7"></a-text>
+                <a-entity position="0 -0.5 0.25">
+                    <a-text value="Ecclesiastical" color="#e6cba0" align="center" scale="0.6" width="2.2"></a-text>
                 </a-entity>
+                <a-entity position="0 -0.9 0.25">
+                    <a-text value="1899" color="#e6cba0" align="center" scale="0.6" width="2" opacity="0.7"></a-text>
+                </a-entity>
+                
                 <a-animation attribute="scale" begin="mouseenter" dur="300" to="1.1 1.1 1.1"></a-animation>
                 <a-animation attribute="scale" begin="mouseleave" dur="300" to="1 1 1"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseenter" dur="300" to="0.8"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseleave" dur="300" to="0.4"></a-animation>
             </a-entity>
             
-            <!-- Casa Real Shrine -->
-            <a-entity class="menu-option" position="2.7 0.5 0" data-project="casa-real-shrine" data-name="Casa Real Shrine"
-                      geometry="primitive: box; width: 1.8; height: 2; depth: 0.4"
-                      material="color: #654321; emissive: #4a2a1a; emissiveIntensity: 0.5">
-                <a-entity position="0 0.6 0.3">
-                    <a-text value="🏰" color="#d4af37" align="center" scale="2"></a-text>
+            <!-- Casa Real Shrine - ENHANCED design -->
+            <a-entity class="menu-option" position="2.8 0.3 0" data-project="casa-real-shrine" data-name="Casa Real Shrine"
+                      geometry="primitive: box; width: 1.5; height: 2.2; depth: 0.4"
+                      material="color: #654321; emissive: #4a2a1a; emissiveIntensity: 0.4; shader: standard; metalness: 0.2; roughness: 0.6">
+                <a-entity geometry="primitive: box; width: 1.55; height: 2.25; depth: 0.45" position="0 0 0" material="color: #d4af37; transparent: true; opacity: 0.3"></a-entity>
+                
+                <a-entity position="0 0.8 0.25">
+                    <a-text value="🏰" color="#d4af37" align="center" scale="2.5"></a-text>
                 </a-entity>
-                <a-entity position="0 0.2 0.3">
-                    <a-text value="CASA REAL" color="#f5e6d3" align="center" scale="0.9"></a-text>
+                <a-entity position="0 0.3 0.25">
+                    <a-text value="CASA REAL" color="#f5e6d3" align="center" scale="0.9" width="2.2"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.1 0.3">
-                    <a-text value="SHRINE" color="#d4af37" align="center" scale="1.2"></a-text>
+                <a-entity position="0 -0.1 0.25">
+                    <a-text value="SHRINE" color="#d4af37" align="center" scale="1.1" width="2.2" weight="bold"></a-text>
                 </a-entity>
-                <a-entity position="0 -0.4 0.3">
-                    <a-text value="GOVERNMENT" color="#f5e6d3" align="center" scale="0.8"></a-text>
+                <a-entity position="0 -0.5 0.25">
+                    <a-text value="Government" color="#e6cba0" align="center" scale="0.7" width="2.2"></a-text>
                 </a-entity>
+                <a-entity position="0 -0.9 0.25">
+                    <a-text value="Spanish Era" color="#e6cba0" align="center" scale="0.6" width="2.2" opacity="0.7"></a-text>
+                </a-entity>
+                
                 <a-animation attribute="scale" begin="mouseenter" dur="300" to="1.1 1.1 1.1"></a-animation>
                 <a-animation attribute="scale" begin="mouseleave" dur="300" to="1 1 1"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseenter" dur="300" to="0.8"></a-animation>
+                <a-animation attribute="material.emissiveIntensity" begin="mouseleave" dur="300" to="0.4"></a-animation>
             </a-entity>
         </a-entity>
         
         <!-- Vintage floor -->
-        <a-grid position="0 -0.5 -3" width="10" height="10" color="#b8860b" opacity="0.2"></a-grid>
+        <a-grid position="0 -0.3 -4" width="12" height="12" color="#b8860b" opacity="0.15"></a-grid>
         
-        <!-- Lighting -->
-        <a-light type="ambient" intensity="1.5"></a-light>
-        <a-light type="directional" position="5 5 5" intensity="1.2" color="#f5e6d3"></a-light>
-        <a-light type="point" intensity="0.8" position="-2 3 2" color="#b8860b"></a-light>
-        <a-light type="point" intensity="0.8" position="2 3 2" color="#d4af37"></a-light>
-        
-        <!-- Floating particles -->
-        <a-entity position="0 2 -3">
-            <a-sphere radius="0.1" color="#b8860b" 
-                      animation="property: position; to: 2 3 -2; dur: 5000; loop: true; dir: alternate"></a-sphere>
-            <a-sphere radius="0.1" color="#d4af37" 
-                      animation="property: position; to: -2 4 -1; dur: 6000; loop: true; dir: alternate"></a-sphere>
-            <a-sphere radius="0.1" color="#e6cba0" 
-                      animation="property: position; to: 1 2 -4; dur: 4500; loop: true; dir: alternate"></a-sphere>
+        <!-- Decorative columns/pillars -->
+        <a-entity position="-3.5 -0.2 -5">
+            <a-cylinder radius="0.2" height="2" color="#8b5a2b" material="emissive: #4a2a1a; emissiveIntensity: 0.2"></a-cylinder>
+            <a-sphere radius="0.25" position="0 1 0" color="#b8860b"></a-sphere>
         </a-entity>
+        
+        <a-entity position="3.5 -0.2 -5">
+            <a-cylinder radius="0.2" height="2" color="#8b5a2b" material="emissive: #4a2a1a; emissiveIntensity: 0.2"></a-cylinder>
+            <a-sphere radius="0.25" position="0 1 0" color="#b8860b"></a-sphere>
+        </a-entity>
+        
+        <!-- Lighting - Enhanced -->
+        <a-light type="ambient" intensity="1.2" color="#f5e6d3"></a-light>
+        <a-light type="directional" position="5 5 5" intensity="1.5" color="#f5e6d3"></a-light>
+        <a-light type="point" intensity="1.0" position="-2 3 2" color="#b8860b"></a-light>
+        <a-light type="point" intensity="1.0" position="2 3 2" color="#d4af37"></a-light>
+        <a-light type="point" intensity="0.8" position="0 2 -1" color="#e6cba0"></a-light>
+        
     </a-scene>
 
     <script>
@@ -878,7 +936,7 @@
             gyroIndicator.classList.remove('inactive');
             gyroText.textContent = 'Gyroscope Active';
             
-            // Enable look controls
+            // Enable look controls - FIXED: Properly enable
             const camera = document.querySelector('[camera]');
             if (camera) {
                 camera.setAttribute('look-controls', 'enabled', true);
@@ -936,23 +994,83 @@
             console.log('Exited VR mode');
         });
 
+        // ==================== INTERSECTION HANDLERS - FIXED ====================
+        // These functions are now properly connected to raycaster events
+        
+        // ==================== SCENE INIT - FIXED ====================
+        document.querySelector('a-scene').addEventListener('loaded', function() {
+            console.log('A-Frame scene loaded');
+            
+            // Set up raycaster intersection events - FIXED: Proper event handlers
+            const raycaster = document.querySelector('#raycaster');
+            if (raycaster) {
+                // When raycast intersects an entity
+                raycaster.addEventListener('raycaster-intersection', function(evt) {
+                    const els = evt.detail.els;
+                    if (els && els.length > 0) {
+                        const intersectedEl = els[0];
+                        if (intersectedEl && intersectedEl.classList.contains('menu-option')) {
+                            handleIntersection(intersectedEl);
+                        }
+                    }
+                });
+                
+                // When raycast intersection is cleared
+                raycaster.addEventListener('raycaster-intersection-cleared', function(evt) {
+                    handleIntersectionCleared();
+                });
+            }
+            
+            // Also add mouseenter/mouseleave for desktop testing
+            const menuOptions = document.querySelectorAll('.menu-option');
+            menuOptions.forEach(option => {
+                option.addEventListener('mouseenter', function() {
+                    if (!isVRMode) handleIntersection(this);
+                });
+                option.addEventListener('mouseleave', function() {
+                    if (!isVRMode) handleIntersectionCleared();
+                });
+            });
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading-screen').style.display = 'none';
+                }, 800);
+            }, 2000);
+        });
+
         // ==================== INTERSECTION HANDLERS ====================
         function handleIntersection(entity) {
             if (!entity || isVRMode) return;
+            
+            // Visual feedback - change cursor color
+            const cursor = document.querySelector('#vr-cursor a-torus:first-child');
+            if (cursor) {
+                cursor.setAttribute('color', '#d4af37');
+            }
             
             const projectName = entity.getAttribute('data-name') || 'Unknown';
 
             // If this is a new target, reset dwell timer
             if (currentTarget !== entity) {
+                // Clear previous dwell
                 if (dwellTimer) {
                     clearTimeout(dwellTimer);
                     dwellTimer = null;
                 }
                 
+                // Reset progress ring
+                dwellProgress = 0;
+                if (progressRing3D) {
+                    progressRing3D.setAttribute('visible', 'true');
+                    progressRing3D.setAttribute('rotation', { x: 90, y: 0, z: 0 });
+                }
+                
                 currentTarget = entity;
                 dwellStartTime = Date.now();
                 isDwelling = true;
-                progressRing3D.setAttribute('visible', 'true');
                 
                 // Start dwell progress
                 updateDwellProgress();
@@ -962,10 +1080,19 @@
         function handleIntersectionCleared() {
             if (isVRMode) return;
             
+            // Reset cursor color
+            const cursor = document.querySelector('#vr-cursor a-torus:first-child');
+            if (cursor) {
+                cursor.setAttribute('color', '#d4af37');
+            }
+            
             // Reset dwell state
             currentTarget = null;
             isDwelling = false;
-            progressRing3D.setAttribute('visible', 'false');
+            
+            if (progressRing3D) {
+                progressRing3D.setAttribute('visible', 'false');
+            }
             
             if (dwellTimer) {
                 clearTimeout(dwellTimer);
@@ -973,22 +1100,20 @@
             }
             
             dwellProgress = 0;
-            
-            if (progressRing3D) {
-                progressRing3D.setAttribute('rotation', { x: 90, y: 0, z: 0 });
-            }
         }
 
-        // ==================== DWELL MECHANISM ====================
+        // ==================== DWELL MECHANISM - FIXED ====================
         function updateDwellProgress() {
             if (!isDwelling || !currentTarget || isVRMode) return;
             
             const elapsed = Date.now() - dwellStartTime;
             dwellProgress = Math.min((elapsed / DWELL_TIME) * 100, 100);
             
-            // Update 3D progress ring
+            // Update 3D progress ring - FIXED: Rotation calculation
             if (progressRing3D) {
-                progressRing3D.setAttribute('rotation', { x: 90, y: dwellProgress * 3.6, z: 0 });
+                // Calculate rotation angle based on progress (0 to 360 degrees)
+                const rotationAngle = dwellProgress * 3.6; // 3.6 degrees per percent
+                progressRing3D.setAttribute('rotation', { x: 90, y: rotationAngle, z: 0 });
             }
 
             if (dwellProgress >= 100) {
@@ -997,14 +1122,17 @@
                 const projectName = currentTarget.getAttribute('data-name');
                 
                 if (projectId) {
-                    // Visual feedback
-                    const material = currentTarget.getAttribute('material');
-                    if (material) {
-                        currentTarget.setAttribute('material', 'color', '#d4af37');
-                        setTimeout(() => {
-                            currentTarget.setAttribute('material', 'color', material.color);
-                        }, 300);
-                    }
+                    // Visual feedback - flash white
+                    const originalColor = currentTarget.getAttribute('material').color;
+                    currentTarget.setAttribute('material', 'color', '#ffffff');
+                    currentTarget.setAttribute('material', 'emissive', '#d4af37');
+                    
+                    setTimeout(() => {
+                        if (currentTarget) {
+                            currentTarget.setAttribute('material', 'color', originalColor);
+                            currentTarget.setAttribute('material', 'emissive', '#4a2a1a');
+                        }
+                    }, 300);
 
                     selectionCount++;
                     
@@ -1012,6 +1140,8 @@
                     selectionFeedback.textContent = `🏛️ SELECTED: ${projectName}`;
                     selectionFeedback.classList.add('show');
                     setTimeout(() => selectionFeedback.classList.remove('show'), 2000);
+                    
+                    console.log(`✅ Selected: ${projectName}`);
                     
                     // Reset dwell state
                     resetDwell();
@@ -1035,36 +1165,16 @@
                 dwellTimer = null;
             }
             dwellProgress = 0;
-            progressRing3D.setAttribute('visible', 'false');
-        }
-
-        // ==================== SCENE INIT ====================
-        document.querySelector('a-scene').addEventListener('loaded', function() {
-            console.log('A-Frame scene loaded');
-            
-            // Set up raycaster intersection events
-            const raycaster = document.querySelector('#raycaster');
-            if (raycaster) {
-                raycaster.addEventListener('raycaster-intersected', function(evt) {
-                    const intersectedEl = evt.detail.el;
-                    if (intersectedEl && intersectedEl.classList.contains('menu-option')) {
-                        handleIntersection(intersectedEl);
-                    }
-                });
-                
-                raycaster.addEventListener('raycaster-intersected-cleared', function() {
-                    handleIntersectionCleared();
-                });
+            if (progressRing3D) {
+                progressRing3D.setAttribute('visible', 'false');
             }
             
-            // Hide loading screen
-            setTimeout(() => {
-                document.getElementById('loading-screen').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('loading-screen').style.display = 'none';
-                }, 800);
-            }, 2000);
-        });
+            // Reset cursor
+            const cursor = document.querySelector('#vr-cursor a-torus:first-child');
+            if (cursor) {
+                cursor.setAttribute('color', '#d4af37');
+            }
+        }
 
         // ==================== SESSION TIMER ====================
         setInterval(() => {
@@ -1082,7 +1192,7 @@
             setTimeout(checkGyroscopePermission, 1500);
             
             console.log('🏛️ Bulacan Heritage VR - Main Menu');
-            console.log('💡 Gaze at any historical site to explore');
+            console.log('💡 Gaze at any historical site for 1 second to explore');
             console.log('💡 Click VR button for immersive mode');
         };
     </script>
