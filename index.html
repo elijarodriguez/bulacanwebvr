@@ -3,896 +3,666 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VR Heritage · Bulacan | Main Menu</title>
+    <title>VR Heritage · Bulacan</title>
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <!-- Google Fonts for enhanced typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { 
             margin: 0; 
             padding: 0; 
             box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
         }
         
         body { 
             margin: 0; 
             overflow: hidden; 
-            background: linear-gradient(135deg, #1a0f0c 0%, #2c1810 100%); 
-            font-family: 'Playfair Display', serif; 
+            background: #0a0a0a;
+            font-family: 'Inter', sans-serif; 
             position: fixed;
             width: 100%;
             height: 100%;
-            touch-action: none;
-        }
-        
-        /* Mobile-optimized Performance Panel */
-        #performance-panel {
-            position: fixed; 
-            top: 10px; 
-            left: 10px;
-            right: 10px;
-            background: rgba(26,15,12,0.9); 
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 2px solid rgba(212,175,55,0.6); 
-            border-radius: 25px;
-            padding: 15px; 
-            color: #f5e6d3; 
-            z-index: 1000;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 30px rgba(212,175,55,0.3);
-            transition: all 0.3s ease;
-            animation: panelGlow 3s infinite alternate;
-            max-width: none;
-            margin: 0 auto;
         }
 
-        @media (min-width: 768px) {
+        /* Minimal Panel */
+        #performance-panel {
+            position: fixed; 
+            top: 16px; 
+            left: 16px;
+            right: 16px;
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 12px;
+            color: #fff;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (min-width: 640px) {
             #performance-panel {
                 top: 20px;
                 left: 20px;
                 right: auto;
-                width: 350px;
+                width: 300px;
             }
         }
 
-        @keyframes panelGlow {
-            0% { box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 30px rgba(212,175,55,0.2); }
-            100% { box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 50px rgba(212,175,55,0.5); }
-        }
-
-        .panel-header {
+        .panel-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 10px;
-        }
-
-        .panel-header h3 {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(18px, 5vw, 24px);
-            font-weight: 700;
-            color: #d4af37;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin: 0;
-            text-shadow: 0 0 15px rgba(212,175,55,0.5);
-        }
-
-        .panel-icon {
-            font-size: clamp(20px, 6vw, 28px);
-            color: #d4af37;
-            filter: drop-shadow(0 0 10px rgba(212,175,55,0.5));
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .status-card {
-            background: rgba(44,24,16,0.6);
-            border-radius: 15px;
-            padding: 10px 5px;
-            border: 1px solid rgba(212,175,55,0.3);
-            transition: transform 0.2s ease;
-            text-align: center;
-        }
-
-        .status-card:active {
-            transform: scale(0.95);
-            background: rgba(212,175,55,0.2);
-        }
-
-        .status-label { 
-            color: #b8860b; 
-            font-size: clamp(10px, 3vw, 14px);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-            display: block;
-        }
-        
-        .status-value { 
-            color: #d4af37; 
-            font-weight: bold; 
-            font-size: clamp(12px, 4vw, 18px);
-            font-family: 'Cinzel', serif;
-            text-shadow: 0 0 10px rgba(212,175,55,0.3);
-        }
-
-        .stat-value {
-            font-size: clamp(16px, 5vw, 24px);
-            font-weight: 900;
-            color: #f5e6d3;
-            line-height: 1.2;
-        }
-
-        .stat-unit {
-            font-size: clamp(8px, 2.5vw, 14px);
-            color: #b8860b;
-            margin-left: 3px;
-        }
-
-        .status-row {
-            display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-bottom: 8px;
-            font-size: clamp(12px, 4vw, 16px);
-            padding: 8px 10px;
-            background: rgba(44,24,16,0.4);
-            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.7);
         }
 
-        .progress-section {
-            margin: 12px 0;
+        .panel-row:last-child {
+            margin-bottom: 0;
         }
 
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            color: #b8860b;
-            font-size: clamp(11px, 3.5vw, 14px);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .panel-value {
+            color: #fff;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .panel-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+        }
+
+        .progress-container {
+            margin: 8px 0;
         }
 
         .progress-bar {
-            width: 100%; 
-            height: 12px; 
-            background: #2c1810;
-            border-radius: 10px; 
-            overflow: hidden; 
-            border: 1px solid #d4af37;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
         }
-        
+
         .progress-fill {
-            height: 100%; 
-            background: linear-gradient(90deg, #d4af37, #fff5d4, #d4af37);
-            width: 0%; 
+            height: 100%;
+            background: #fff;
+            width: 0%;
             transition: width 0.1s linear;
-            box-shadow: 0 0 20px #d4af37;
-            animation: progressPulse 1.5s infinite;
         }
 
-        @keyframes progressPulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
         }
 
-        /* Mobile-optimized buttons */
-        #toggle-log-btn, #export-data {
-            width: 100%;
-            padding: 14px;
-            margin-top: 10px;
-            background: linear-gradient(135deg, #2c1810, #1a0f0c);
-            border: 2px solid #d4af37;
+        .metric-item {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 8px 4px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-number {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 2px;
+        }
+
+        /* Minimal Buttons */
+        .minimal-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 30px;
-            color: #d4af37;
-            font-family: 'Cinzel', serif;
-            font-size: clamp(14px, 4vw, 16px);
-            font-weight: bold;
+            padding: 8px 14px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
+            transition: all 0.2s ease;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 6px;
             -webkit-appearance: none;
             appearance: none;
-            touch-action: manipulation;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
         }
 
-        #toggle-log-btn:active, #export-data:active {
-            background: #d4af37;
-            color: #1a0f0c;
+        .minimal-btn:active {
+            background: rgba(255, 255, 255, 0.15);
             transform: scale(0.98);
-            box-shadow: 0 0 30px rgba(212,175,55,0.5);
+        }
+
+        .minimal-btn i {
+            font-size: 12px;
+            opacity: 0.7;
         }
 
         #export-data {
             position: fixed;
-            bottom: 10px;
-            right: 10px;
-            left: 10px;
-            width: auto;
-            margin: 0;
+            bottom: 80px;
+            right: 16px;
             z-index: 1000;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 640px) {
             #export-data {
-                bottom: 120px;
+                bottom: 20px;
                 right: 20px;
-                left: auto;
-                width: auto;
             }
         }
 
-        /* Mobile-optimized Instructions */
+        /* Minimal Instructions */
         #instructions {
             position: fixed; 
-            bottom: 80px; 
-            left: 10px;
-            right: 10px;
-            background: rgba(26,15,12,0.9); 
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 2px solid #d4af37; 
-            border-radius: 60px;
-            padding: 12px; 
-            color: #f5e6d3; 
+            bottom: 16px; 
+            left: 16px;
+            right: 16px;
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 10px 16px;
+            color: #fff;
             z-index: 100;
-            display: flex; 
+            display: flex;
             justify-content: space-around;
-            gap: 5px; 
-            font-size: clamp(12px, 3.5vw, 18px);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 30px rgba(212,175,55,0.3);
-            animation: instructionGlow 2s infinite alternate;
-            margin: 0 auto;
-            max-width: 500px;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 400;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 640px) {
             #instructions {
-                bottom: 30px;
+                bottom: 20px;
                 left: 50%;
                 right: auto;
                 transform: translateX(-50%);
-                padding: 15px 40px;
-                gap: 40px;
+                width: auto;
+                min-width: 400px;
             }
         }
 
-        @keyframes instructionGlow {
-            0% { box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(212,175,55,0.3); }
-            100% { box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.6); }
-        }
-
-        .instruction-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 5px; 
-            position: relative;
-            flex: 1;
-            justify-content: center;
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .instruction-item i {
-            font-size: clamp(16px, 5vw, 24px);
-            color: #d4af37;
-            filter: drop-shadow(0 0 10px rgba(212,175,55,0.5));
+            font-size: 14px;
+            opacity: 0.7;
         }
 
-        .instruction-item span {
-            display: none;
-        }
-
-        @media (min-width: 480px) {
-            .instruction-item span {
-                display: inline;
-            }
-        }
-
-        /* Mobile-optimized Selection Feedback */
+        /* Selection Feedback */
         #selection-feedback {
             position: fixed; 
             top: 50%; 
-            left: 10px;
-            right: 10px;
+            left: 16px;
+            right: 16px;
             transform: translateY(-50%);
-            background: linear-gradient(135deg, #d4af37, #b8860b);
-            color: #1a0f0c; 
-            padding: 20px; 
-            border-radius: 100px;
-            font-size: clamp(18px, 6vw, 36px); 
-            font-weight: 900; 
-            border: 4px solid #f5e6d3;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: #fff; 
+            padding: 16px; 
+            border-radius: 40px;
+            font-size: 16px; 
+            font-weight: 500; 
+            border: 1px solid rgba(255, 255, 255, 0.2);
             opacity: 0; 
-            transition: opacity 0.3s; 
+            transition: opacity 0.2s; 
             pointer-events: none;
             z-index: 10000; 
             text-align: center;
-            box-shadow: 0 0 100px gold;
-            font-family: 'Cinzel', serif;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            max-width: 300px;
             margin: 0 auto;
-            max-width: 90%;
-            width: auto;
         }
         
         #selection-feedback.show { 
             opacity: 1; 
-            animation: feedbackPulse 0.5s infinite alternate;
         }
 
-        @keyframes feedbackPulse {
-            0% { transform: translateY(-50%) scale(1); }
-            100% { transform: translateY(-50%) scale(1.05); }
-        }
-
-        /* Mobile-optimized FPS Log Modal */
+        /* Minimal Modal */
         #fps-log-modal {
             position: fixed;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            background: rgba(26,15,12,0.98);
+            top: 50%;
+            left: 16px;
+            right: 16px;
+            transform: translateY(-50%);
+            background: rgba(20, 20, 20, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 3px solid #d4af37;
-            border-radius: 30px;
-            padding: 15px;
-            color: #f5e6d3;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 20px;
+            color: #fff;
             z-index: 10000;
+            max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 30px 100px rgba(0,0,0,0.9), 0 0 100px rgba(212,175,55,0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             display: none;
             -webkit-overflow-scrolling: touch;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 640px) {
             #fps-log-modal {
                 top: 50%;
                 left: 50%;
                 right: auto;
-                bottom: auto;
                 transform: translate(-50%, -50%);
-                width: 800px;
-                max-height: 80vh;
-                padding: 30px;
+                width: 600px;
             }
         }
 
         #fps-log-modal.show {
             display: block;
-            animation: modalFadeIn 0.3s ease;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 10px;
+            margin-bottom: 16px;
         }
 
-        .modal-header h2 {
-            font-family: 'Cinzel', serif;
-            font-size: clamp(18px, 5vw, 28px);
-            color: #d4af37;
-            margin: 0;
+        .modal-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: -0.2px;
         }
 
         .close-btn {
             background: none;
             border: none;
-            color: #d4af37;
-            font-size: clamp(24px, 7vw, 30px);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 20px;
             cursor: pointer;
-            transition: transform 0.3s;
-            padding: 10px;
-            -webkit-appearance: none;
-            appearance: none;
-            touch-action: manipulation;
+            padding: 4px 8px;
         }
 
-        .close-btn:active {
-            transform: scale(1.2);
-            color: #ff6b6b;
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px;
+            border-radius: 30px;
+            margin-bottom: 16px;
         }
 
-        .log-tabs {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        .tab-btn {
-            padding: 12px 5px;
-            background: rgba(44,24,16,0.8);
-            border: 2px solid #b8860b;
-            border-radius: 12px;
-            color: #e4d5b9;
-            font-family: 'Cinzel', serif;
-            font-weight: bold;
+        .tab {
+            flex: 1;
+            padding: 8px;
+            background: none;
+            border: none;
+            border-radius: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: clamp(12px, 3.5vw, 16px);
-            -webkit-appearance: none;
-            appearance: none;
-            touch-action: manipulation;
+            transition: all 0.2s;
         }
 
-        .tab-btn.active {
-            background: #d4af37;
-            color: #1a0f0c;
-            border-color: #d4af37;
+        .tab.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
         }
 
-        .tab-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Mobile-optimized tables */
-        .log-table {
+        /* Minimal Tables */
+        .minimal-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: clamp(11px, 3vw, 14px);
+            font-size: 12px;
         }
 
-        .log-table th {
-            background: #2c1810;
-            color: #d4af37;
-            padding: 10px 5px;
-            font-family: 'Cinzel', serif;
-            font-weight: 700;
-            border: 1px solid #b8860b;
-            white-space: nowrap;
+        .minimal-table th {
+            text-align: left;
+            padding: 8px 4px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 500;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .log-table td {
-            padding: 8px 5px;
-            text-align: center;
-            border: 1px solid rgba(212,175,55,0.3);
-            color: #f5e6d3;
-            word-break: break-word;
+        .minimal-table td {
+            padding: 8px 4px;
+            color: #fff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .log-table tr:active {
-            background: rgba(212,175,55,0.2);
+        .minimal-table tr:last-child td {
+            border-bottom: none;
         }
 
-        .stats-summary {
+        .stats-cards {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(44,24,16,0.6);
-            border-radius: 20px;
-            border: 2px solid #d4af37;
+            gap: 8px;
+            margin-top: 16px;
         }
 
-        .summary-item {
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 12px;
             text-align: center;
         }
 
-        .summary-label {
-            color: #b8860b;
-            font-size: clamp(10px, 3vw, 14px);
-            text-transform: uppercase;
-            margin-bottom: 5px;
+        .stat-card-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 4px;
         }
 
-        .summary-value {
-            color: #d4af37;
-            font-size: clamp(16px, 5vw, 28px);
-            font-weight: 900;
-            font-family: 'Cinzel', serif;
+        .stat-card-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
         }
 
         /* VR Mode */
         body.vr-mode #instructions,
         body.vr-mode #performance-panel,
-        body.vr-mode #export-data,
-        body.vr-mode #toggle-log-btn {
+        body.vr-mode #export-data {
             display: none !important;
         }
 
-        /* Loading indicator */
-        #loading-indicator {
+        /* Loading */
+        #loading {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(26,15,12,0.9);
-            border: 3px solid #d4af37;
-            border-radius: 50px;
-            padding: 20px 40px;
-            color: #d4af37;
-            font-family: 'Cinzel', serif;
-            font-size: clamp(16px, 5vw, 24px);
+            color: #fff;
+            font-size: 14px;
+            background: rgba(0,0,0,0.5);
+            padding: 12px 24px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
             z-index: 10001;
             display: none;
-            animation: loadingPulse 1.5s infinite;
-        }
-
-        @keyframes loadingPulse {
-            0% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
-            100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        /* Safe area for notched phones */
-        @supports (padding: max(0px)) {
-            #performance-panel {
-                top: max(10px, env(safe-area-inset-top));
-                left: max(10px, env(safe-area-inset-left));
-                right: max(10px, env(safe-area-inset-right));
-            }
-            
-            #instructions {
-                bottom: max(80px, env(safe-area-inset-bottom));
-                left: max(10px, env(safe-area-inset-left));
-                right: max(10px, env(safe-area-inset-right));
-            }
-            
-            #export-data {
-                bottom: max(10px, env(safe-area-inset-bottom));
-                right: max(10px, env(safe-area-inset-right));
-                left: max(10px, env(safe-area-inset-left));
-            }
-            
-            #fps-log-modal {
-                top: max(10px, env(safe-area-inset-top));
-                left: max(10px, env(safe-area-inset-left));
-                right: max(10px, env(safe-area-inset-right));
-                bottom: max(10px, env(safe-area-inset-bottom));
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Loading Indicator -->
-    <div id="loading-indicator">
-        <i class="fas fa-spinner fa-spin" style="margin-right: 15px;"></i>
+    <!-- Loading -->
+    <div id="loading">
+        <i class="fas fa-circle-notch fa-spin" style="margin-right: 8px;"></i>
         Loading...
     </div>
 
-    <!-- Mobile-optimized Performance Panel -->
+    <!-- Minimal Performance Panel -->
     <div id="performance-panel">
-        <div class="panel-header">
-            <i class="fas fa-crown panel-icon"></i>
-            <h3>Heritage Command</h3>
+        <div class="panel-row">
+            <span>Gaze</span>
+            <span class="panel-value" id="gaze-status">● Active</span>
+        </div>
+        <div class="panel-row">
+            <span>Target</span>
+            <span class="panel-value" id="hotspot-status">None</span>
+        </div>
+        <div class="panel-row">
+            <span>Dwell</span>
+            <span class="panel-value" id="dwell-status">Inactive</span>
         </div>
         
-        <div class="status-grid">
-            <div class="status-card">
-                <span class="status-label">🏛️</span>
-                <div class="stat-value">5</div>
-            </div>
-            <div class="status-card">
-                <span class="status-label">👆</span>
-                <div class="stat-value" id="gaze-status">●</div>
-            </div>
-            <div class="status-card">
-                <span class="status-label">📊</span>
-                <div class="stat-value" id="fps-display">60</div>
-            </div>
-            <div class="status-card">
-                <span class="status-label">⚡</span>
-                <div class="stat-value" id="latency-display">0</div>
-            </div>
-        </div>
-
-        <div class="status-row">
-            <span><i class="fas fa-bullseye" style="margin-right: 8px;"></i>TARGET:</span>
-            <span class="status-value" id="hotspot-status">None</span>
-        </div>
-        
-        <div class="status-row">
-            <span><i class="fas fa-hourglass-half" style="margin-right: 8px;"></i>DWELL:</span>
-            <span class="status-value" id="dwell-status">Inactive</span>
-        </div>
-
-        <div class="progress-section">
-            <div class="progress-header">
-                <span>SELECTION</span>
-                <span id="progress-percent">0%</span>
-            </div>
+        <div class="progress-container">
             <div class="progress-bar">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
         </div>
 
-        <div class="status-row">
-            <span><i class="fas fa-check-circle" style="margin-right: 8px;"></i>SELECTIONS:</span>
-            <span class="status-value" id="selection-count">0</span>
-        </div>
-
-        <button id="toggle-log-btn">
-            <i class="fas fa-chart-line"></i>
-            View Logs
-        </button>
-    </div>
-
-    <!-- FPS/Latency Log Modal -->
-    <div id="fps-log-modal">
-        <div class="modal-header">
-            <h2><i class="fas fa-chart-bar" style="margin-right: 10px;"></i>Performance Logs</h2>
-            <button class="close-btn" onclick="closeLogModal()">&times;</button>
-        </div>
-
-        <div class="log-tabs">
-            <button class="tab-btn active" onclick="switchTab('fps')">FPS</button>
-            <button class="tab-btn" onclick="switchTab('latency')">Latency</button>
-            <button class="tab-btn" onclick="switchTab('accuracy')">Accuracy</button>
-        </div>
-
-        <!-- FPS Log Table -->
-        <div id="fps-tab" class="tab-content">
-            <table class="log-table" id="fps-table">
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>FPS</th>
-                        <th>≥30</th>
-                    </tr>
-                </thead>
-                <tbody id="fps-log-body">
-                    <!-- FPS logs will be inserted here -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Latency Log Table -->
-        <div id="latency-tab" class="tab-content" style="display: none;">
-            <table class="log-table">
-                <thead>
-                    <tr>
-                        <th>Trial</th>
-                        <th>Latency (ms)</th>
-                    </tr>
-                </thead>
-                <tbody id="latency-log-body">
-                    <!-- Latency logs will be inserted here -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Accuracy Test Table -->
-        <div id="accuracy-tab" class="tab-content" style="display: none;">
-            <table class="log-table">
-                <thead>
-                    <tr>
-                        <th>Participant</th>
-                        <th>Low</th>
-                        <th>Medium</th>
-                        <th>High</th>
-                    </tr>
-                </thead>
-                <tbody id="accuracy-log-body">
-                    <tr>
-                        <td>P1</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                    </tr>
-                    <tr>
-                        <td>P2</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                    </tr>
-                    <tr>
-                        <td>P3</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                        <td contenteditable="true" class="editable" onblur="updateAccuracyStats()">0/10</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="stats-summary">
-            <div class="summary-item">
-                <div class="summary-label">Avg FPS</div>
-                <div class="summary-value" id="avg-fps">0</div>
+        <div class="metric-grid">
+            <div class="metric-item">
+                <div class="metric-label">FPS</div>
+                <div class="metric-number" id="fps-display">60</div>
             </div>
-            <div class="summary-item">
-                <div class="summary-label">Avg Latency</div>
-                <div class="summary-value" id="avg-latency">0ms</div>
+            <div class="metric-item">
+                <div class="metric-label">Latency</div>
+                <div class="metric-number" id="latency-display">0</div>
             </div>
-            <div class="summary-item">
-                <div class="summary-label">Stability</div>
-                <div class="summary-value" id="stability">0%</div>
+            <div class="metric-item">
+                <div class="metric-label">Selections</div>
+                <div class="metric-number" id="selection-count">0</div>
             </div>
-            <div class="summary-item">
-                <div class="summary-label">Min FPS</div>
-                <div class="summary-value" id="min-fps">0</div>
-            </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <div style="display: flex; gap: 8px;">
+            <button class="minimal-btn" id="toggle-log-btn" style="flex: 2;">
+                <i class="fas fa-chart-bar"></i>
+                Logs
+            </button>
         </div>
     </div>
 
     <!-- Export Button -->
-    <button id="export-data">
+    <button class="minimal-btn" id="export-data">
         <i class="fas fa-download"></i>
-        Export Data
+        Export
     </button>
 
-    <!-- Instructions -->
+    <!-- Minimal Instructions -->
     <div id="instructions">
         <div class="instruction-item">
             <i class="fas fa-eye"></i>
             <span>Look</span>
         </div>
         <div class="instruction-item">
-            <i class="fas fa-hourglass-half"></i>
-            <span>Hold 1s</span>
+            <i class="fas fa-circle-notch"></i>
+            <span>Hold</span>
         </div>
         <div class="instruction-item">
-            <i class="fas fa-map-marked-alt"></i>
-            <span>Explore</span>
+            <i class="fas fa-arrow-right"></i>
+            <span>Enter</span>
         </div>
     </div>
 
     <!-- Selection Feedback -->
     <div id="selection-feedback"></div>
 
-    <!-- VR Scene - Main Menu -->
+    <!-- Minimal Log Modal -->
+    <div id="fps-log-modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-chart-line" style="margin-right: 8px;"></i>Performance Logs</h3>
+            <button class="close-btn" onclick="closeLogModal()">&times;</button>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('fps')">FPS</button>
+            <button class="tab" onclick="switchTab('latency')">Latency</button>
+            <button class="tab" onclick="switchTab('accuracy')">Accuracy</button>
+        </div>
+
+        <!-- FPS Tab -->
+        <div id="fps-tab" class="tab-content">
+            <table class="minimal-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>FPS</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="fps-log-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Latency Tab -->
+        <div id="latency-tab" class="tab-content" style="display: none;">
+            <table class="minimal-table">
+                <thead>
+                    <tr>
+                        <th>Trial</th>
+                        <th>Latency (ms)</th>
+                    </tr>
+                </thead>
+                <tbody id="latency-log-body"></tbody>
+            </table>
+        </div>
+
+        <!-- Accuracy Tab -->
+        <div id="accuracy-tab" class="tab-content" style="display: none;">
+            <table class="minimal-table">
+                <thead>
+                    <tr>
+                        <th>Participant</th>
+                        <th>Low</th>
+                        <th>Med</th>
+                        <th>High</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>P1</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                    </tr>
+                    <tr>
+                        <td>P2</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                    </tr>
+                    <tr>
+                        <td>P3</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                        <td contenteditable="true" class="editable">0/10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-card-label">Avg FPS</div>
+                <div class="stat-card-value" id="avg-fps">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Avg Latency</div>
+                <div class="stat-card-value" id="avg-latency">0ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Stability</div>
+                <div class="stat-card-value" id="stability">0%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-label">Min FPS</div>
+                <div class="stat-card-value" id="min-fps">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VR Scene -->
     <a-scene id="scene" 
              vr-mode-ui="enabled: true"
-             background="color: #1a0f0c"
-             fog="type: exponential; color: #1a0f0c; density: 0.04"
-             loading-screen="enabled: false">
+             background="color: #0a0a0a"
+             fog="type: exponential; color: #0a0a0a; density: 0.04">
         
-        <!-- Camera with cursor -->
+        <!-- Camera -->
         <a-entity id="camera" camera="fov: 80" look-controls position="0 1.6 0">
             <a-entity id="vr-cursor" position="0 0 -2">
-                <a-torus id="cursor-ring" radius="0.12" radius-tubular="0.015" 
-                         color="#d4af37" rotation="90 0 0"
-                         material="emissive: #d4af37; emissiveIntensity: 0.8"></a-torus>
-                <a-sphere radius="0.04" color="#f5e6d3" position="0 0 0"
-                         material="emissive: #ffffff; emissiveIntensity: 0.5"></a-sphere>
-                <a-torus id="dwell-ring" radius="0.15" radius-tubular="0.02" 
-                         color="#ffffff" rotation="90 0 0" visible="false"
-                         material="emissive: #ffffff; emissiveIntensity: 1.5; opacity: 0.9"></a-torus>
+                <a-ring radius-inner="0.08" radius-outer="0.1" color="#fff" rotation="90 0 0"></a-ring>
+                <a-torus id="dwell-ring" radius="0.12" radius-tubular="0.005" 
+                         color="#fff" rotation="90 0 0" visible="false"
+                         material="transparent: true; opacity: 0.5"></a-torus>
             </a-entity>
             <a-entity id="raycaster" raycaster="objects: .hotspot; far: 20; interval: 100;"></a-entity>
         </a-entity>
 
-        <!-- Enhanced Title -->
+        <!-- Title -->
         <a-entity position="0 3 -5">
-            <a-text value="✦ BULACAN ✦" color="#d4af37" align="center" width="8" scale="2 2 1"
-                   material="emissive: #d4af37; emissiveIntensity: 0.3"></a-text>
-            <a-text value="Heritage VR" color="#b8860b" align="center" width="6" scale="1.2 1.2 1" position="0 -0.8 0"></a-text>
+            <a-text value="BULACAN" color="#fff" align="center" width="6" scale="1.5 1.5 1"></a-text>
+            <a-text value="heritage" color="#888" align="center" width="4" scale="0.8 0.8 1" position="0 -0.6 0"></a-text>
         </a-entity>
 
-        <!-- 5 Historical Site Hotspots - Mobile-optimized positions -->
+        <!-- Hotspots -->
         <a-entity position="0 1.5 -4.5">
-            <!-- Site 1: Battle of Quinga -->
-            <a-entity class="hotspot" id="site-quinga" data-site="quinga" data-name="Battle of Quinga"
+            <!-- Site 1 -->
+            <a-entity class="hotspot" id="site-quinga" data-name="Battle of Quinga"
                       data-file="quinga.html"
-                      position="-2.6 0.5 0"
-                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.3"
-                      material="color: #2c1810; emissive: #8b4513; emissiveIntensity: 0.5">
-                <a-entity position="0 0.5 0.2">
-                    <a-text value="⚔️" color="#d4af37" align="center" scale="2"></a-text>
-                </a-entity>
-                <a-entity position="0 0 0.2">
-                    <a-text value="QUINGA" color="#e4d5b9" align="center" scale="0.8"></a-text>
-                </a-entity>
-                <a-entity position="0 -0.5 0.2">
-                    <a-text value="1896" color="#b8860b" align="center" scale="0.6"></a-text>
-                </a-entity>
+                      position="-2.4 0.5 0"
+                      geometry="primitive: plane; width: 1.2; height: 1.4"
+                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
+                <a-text value="QUINGA" color="#fff" align="center" scale="0.6" position="0 0.2 0.1"></a-text>
+                <a-text value="1896" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
             </a-entity>
 
-            <!-- Site 2: Hiyas Museum -->
-            <a-entity class="hotspot" id="site-museum" data-site="museum" data-name="Hiyas ng Bulacan Museum"
+            <!-- Site 2 -->
+            <a-entity class="hotspot" id="site-museum" data-name="Hiyas Museum"
                       data-file="museum.html"
-                      position="-1.3 0.5 0"
-                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.3"
-                      material="color: #2c1810; emissive: #004d4d; emissiveIntensity: 0.5">
-                <a-entity position="0 0.5 0.2">
-                    <a-text value="🏛️" color="#d4af37" align="center" scale="2"></a-text>
-                </a-entity>
-                <a-entity position="0 0 0.2">
-                    <a-text value="HIYAS" color="#e4d5b9" align="center" scale="0.8"></a-text>
-                </a-entity>
-                <a-entity position="0 -0.5 0.2">
-                    <a-text value="MUSEUM" color="#b8860b" align="center" scale="0.6"></a-text>
-                </a-entity>
+                      position="-1.2 0.5 0"
+                      geometry="primitive: plane; width: 1.2; height: 1.4"
+                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
+                <a-text value="HIYAS" color="#fff" align="center" scale="0.6" position="0 0.2 0.1"></a-text>
+                <a-text value="MUSEUM" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
             </a-entity>
 
-            <!-- Site 3: Del Pilar Shrine -->
-            <a-entity class="hotspot" id="site-delpilar" data-site="delpilar" data-name="Marcelo H. Del Pilar Shrine"
+            <!-- Site 3 -->
+            <a-entity class="hotspot" id="site-delpilar" data-name="Del Pilar Shrine"
                       data-file="delpilar.html"
                       position="0 0.5 0"
-                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.3"
-                      material="color: #2c1810; emissive: #665d1e; emissiveIntensity: 0.5">
-                <a-entity position="0 0.5 0.2">
-                    <a-text value="🗽" color="#d4af37" align="center" scale="2"></a-text>
-                </a-entity>
-                <a-entity position="0 0 0.2">
-                    <a-text value="DEL PILAR" color="#e4d5b9" align="center" scale="0.8"></a-text>
-                </a-entity>
-                <a-entity position="0 -0.5 0.2">
-                    <a-text value="SHRINE" color="#b8860b" align="center" scale="0.6"></a-text>
-                </a-entity>
+                      geometry="primitive: plane; width: 1.2; height: 1.4"
+                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
+                <a-text value="DEL PILAR" color="#fff" align="center" scale="0.5" position="0 0.2 0.1"></a-text>
+                <a-text value="SHRINE" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
             </a-entity>
 
-            <!-- Site 4: Barasoain Museum -->
-            <a-entity class="hotspot" id="site-barasoain" data-site="barasoain" data-name="Barasoain Museum"
+            <!-- Site 4 -->
+            <a-entity class="hotspot" id="site-barasoain" data-name="Barasoain Museum"
                       data-file="barasoain.html"
-                      position="1.3 0.5 0"
-                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.3"
-                      material="color: #2c1810; emissive: #8b4513; emissiveIntensity: 0.5">
-                <a-entity position="0 0.5 0.2">
-                    <a-text value="⛪" color="#d4af37" align="center" scale="2"></a-text>
-                </a-entity>
-                <a-entity position="0 0 0.2">
-                    <a-text value="BARASOAIN" color="#e4d5b9" align="center" scale="0.8"></a-text>
-                </a-entity>
-                <a-entity position="0 -0.5 0.2">
-                    <a-text value="1899" color="#b8860b" align="center" scale="0.6"></a-text>
-                </a-entity>
+                      position="1.2 0.5 0"
+                      geometry="primitive: plane; width: 1.2; height: 1.4"
+                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
+                <a-text value="BARASOAIN" color="#fff" align="center" scale="0.5" position="0 0.2 0.1"></a-text>
+                <a-text value="1899" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
             </a-entity>
 
-            <!-- Site 5: Casa Real Shrine -->
-            <a-entity class="hotspot" id="site-casareal" data-site="casareal" data-name="Casa Real Shrine"
+            <!-- Site 5 -->
+            <a-entity class="hotspot" id="site-casareal" data-name="Casa Real Shrine"
                       data-file="casareal.html"
-                      position="2.6 0.5 0"
-                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.3"
-                      material="color: #2c1810; emissive: #4a2c1a; emissiveIntensity: 0.5">
-                <a-entity position="0 0.5 0.2">
-                    <a-text value="🏰" color="#d4af37" align="center" scale="2"></a-text>
-                </a-entity>
-                <a-entity position="0 0 0.2">
-                    <a-text value="CASA REAL" color="#e4d5b9" align="center" scale="0.8"></a-text>
-                </a-entity>
-                <a-entity position="0 -0.5 0.2">
-                    <a-text value="1580" color="#b8860b" align="center" scale="0.6"></a-text>
-                </a-entity>
+                      position="2.4 0.5 0"
+                      geometry="primitive: plane; width: 1.2; height: 1.4"
+                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
+                <a-text value="CASA REAL" color="#fff" align="center" scale="0.5" position="0 0.2 0.1"></a-text>
+                <a-text value="1580" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
             </a-entity>
         </a-entity>
 
         <!-- Floor -->
-        <a-grid position="0 -0.5 -4.5" width="12" height="12" color="#8b5a2b" opacity="0.2"></a-ring>
+        <a-circle radius="10" position="0 -0.5 -4.5" rotation="-90 0 0" material="color: #111; emissive: #111"></a-circle>
         
         <!-- Lighting -->
-        <a-light type="ambient" intensity="1.8" color="#f5e6d3"></a-light>
-        <a-light type="directional" position="2 5 3" intensity="1.5" color="#d4af37"></a-light>
-        <a-light type="point" intensity="1" color="#d4af37" position="0 2 -3"></a-light>
+        <a-light type="ambient" intensity="1.2"></a-light>
+        <a-light type="directional" position="2 5 3" intensity="0.8"></a-light>
     </a-scene>
 
     <script>
         // ==================== CONFIG ====================
-        const DWELL_TIME = 1000; // 1 second
+        const DWELL_TIME = 1000;
 
         // State
         let currentHotspot = null;
@@ -901,27 +671,22 @@
         let dwellStartTime = 0;
         let selectionCount = 0;
 
-        // Performance Monitoring
+        // Performance
         let fpsLogs = [];
         let latencyLogs = [];
         let lastFrameTime = performance.now();
-        let frameCount = 0;
         let sessionStartTime = Date.now();
-        let currentSession = 1;
         let lastSelectionTime = 0;
-        let isVRMode = false;
 
         // DOM elements
         const hotspotStatus = document.getElementById('hotspot-status');
         const dwellStatus = document.getElementById('dwell-status');
         const progressFill = document.getElementById('progress-fill');
-        const progressPercent = document.getElementById('progress-percent');
         const selectionCountEl = document.getElementById('selection-count');
         const dwellRing = document.getElementById('dwell-ring');
-        const cursorRing = document.getElementById('cursor-ring');
         const fpsDisplay = document.getElementById('fps-display');
         const latencyDisplay = document.getElementById('latency-display');
-        const loadingIndicator = document.getElementById('loading-indicator');
+        const loading = document.getElementById('loading');
 
         // ==================== FPS MONITORING ====================
         function measureFPS() {
@@ -929,21 +694,16 @@
             const delta = now - lastFrameTime;
             const currentFPS = Math.round(1000 / delta);
             
-            frameCount++;
+            fpsDisplay.textContent = currentFPS;
             
-            // Update FPS display
-            fpsDisplay.innerHTML = currentFPS;
-            
-            // Log FPS every 30 seconds
-            const sessionElapsed = (now - sessionStartTime) / 1000;
-            
-            if (Math.floor(sessionElapsed) % 30 === 0 && Math.floor(sessionElapsed) > 0) {
+            // Log every 30 seconds
+            const elapsed = (now - sessionStartTime) / 1000;
+            if (Math.floor(elapsed) % 30 === 0 && Math.floor(elapsed) > 0) {
                 const lastLog = fpsLogs[fpsLogs.length - 1];
-                if (!lastLog || Math.abs(lastLog.time - sessionElapsed) >= 29) {
+                if (!lastLog || Math.abs(lastLog.time - elapsed) >= 29) {
                     fpsLogs.push({
-                        time: Math.floor(sessionElapsed),
+                        time: Math.floor(elapsed),
                         fps: currentFPS,
-                        session: currentSession,
                         isAcceptable: currentFPS >= 30
                     });
                     updateFPSDisplay();
@@ -953,80 +713,56 @@
             lastFrameTime = now;
         }
 
-        // ==================== LATENCY MEASUREMENT ====================
+        // ==================== LATENCY ====================
         function measureLatency(action) {
-            const now = Date.now();
-            
             if (action === 'start') {
-                lastSelectionTime = now;
-            } else if (action === 'end') {
-                if (lastSelectionTime > 0) {
-                    const latency = now - lastSelectionTime;
-                    latencyLogs.push({
-                        trial: latencyLogs.length + 1,
-                        latency: latency
-                    });
-                    
-                    // Update latency display
-                    const avgLatency = calculateAverageLatency();
-                    latencyDisplay.innerHTML = Math.round(avgLatency);
-                    
-                    updateLatencyDisplay();
-                }
+                lastSelectionTime = Date.now();
+            } else if (action === 'end' && lastSelectionTime > 0) {
+                const latency = Date.now() - lastSelectionTime;
+                latencyLogs.push({
+                    trial: latencyLogs.length + 1,
+                    latency: latency
+                });
+                
+                const avgLatency = latencyLogs.reduce((a, b) => a + b.latency, 0) / latencyLogs.length;
+                latencyDisplay.textContent = Math.round(avgLatency);
+                updateLatencyDisplay();
             }
         }
 
-        function calculateAverageLatency() {
-            if (latencyLogs.length === 0) return 0;
-            const sum = latencyLogs.reduce((acc, log) => acc + log.latency, 0);
-            return sum / latencyLogs.length;
-        }
-
-        // ==================== NAVIGATION FUNCTION ====================
+        // ==================== NAVIGATION ====================
         function navigateToSite(hotspot) {
             const siteFile = hotspot.getAttribute('data-file');
             const siteName = hotspot.getAttribute('data-name');
             
             if (siteFile) {
-                // Measure latency end
                 measureLatency('end');
                 
-                // Show loading indicator
-                loadingIndicator.style.display = 'block';
+                loading.style.display = 'block';
                 
-                // Show selection feedback
                 const feedback = document.getElementById('selection-feedback');
-                feedback.textContent = `📍 ${siteName}`;
+                feedback.textContent = siteName;
                 feedback.classList.add('show');
                 
-                // Short delay then navigate
                 setTimeout(() => {
                     window.location.href = siteFile;
-                }, 800);
+                }, 500);
             }
         }
 
-        // ==================== RAYCASTER SETUP ====================
+        // ==================== RAYCASTER ====================
         function setupRaycaster() {
             const scene = document.querySelector('a-scene');
             scene.addEventListener('loaded', () => {
                 const raycaster = document.getElementById('raycaster');
                 
                 raycaster.addEventListener('raycaster-intersection', (evt) => {
-                    const intersections = evt.detail.intersections;
-                    if (intersections && intersections.length > 0) {
-                        const hit = intersections[0].object.el;
-                        if (hit && hit.classList.contains('hotspot')) {
-                            
-                            if (currentHotspot !== hit) {
-                                currentHotspot = hit;
-                                const siteName = hit.getAttribute('data-name');
-                                hotspotStatus.innerHTML = siteName.substring(0, 15) + (siteName.length > 15 ? '...' : '');
-                                cursorRing.setAttribute('color', '#ffffff');
-                                
-                                // Start dwell timer immediately
-                                startDwellTimer();
-                            }
+                    const hit = evt.detail.intersections[0]?.object.el;
+                    if (hit?.classList.contains('hotspot')) {
+                        if (currentHotspot !== hit) {
+                            currentHotspot = hit;
+                            hotspotStatus.textContent = hit.getAttribute('data-name').substring(0, 15);
+                            startDwellTimer();
                         }
                     }
                 });
@@ -1034,41 +770,29 @@
                 raycaster.addEventListener('raycaster-intersection-cleared', () => {
                     if (currentHotspot) {
                         currentHotspot = null;
-                        hotspotStatus.innerHTML = 'None';
-                        cursorRing.setAttribute('color', '#d4af37');
+                        hotspotStatus.textContent = 'None';
                         cancelDwellTimer();
                     }
                 });
             });
         }
 
-        // ==================== DWELL LOGIC ====================
+        // ==================== DWELL ====================
         function startDwellTimer() {
             if (!currentHotspot) return;
             
-            // Measure latency start
             measureLatency('start');
             
-            // Cancel any existing timer
-            if (dwellActive) {
-                cancelDwellTimer();
-            }
+            if (dwellActive) cancelDwellTimer();
             
             dwellActive = true;
             dwellStartTime = Date.now();
             dwellRing.setAttribute('visible', 'true');
-            cursorRing.setAttribute('color', '#00ff00');
-            dwellStatus.innerHTML = 'Active';
-            
-            if (dwellTimer) clearInterval(dwellTimer);
+            dwellStatus.textContent = 'Active';
             
             dwellTimer = setInterval(() => {
-                const elapsed = Date.now() - dwellStartTime;
-                const progress = Math.min((elapsed / DWELL_TIME) * 100, 100);
-                
-                progressFill.style.width = progress + '%';
-                progressPercent.textContent = Math.round(progress) + '%';
-                dwellRing.setAttribute('rotation', { x: 90, y: progress * 3.6, z: 0 });
+                const progress = (Date.now() - dwellStartTime) / DWELL_TIME * 100;
+                progressFill.style.width = Math.min(progress, 100) + '%';
                 
                 if (progress >= 100) {
                     completeSelection();
@@ -1078,218 +802,103 @@
 
         function cancelDwellTimer() {
             dwellActive = false;
-            if (dwellTimer) {
-                clearInterval(dwellTimer);
-                dwellTimer = null;
-            }
+            if (dwellTimer) clearInterval(dwellTimer);
             dwellRing.setAttribute('visible', 'false');
-            cursorRing.setAttribute('color', '#d4af37');
-            dwellStatus.innerHTML = 'Inactive';
+            dwellStatus.textContent = 'Inactive';
             progressFill.style.width = '0%';
-            progressPercent.textContent = '0%';
         }
 
         function completeSelection() {
-            if (!currentHotspot) {
-                cancelDwellTimer();
-                return;
-            }
+            if (!currentHotspot) return;
             
             selectionCount++;
             selectionCountEl.textContent = selectionCount;
-            
-            // Navigate to the selected site
             navigateToSite(currentHotspot);
-            
             cancelDwellTimer();
         }
 
-        // ==================== LOG DISPLAY FUNCTIONS ====================
+        // ==================== LOGS ====================
         function updateFPSDisplay() {
             const tbody = document.getElementById('fps-log-body');
             tbody.innerHTML = '';
             
-            // Show last 10 FPS logs for mobile
-            const recentLogs = fpsLogs.slice(-10);
-            recentLogs.forEach(log => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${log.time}s</td>
-                    <td>${log.fps}</td>
-                    <td style="color: ${log.isAcceptable ? '#4ECDC4' : '#FF6B6B'}">${log.isAcceptable ? '✓' : '✗'}</td>
+            fpsLogs.slice(-8).forEach(log => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${log.time}s</td>
+                        <td>${log.fps}</td>
+                        <td style="color: ${log.isAcceptable ? '#4ade80' : '#f87171'}">${log.isAcceptable ? '✓' : '✗'}</td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
             });
             
-            // Update summary stats
-            updateSummaryStats();
+            updateStats();
         }
 
         function updateLatencyDisplay() {
             const tbody = document.getElementById('latency-log-body');
             tbody.innerHTML = '';
             
-            latencyLogs.slice(-8).forEach(log => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${log.trial}</td>
-                    <td>${log.latency}</td>
-                `;
-                tbody.appendChild(row);
+            latencyLogs.slice(-6).forEach(log => {
+                tbody.innerHTML += `<tr><td>${log.trial}</td><td>${log.latency}ms</td></tr>`;
             });
         }
 
-        function updateSummaryStats() {
+        function updateStats() {
             if (fpsLogs.length > 0) {
-                const fpsValues = fpsLogs.map(log => log.fps);
-                const avgFPS = Math.round(fpsValues.reduce((a, b) => a + b, 0) / fpsValues.length);
-                const minFPS = Math.min(...fpsValues);
-                const stableLogs = fpsLogs.filter(log => log.isAcceptable).length;
-                const stability = Math.round((stableLogs / fpsLogs.length) * 100);
+                const fpsValues = fpsLogs.map(l => l.fps);
+                const avg = Math.round(fpsValues.reduce((a, b) => a + b, 0) / fpsValues.length);
+                const min = Math.min(...fpsValues);
+                const stable = Math.round((fpsLogs.filter(l => l.isAcceptable).length / fpsLogs.length) * 100);
                 
-                document.getElementById('avg-fps').textContent = avgFPS;
-                document.getElementById('min-fps').textContent = minFPS;
-                document.getElementById('stability').textContent = stability + '%';
+                document.getElementById('avg-fps').textContent = avg;
+                document.getElementById('min-fps').textContent = min;
+                document.getElementById('stability').textContent = stable + '%';
             }
             
-            const avgLatency = calculateAverageLatency();
-            document.getElementById('avg-latency').textContent = Math.round(avgLatency) + 'ms';
+            const avgLatency = latencyLogs.length ? 
+                Math.round(latencyLogs.reduce((a, b) => a + b.latency, 0) / latencyLogs.length) : 0;
+            document.getElementById('avg-latency').textContent = avgLatency + 'ms';
         }
 
-        function updateAccuracyStats() {
-            // Calculate accuracy from editable cells
-            console.log('Accuracy stats updated');
-        }
-
-        // ==================== MODAL FUNCTIONS ====================
-        window.openLogModal = function() {
-            document.getElementById('fps-log-modal').classList.add('show');
-            updateFPSDisplay();
-            updateLatencyDisplay();
-        }
-
-        window.closeLogModal = function() {
-            document.getElementById('fps-log-modal').classList.remove('show');
-        }
-
-        window.switchTab = function(tab) {
-            // Hide all tabs
+        // ==================== UI ====================
+        window.openLogModal = () => document.getElementById('fps-log-modal').classList.add('show');
+        window.closeLogModal = () => document.getElementById('fps-log-modal').classList.remove('show');
+        
+        window.switchTab = (tab) => {
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            // Show selected tab
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
             document.getElementById(tab + '-tab').style.display = 'block';
             event.target.classList.add('active');
-        }
+        };
 
-        // Toggle log modal
         document.getElementById('toggle-log-btn').addEventListener('click', openLogModal);
-        document.getElementById('toggle-log-btn').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            openLogModal();
-        });
-
-        // ==================== EXPORT DATA ====================
-        document.getElementById('export-data').addEventListener('click', exportData);
-        document.getElementById('export-data').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            exportData();
-        });
-
-        function exportData() {
+        document.getElementById('export-data').addEventListener('click', () => {
             const data = {
-                fpsLogs: fpsLogs,
-                latencyLogs: latencyLogs,
-                selectionCount: selectionCount,
-                sessionStartTime: new Date(sessionStartTime).toISOString(),
+                fps: fpsLogs,
+                latency: latencyLogs,
+                selections: selectionCount,
                 summary: {
-                    avgFPS: fpsLogs.length > 0 ? Math.round(fpsLogs.reduce((a, b) => a + b.fps, 0) / fpsLogs.length) : 0,
-                    avgLatency: calculateAverageLatency(),
-                    totalSelections: selectionCount,
-                    stability: fpsLogs.length > 0 ? Math.round((fpsLogs.filter(l => l.isAcceptable).length / fpsLogs.length) * 100) : 0
+                    avgFPS: fpsLogs.length ? Math.round(fpsLogs.reduce((a, b) => a + b.fps, 0) / fpsLogs.length) : 0,
+                    avgLatency: latencyLogs.length ? Math.round(latencyLogs.reduce((a, b) => a + b.latency, 0) / latencyLogs.length) : 0
                 }
             };
             
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
+            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `vr-heritage-${new Date().toISOString().slice(0,10)}.json`;
+            a.href = URL.createObjectURL(blob);
+            a.download = `heritage-data-${new Date().toISOString().slice(0,10)}.json`;
             a.click();
-            
-            // Show feedback
-            const feedback = document.getElementById('selection-feedback');
-            feedback.textContent = '📊 Data Exported!';
-            feedback.classList.add('show');
-            setTimeout(() => feedback.classList.remove('show'), 2000);
-        }
-
-        // ==================== VR MODE ====================
-        document.getElementById('scene').addEventListener('enter-vr', () => {
-            document.body.classList.add('vr-mode');
-            isVRMode = true;
-        });
-        
-        document.getElementById('scene').addEventListener('exit-vr', () => {
-            document.body.classList.remove('vr-mode');
-            isVRMode = false;
-        });
-
-        // ==================== MOBILE OPTIMIZATIONS ====================
-        // Prevent zoom on double tap
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Handle orientation changes
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                // Refresh display after orientation change
-                updateFPSDisplay();
-                updateLatencyDisplay();
-            }, 100);
         });
 
         // ==================== INIT ====================
         window.onload = () => {
             setupRaycaster();
+            setInterval(measureFPS, 100);
+            setTimeout(() => loading.style.display = 'none', 1500);
             
-            // Hide loading indicator after scene loads
-            setTimeout(() => {
-                loadingIndicator.style.display = 'none';
-            }, 2000);
-            
-            // Start FPS monitoring
-            setInterval(() => {
-                measureFPS();
-            }, 100);
-            
-            // Start a new session every 3 minutes
-            setInterval(() => {
-                currentSession++;
-                sessionStartTime = Date.now();
-            }, 180000);
-            
-            // Set gaze status
-            document.getElementById('gaze-status').innerHTML = '●';
-            document.getElementById('gaze-status').style.color = '#4ECDC4';
-            
-            // Add editable cell functionality
-            document.querySelectorAll('.editable').forEach(cell => {
-                cell.addEventListener('blur', function() {
-                    // Validate format
-                    const value = this.textContent;
-                    if (!value.match(/\d+\/10/)) {
-                        this.textContent = '0/10';
-                    }
-                });
-                
-                cell.addEventListener('touchstart', (e) => {
-                    e.stopPropagation();
-                });
-            });
+            document.getElementById('gaze-status').innerHTML = '● Active';
+            document.getElementById('gaze-status').style.color = '#4ade80';
         };
     </script>
 </body>
