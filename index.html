@@ -7,7 +7,7 @@
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { 
             margin: 0; 
@@ -19,28 +19,28 @@
         body { 
             margin: 0; 
             overflow: hidden; 
-            background: #0a0a0a;
-            font-family: 'Inter', sans-serif; 
+            background: #1a0f0c;
+            font-family: 'Cormorant Garamond', serif; 
             position: fixed;
             width: 100%;
             height: 100%;
         }
 
-        /* Minimal Panel */
+        /* Elegant Panel with Heritage Colors */
         #performance-panel {
             position: fixed; 
             top: 16px; 
             left: 16px;
             right: 16px;
-            background: rgba(20, 20, 20, 0.7);
+            background: rgba(26, 15, 12, 0.85);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 20px;
-            padding: 12px;
-            color: #fff;
+            padding: 14px;
+            color: #e4d5b9;
             z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
 
         @media (min-width: 640px) {
@@ -56,10 +56,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #b8860b;
+            letter-spacing: 0.3px;
         }
 
         .panel-row:last-child {
@@ -67,92 +68,101 @@
         }
 
         .panel-value {
-            color: #fff;
-            font-weight: 500;
-            font-size: 14px;
+            color: #d4af37;
+            font-weight: 600;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
         }
 
         .panel-divider {
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-            margin: 10px 0;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
+            margin: 12px 0;
         }
 
         .progress-container {
-            margin: 8px 0;
+            margin: 12px 0 8px;
         }
 
         .progress-bar {
             height: 3px;
-            background: rgba(255, 255, 255, 0.1);
+            background: #2c1810;
             border-radius: 4px;
             overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.2);
         }
 
         .progress-fill {
             height: 100%;
-            background: #fff;
+            background: linear-gradient(90deg, #b8860b, #d4af37, #f5e6d3);
             width: 0%;
             transition: width 0.1s linear;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
         }
 
         .metric-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            margin-top: 8px;
+            margin: 12px 0 4px;
         }
 
         .metric-item {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(44, 24, 16, 0.6);
             border-radius: 12px;
             padding: 8px 4px;
             text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.15);
         }
 
         .metric-label {
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 11px;
+            color: #b8860b;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 4px;
         }
 
         .metric-number {
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
-            margin-top: 2px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #d4af37;
+            line-height: 1;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
         }
 
-        /* Minimal Buttons */
-        .minimal-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Elegant Buttons */
+        .elegant-btn {
+            background: rgba(44, 24, 16, 0.8);
+            border: 1px solid #d4af37;
             border-radius: 30px;
-            padding: 8px 14px;
-            color: #fff;
-            font-size: 12px;
-            font-weight: 500;
+            padding: 10px 16px;
+            color: #d4af37;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
             -webkit-appearance: none;
             appearance: none;
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
+            letter-spacing: 0.5px;
         }
 
-        .minimal-btn:active {
-            background: rgba(255, 255, 255, 0.15);
+        .elegant-btn:active {
+            background: #d4af37;
+            color: #1a0f0c;
             transform: scale(0.98);
         }
 
-        .minimal-btn i {
-            font-size: 12px;
-            opacity: 0.7;
+        .elegant-btn i {
+            font-size: 14px;
+            color: inherit;
         }
 
         #export-data {
@@ -160,6 +170,7 @@
             bottom: 80px;
             right: 16px;
             z-index: 1000;
+            background: rgba(26, 15, 12, 0.85);
         }
 
         @media (min-width: 640px) {
@@ -169,50 +180,6 @@
             }
         }
 
-        /* Minimal Instructions */
-        #instructions {
-            position: fixed; 
-            bottom: 16px; 
-            left: 16px;
-            right: 16px;
-            background: rgba(20, 20, 20, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            padding: 10px 16px;
-            color: #fff;
-            z-index: 100;
-            display: flex;
-            justify-content: space-around;
-            gap: 8px;
-            font-size: 12px;
-            font-weight: 400;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        @media (min-width: 640px) {
-            #instructions {
-                bottom: 20px;
-                left: 50%;
-                right: auto;
-                transform: translateX(-50%);
-                width: auto;
-                min-width: 400px;
-            }
-        }
-
-        .instruction-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .instruction-item i {
-            font-size: 14px;
-            opacity: 0.7;
-        }
 
         /* Selection Feedback */
         #selection-feedback {
@@ -221,15 +188,15 @@
             left: 16px;
             right: 16px;
             transform: translateY(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(26, 15, 12, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            color: #fff; 
-            padding: 16px; 
-            border-radius: 40px;
-            font-size: 16px; 
-            font-weight: 500; 
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #d4af37; 
+            padding: 18px; 
+            border-radius: 50px;
+            font-size: 18px; 
+            font-weight: 600; 
+            border: 2px solid #d4af37;
             opacity: 0; 
             transition: opacity 0.2s; 
             pointer-events: none;
@@ -237,30 +204,33 @@
             text-align: center;
             max-width: 300px;
             margin: 0 auto;
+            font-family: 'Cormorant Garamond', serif;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
         }
         
         #selection-feedback.show { 
             opacity: 1; 
         }
 
-        /* Minimal Modal */
+        /* Elegant Modal */
         #fps-log-modal {
             position: fixed;
             top: 50%;
             left: 16px;
             right: 16px;
             transform: translateY(-50%);
-            background: rgba(20, 20, 20, 0.95);
+            background: rgba(26, 15, 12, 0.98);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid #d4af37;
             border-radius: 24px;
-            padding: 20px;
-            color: #fff;
+            padding: 24px;
+            color: #e4d5b9;
             z-index: 10000;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.2);
             display: none;
             -webkit-overflow-scrolling: touch;
         }
@@ -283,101 +253,146 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            padding-bottom: 12px;
         }
 
         .modal-header h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
-            letter-spacing: -0.2px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #d4af37;
+            font-family: 'Cormorant Garamond', serif;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-header h3 i {
+            margin-right: 10px;
+            color: #d4af37;
         }
 
         .close-btn {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 20px;
+            color: #b8860b;
+            font-size: 24px;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 4px 12px;
+            transition: color 0.2s;
+        }
+
+        .close-btn:active {
+            color: #d4af37;
         }
 
         .tabs {
             display: flex;
             gap: 4px;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(44, 24, 16, 0.6);
             padding: 4px;
-            border-radius: 30px;
-            margin-bottom: 16px;
+            border-radius: 40px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
         }
 
         .tab {
             flex: 1;
-            padding: 8px;
+            padding: 10px;
             background: none;
             border: none;
-            border-radius: 30px;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            font-weight: 500;
+            border-radius: 40px;
+            color: #b8860b;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Cormorant Garamond', serif;
             cursor: pointer;
             transition: all 0.2s;
+            letter-spacing: 0.5px;
         }
 
         .tab.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: #d4af37;
+            color: #1a0f0c;
         }
 
-        /* Minimal Tables */
-        .minimal-table {
+        /* Elegant Tables */
+        .elegant-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12px;
+            font-size: 14px;
+            font-family: 'Cormorant Garamond', serif;
         }
 
-        .minimal-table th {
+        .elegant-table th {
             text-align: left;
-            padding: 8px 4px;
-            color: rgba(255, 255, 255, 0.5);
-            font-weight: 500;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 4px;
+            color: #b8860b;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            font-size: 14px;
         }
 
-        .minimal-table td {
-            padding: 8px 4px;
-            color: #fff;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        .elegant-table td {
+            padding: 10px 4px;
+            color: #e4d5b9;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
         }
 
-        .minimal-table tr:last-child td {
+        .elegant-table tr:last-child td {
             border-bottom: none;
+        }
+
+        .elegant-table .success {
+            color: #d4af37;
+        }
+
+        .elegant-table .fail {
+            color: #b8860b;
         }
 
         .stats-cards {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 16px;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .stat-card {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(44, 24, 16, 0.8);
             border-radius: 16px;
-            padding: 12px;
+            padding: 14px;
             text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.2);
         }
 
         .stat-card-label {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 4px;
+            font-size: 12px;
+            color: #b8860b;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .stat-card-value {
-            font-size: 18px;
-            font-weight: 600;
-            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+            color: #d4af37;
+            line-height: 1;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        /* Editable cells */
+        .editable {
+            background: rgba(44, 24, 16, 0.4);
+            border-radius: 8px;
+            padding: 4px 8px;
+            outline: 1px solid rgba(212, 175, 55, 0.2);
+            cursor: text;
+        }
+
+        .editable:focus {
+            outline: 2px solid #d4af37;
+            background: rgba(44, 24, 16, 0.8);
         }
 
         /* VR Mode */
@@ -393,36 +408,40 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #fff;
-            font-size: 14px;
-            background: rgba(0,0,0,0.5);
-            padding: 12px 24px;
-            border-radius: 30px;
+            color: #d4af37;
+            font-size: 16px;
+            background: rgba(26, 15, 12, 0.9);
+            padding: 16px 32px;
+            border-radius: 40px;
+            border: 1px solid #d4af37;
             backdrop-filter: blur(5px);
             z-index: 10001;
             display: none;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
     <!-- Loading -->
     <div id="loading">
-        <i class="fas fa-circle-notch fa-spin" style="margin-right: 8px;"></i>
-        Loading...
+        <i class="fas fa-circle-notch fa-spin" style="margin-right: 8px; color: #d4af37;"></i>
+        Entering Heritage Site...
     </div>
 
-    <!-- Minimal Performance Panel -->
+    <!-- Elegant Performance Panel -->
     <div id="performance-panel">
         <div class="panel-row">
-            <span>Gaze</span>
+            <span>GAZE</span>
             <span class="panel-value" id="gaze-status">● Active</span>
         </div>
         <div class="panel-row">
-            <span>Target</span>
+            <span>TARGET</span>
             <span class="panel-value" id="hotspot-status">None</span>
         </div>
         <div class="panel-row">
-            <span>Dwell</span>
+            <span>DWELL</span>
             <span class="panel-value" id="dwell-status">Inactive</span>
         </div>
         
@@ -438,11 +457,11 @@
                 <div class="metric-number" id="fps-display">60</div>
             </div>
             <div class="metric-item">
-                <div class="metric-label">Latency</div>
+                <div class="metric-label">LATENCY</div>
                 <div class="metric-number" id="latency-display">0</div>
             </div>
             <div class="metric-item">
-                <div class="metric-label">Selections</div>
+                <div class="metric-label">SELECT</div>
                 <div class="metric-number" id="selection-count">0</div>
             </div>
         </div>
@@ -450,57 +469,42 @@
         <div class="panel-divider"></div>
 
         <div style="display: flex; gap: 8px;">
-            <button class="minimal-btn" id="toggle-log-btn" style="flex: 2;">
+            <button class="elegant-btn" id="toggle-log-btn" style="flex: 2;">
                 <i class="fas fa-chart-bar"></i>
-                Logs
+                Performance Logs
             </button>
         </div>
     </div>
 
     <!-- Export Button -->
-    <button class="minimal-btn" id="export-data">
+    <button class="elegant-btn" id="export-data">
         <i class="fas fa-download"></i>
-        Export
+        Export Data
     </button>
 
-    <!-- Minimal Instructions -->
-    <div id="instructions">
-        <div class="instruction-item">
-            <i class="fas fa-eye"></i>
-            <span>Look</span>
-        </div>
-        <div class="instruction-item">
-            <i class="fas fa-circle-notch"></i>
-            <span>Hold</span>
-        </div>
-        <div class="instruction-item">
-            <i class="fas fa-arrow-right"></i>
-            <span>Enter</span>
-        </div>
-    </div>
 
     <!-- Selection Feedback -->
     <div id="selection-feedback"></div>
 
-    <!-- Minimal Log Modal -->
+    <!-- Elegant Log Modal -->
     <div id="fps-log-modal">
         <div class="modal-header">
-            <h3><i class="fas fa-chart-line" style="margin-right: 8px;"></i>Performance Logs</h3>
+            <h3><i class="fas fa-crown"></i> Heritage Performance Logs</h3>
             <button class="close-btn" onclick="closeLogModal()">&times;</button>
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('fps')">FPS</button>
+            <button class="tab active" onclick="switchTab('fps')">FPS Monitor</button>
             <button class="tab" onclick="switchTab('latency')">Latency</button>
-            <button class="tab" onclick="switchTab('accuracy')">Accuracy</button>
+            <button class="tab" onclick="switchTab('accuracy')">Accuracy Tests</button>
         </div>
 
         <!-- FPS Tab -->
         <div id="fps-tab" class="tab-content">
-            <table class="minimal-table">
+            <table class="elegant-table">
                 <thead>
                     <tr>
-                        <th>Time</th>
+                        <th>Time (s)</th>
                         <th>FPS</th>
                         <th>Status</th>
                     </tr>
@@ -511,11 +515,12 @@
 
         <!-- Latency Tab -->
         <div id="latency-tab" class="tab-content" style="display: none;">
-            <table class="minimal-table">
+            <table class="elegant-table">
                 <thead>
                     <tr>
                         <th>Trial</th>
                         <th>Latency (ms)</th>
+                        <th>Timestamp</th>
                     </tr>
                 </thead>
                 <tbody id="latency-log-body"></tbody>
@@ -524,30 +529,30 @@
 
         <!-- Accuracy Tab -->
         <div id="accuracy-tab" class="tab-content" style="display: none;">
-            <table class="minimal-table">
+            <table class="elegant-table">
                 <thead>
                     <tr>
                         <th>Participant</th>
-                        <th>Low</th>
-                        <th>Med</th>
-                        <th>High</th>
+                        <th>Low Light</th>
+                        <th>Medium</th>
+                        <th>High Light</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>P1</td>
+                        <td>Participant 1</td>
                         <td contenteditable="true" class="editable">0/10</td>
                         <td contenteditable="true" class="editable">0/10</td>
                         <td contenteditable="true" class="editable">0/10</td>
                     </tr>
                     <tr>
-                        <td>P2</td>
+                        <td>Participant 2</td>
                         <td contenteditable="true" class="editable">0/10</td>
                         <td contenteditable="true" class="editable">0/10</td>
                         <td contenteditable="true" class="editable">0/10</td>
                     </tr>
                     <tr>
-                        <td>P3</td>
+                        <td>Participant 3</td>
                         <td contenteditable="true" class="editable">0/10</td>
                         <td contenteditable="true" class="editable">0/10</td>
                         <td contenteditable="true" class="editable">0/10</td>
@@ -558,7 +563,7 @@
 
         <div class="stats-cards">
             <div class="stat-card">
-                <div class="stat-card-label">Avg FPS</div>
+                <div class="stat-card-label">Average FPS</div>
                 <div class="stat-card-value" id="avg-fps">0</div>
             </div>
             <div class="stat-card">
@@ -579,85 +584,88 @@
     <!-- VR Scene -->
     <a-scene id="scene" 
              vr-mode-ui="enabled: true"
-             background="color: #0a0a0a"
-             fog="type: exponential; color: #0a0a0a; density: 0.04">
+             background="color: #1a0f0c"
+             fog="type: exponential; color: #1a0f0c; density: 0.04">
         
-        <!-- Camera -->
+        <!-- Camera with cursor -->
         <a-entity id="camera" camera="fov: 80" look-controls position="0 1.6 0">
             <a-entity id="vr-cursor" position="0 0 -2">
-                <a-ring radius-inner="0.08" radius-outer="0.1" color="#fff" rotation="90 0 0"></a-ring>
-                <a-torus id="dwell-ring" radius="0.12" radius-tubular="0.005" 
-                         color="#fff" rotation="90 0 0" visible="false"
-                         material="transparent: true; opacity: 0.5"></a-torus>
+                <a-torus id="cursor-ring" radius="0.12" radius-tubular="0.015" 
+                         color="#d4af37" rotation="90 0 0"
+                         material="emissive: #d4af37; emissiveIntensity: 0.3"></a-torus>
+                <a-sphere radius="0.03" color="#e4d5b9" position="0 0 0"></a-sphere>
+                <a-torus id="dwell-ring" radius="0.15" radius-tubular="0.01" 
+                         color="#d4af37" rotation="90 0 0" visible="false"
+                         material="emissive: #d4af37; emissiveIntensity: 0.5; transparent: true; opacity: 0.6"></a-torus>
             </a-entity>
             <a-entity id="raycaster" raycaster="objects: .hotspot; far: 20; interval: 100;"></a-entity>
         </a-entity>
 
         <!-- Title -->
         <a-entity position="0 3 -5">
-            <a-text value="BULACAN" color="#fff" align="center" width="6" scale="1.5 1.5 1"></a-text>
-            <a-text value="heritage" color="#888" align="center" width="4" scale="0.8 0.8 1" position="0 -0.6 0"></a-text>
+            <a-text value="HISTORICAL BULACAN" color="#d4af37" align="center" width="8" scale="1.8 1.8 1"></a-text>
+            <a-text value="heritage sites" color="#b8860b" align="center" width="6" scale="0.9 0.9 1" position="0 -0.7 0"></a-text>
         </a-entity>
 
-        <!-- Hotspots -->
+        <!-- Hotspots with Heritage Colors -->
         <a-entity position="0 1.5 -4.5">
-            <!-- Site 1 -->
+            <!-- Site 1: Quinga -->
             <a-entity class="hotspot" id="site-quinga" data-name="Battle of Quinga"
-                      data-file="quinga.html"
+                      data-file="battle-of-quinga/index.html"
                       position="-2.4 0.5 0"
-                      geometry="primitive: plane; width: 1.2; height: 1.4"
-                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
-                <a-text value="QUINGA" color="#fff" align="center" scale="0.6" position="0 0.2 0.1"></a-text>
-                <a-text value="1896" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
+                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.2"
+                      material="color: #2c1810; emissive: #8b4513; emissiveIntensity: 0.3">
+                <a-text value="QUINGA" color="#d4af37" align="center" scale="0.7" position="0 0.2 0.2"></a-text>
+                <a-text value="1896" color="#b8860b" align="center" scale="0.5" position="0 -0.3 0.2"></a-text>
             </a-entity>
 
-            <!-- Site 2 -->
+            <!-- Site 2: Hiyas -->
             <a-entity class="hotspot" id="site-museum" data-name="Hiyas Museum"
-                      data-file="museum.html"
+                      data-file="hiyas-ng-bulacan-museum/index.html"
                       position="-1.2 0.5 0"
-                      geometry="primitive: plane; width: 1.2; height: 1.4"
-                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
-                <a-text value="HIYAS" color="#fff" align="center" scale="0.6" position="0 0.2 0.1"></a-text>
-                <a-text value="MUSEUM" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
+                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.2"
+                      material="color: #2c1810; emissive: #004d4d; emissiveIntensity: 0.3">
+                <a-text value="HIYAS" color="#d4af37" align="center" scale="0.7" position="0 0.2 0.2"></a-text>
+                <a-text value="MUSEUM" color="#b8860b" align="center" scale="0.5" position="0 -0.3 0.2"></a-text>
             </a-entity>
 
-            <!-- Site 3 -->
+            <!-- Site 3: Del Pilar -->
             <a-entity class="hotspot" id="site-delpilar" data-name="Del Pilar Shrine"
-                      data-file="delpilar.html"
+                      data-file="del-pilar-shrine/index.html"
                       position="0 0.5 0"
-                      geometry="primitive: plane; width: 1.2; height: 1.4"
-                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
-                <a-text value="DEL PILAR" color="#fff" align="center" scale="0.5" position="0 0.2 0.1"></a-text>
-                <a-text value="SHRINE" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
+                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.2"
+                      material="color: #2c1810; emissive: #665d1e; emissiveIntensity: 0.3">
+                <a-text value="DEL PILAR" color="#d4af37" align="center" scale="0.6" position="0 0.2 0.2"></a-text>
+                <a-text value="SHRINE" color="#b8860b" align="center" scale="0.5" position="0 -0.3 0.2"></a-text>
             </a-entity>
 
-            <!-- Site 4 -->
+            <!-- Site 4: Barasoain -->
             <a-entity class="hotspot" id="site-barasoain" data-name="Barasoain Museum"
-                      data-file="barasoain.html"
+                      data-file="barasoain-museum/index.html"
                       position="1.2 0.5 0"
-                      geometry="primitive: plane; width: 1.2; height: 1.4"
-                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
-                <a-text value="BARASOAIN" color="#fff" align="center" scale="0.5" position="0 0.2 0.1"></a-text>
-                <a-text value="1899" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
+                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.2"
+                      material="color: #2c1810; emissive: #8b4513; emissiveIntensity: 0.3">
+                <a-text value="BARASOAIN" color="#d4af37" align="center" scale="0.6" position="0 0.2 0.2"></a-text>
+                <a-text value="1899" color="#b8860b" align="center" scale="0.5" position="0 -0.3 0.2"></a-text>
             </a-entity>
 
-            <!-- Site 5 -->
+            <!-- Site 5: Casa Real -->
             <a-entity class="hotspot" id="site-casareal" data-name="Casa Real Shrine"
-                      data-file="casareal.html"
+                      data-file="casa-real-shrine/index.html"
                       position="2.4 0.5 0"
-                      geometry="primitive: plane; width: 1.2; height: 1.4"
-                      material="color: #222; emissive: #333; transparent: true; opacity: 0.9">
-                <a-text value="CASA REAL" color="#fff" align="center" scale="0.5" position="0 0.2 0.1"></a-text>
-                <a-text value="1580" color="#666" align="center" scale="0.4" position="0 -0.3 0.1"></a-text>
+                      geometry="primitive: box; width: 1.4; height: 1.6; depth: 0.2"
+                      material="color: #2c1810; emissive: #4a2c1a; emissiveIntensity: 0.3">
+                <a-text value="CASA REAL" color="#d4af37" align="center" scale="0.6" position="0 0.2 0.2"></a-text>
+                <a-text value="1580" color="#b8860b" align="center" scale="0.5" position="0 -0.3 0.2"></a-text>
             </a-entity>
         </a-entity>
 
         <!-- Floor -->
-        <a-circle radius="10" position="0 -0.5 -4.5" rotation="-90 0 0" material="color: #111; emissive: #111"></a-circle>
+        <a-grid position="0 -0.5 -4.5" width="12" height="12" color="#8b5a2b" opacity="0.15"></a-grid>
         
         <!-- Lighting -->
-        <a-light type="ambient" intensity="1.2"></a-light>
-        <a-light type="directional" position="2 5 3" intensity="0.8"></a-light>
+        <a-light type="ambient" intensity="1.5" color="#e4d5b9"></a-light>
+        <a-light type="directional" position="2 5 3" intensity="1.2" color="#d4af37"></a-light>
     </a-scene>
 
     <script>
@@ -713,20 +721,52 @@
             lastFrameTime = now;
         }
 
-        // ==================== LATENCY ====================
+        // ==================== LATENCY MEASUREMENT ====================
         function measureLatency(action) {
+            console.log('Latency action:', action); // Debug log
+            
             if (action === 'start') {
                 lastSelectionTime = Date.now();
-            } else if (action === 'end' && lastSelectionTime > 0) {
-                const latency = Date.now() - lastSelectionTime;
-                latencyLogs.push({
-                    trial: latencyLogs.length + 1,
-                    latency: latency
-                });
+                console.log('Latency start recorded:', lastSelectionTime);
+            } else if (action === 'end') {
+                if (lastSelectionTime > 0) {
+                    const latency = Date.now() - lastSelectionTime;
+                    console.log('Latency end - duration:', latency, 'ms');
+                    
+                    // Only record if latency is reasonable (between 800ms and 2000ms, accounting for DWELL_TIME)
+                    if (latency >= 800 && latency <= 3000) {
+                        const latencyData = {
+                            trial: latencyLogs.length + 1,
+                            latency: latency,
+                            timestamp: new Date().toLocaleTimeString()
+                        };
+                        
+                        latencyLogs.push(latencyData);
+                        console.log('Latency recorded:', latencyData);
+                        
+                        // Update latency display with average
+                        updateLatencyStats();
+                        updateLatencyDisplay();
+                    } else {
+                        console.log('Latency outside range, not recording:', latency);
+                    }
+                    
+                    // Reset lastSelectionTime
+                    lastSelectionTime = 0;
+                } else {
+                    console.log('No start time recorded for latency end');
+                }
+            }
+        }
+
+        function updateLatencyStats() {
+            if (latencyLogs.length > 0) {
+                const sum = latencyLogs.reduce((acc, log) => acc + log.latency, 0);
+                const avgLatency = Math.round(sum / latencyLogs.length);
+                latencyDisplay.textContent = avgLatency;
                 
-                const avgLatency = latencyLogs.reduce((a, b) => a + b.latency, 0) / latencyLogs.length;
-                latencyDisplay.textContent = Math.round(avgLatency);
-                updateLatencyDisplay();
+                // Also update the avg latency in stats cards
+                document.getElementById('avg-latency').textContent = avgLatency + 'ms';
             }
         }
 
@@ -736,17 +776,18 @@
             const siteName = hotspot.getAttribute('data-name');
             
             if (siteFile) {
+                // Record latency end before navigation
                 measureLatency('end');
                 
                 loading.style.display = 'block';
                 
                 const feedback = document.getElementById('selection-feedback');
-                feedback.textContent = siteName;
+                feedback.textContent = `✨ ${siteName} ✨`;
                 feedback.classList.add('show');
                 
                 setTimeout(() => {
                     window.location.href = siteFile;
-                }, 500);
+                }, 800);
             }
         }
 
@@ -761,7 +802,9 @@
                     if (hit?.classList.contains('hotspot')) {
                         if (currentHotspot !== hit) {
                             currentHotspot = hit;
-                            hotspotStatus.textContent = hit.getAttribute('data-name').substring(0, 15);
+                            const siteName = hit.getAttribute('data-name');
+                            hotspotStatus.textContent = siteName.substring(0, 15);
+                            // Start dwell timer and latency measurement
                             startDwellTimer();
                         }
                     }
@@ -781,9 +824,13 @@
         function startDwellTimer() {
             if (!currentHotspot) return;
             
-            measureLatency('start');
+            // Cancel any existing timer first
+            if (dwellActive) {
+                cancelDwellTimer();
+            }
             
-            if (dwellActive) cancelDwellTimer();
+            // Start latency measurement
+            measureLatency('start');
             
             dwellActive = true;
             dwellStartTime = Date.now();
@@ -791,7 +838,8 @@
             dwellStatus.textContent = 'Active';
             
             dwellTimer = setInterval(() => {
-                const progress = (Date.now() - dwellStartTime) / DWELL_TIME * 100;
+                const elapsed = Date.now() - dwellStartTime;
+                const progress = (elapsed / DWELL_TIME) * 100;
                 progressFill.style.width = Math.min(progress, 100) + '%';
                 
                 if (progress >= 100) {
@@ -802,10 +850,16 @@
 
         function cancelDwellTimer() {
             dwellActive = false;
-            if (dwellTimer) clearInterval(dwellTimer);
+            if (dwellTimer) {
+                clearInterval(dwellTimer);
+                dwellTimer = null;
+            }
             dwellRing.setAttribute('visible', 'false');
             dwellStatus.textContent = 'Inactive';
             progressFill.style.width = '0%';
+            
+            // Reset lastSelectionTime if dwell cancelled
+            lastSelectionTime = 0;
         }
 
         function completeSelection() {
@@ -813,7 +867,10 @@
             
             selectionCount++;
             selectionCountEl.textContent = selectionCount;
+            
+            // Navigate - latency end will be called in navigateToSite
             navigateToSite(currentHotspot);
+            
             cancelDwellTimer();
         }
 
@@ -827,7 +884,7 @@
                     <tr>
                         <td>${log.time}s</td>
                         <td>${log.fps}</td>
-                        <td style="color: ${log.isAcceptable ? '#4ade80' : '#f87171'}">${log.isAcceptable ? '✓' : '✗'}</td>
+                        <td class="${log.isAcceptable ? 'success' : 'fail'}">${log.isAcceptable ? '✓ Stable' : '✗ Low'}</td>
                     </tr>
                 `;
             });
@@ -839,9 +896,19 @@
             const tbody = document.getElementById('latency-log-body');
             tbody.innerHTML = '';
             
-            latencyLogs.slice(-6).forEach(log => {
-                tbody.innerHTML += `<tr><td>${log.trial}</td><td>${log.latency}ms</td></tr>`;
-            });
+            if (latencyLogs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #b8860b;">No latency data yet</td></tr>';
+            } else {
+                latencyLogs.slice(-6).forEach(log => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${log.trial}</td>
+                            <td>${log.latency}ms</td>
+                            <td>${log.timestamp}</td>
+                        </tr>
+                    `;
+                });
+            }
         }
 
         function updateStats() {
@@ -856,13 +923,16 @@
                 document.getElementById('stability').textContent = stable + '%';
             }
             
-            const avgLatency = latencyLogs.length ? 
-                Math.round(latencyLogs.reduce((a, b) => a + b.latency, 0) / latencyLogs.length) : 0;
-            document.getElementById('avg-latency').textContent = avgLatency + 'ms';
+            updateLatencyStats();
         }
 
         // ==================== UI ====================
-        window.openLogModal = () => document.getElementById('fps-log-modal').classList.add('show');
+        window.openLogModal = () => {
+            document.getElementById('fps-log-modal').classList.add('show');
+            updateFPSDisplay();
+            updateLatencyDisplay();
+        };
+        
         window.closeLogModal = () => document.getElementById('fps-log-modal').classList.remove('show');
         
         window.switchTab = (tab) => {
@@ -870,25 +940,45 @@
             document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
             document.getElementById(tab + '-tab').style.display = 'block';
             event.target.classList.add('active');
+            
+            // Update displays when switching to a tab
+            if (tab === 'latency') updateLatencyDisplay();
+            if (tab === 'fps') updateFPSDisplay();
         };
 
         document.getElementById('toggle-log-btn').addEventListener('click', openLogModal);
         document.getElementById('export-data').addEventListener('click', () => {
             const data = {
-                fps: fpsLogs,
-                latency: latencyLogs,
+                fpsLogs: fpsLogs,
+                latencyLogs: latencyLogs,
                 selections: selectionCount,
                 summary: {
                     avgFPS: fpsLogs.length ? Math.round(fpsLogs.reduce((a, b) => a + b.fps, 0) / fpsLogs.length) : 0,
-                    avgLatency: latencyLogs.length ? Math.round(latencyLogs.reduce((a, b) => a + b.latency, 0) / latencyLogs.length) : 0
+                    avgLatency: latencyLogs.length ? Math.round(latencyLogs.reduce((a, b) => a + b.latency, 0) / latencyLogs.length) : 0,
+                    stability: fpsLogs.length ? Math.round((fpsLogs.filter(l => l.isAcceptable).length / fpsLogs.length) * 100) : 0,
+                    totalSelections: selectionCount
                 }
             };
             
-            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `heritage-data-${new Date().toISOString().slice(0,10)}.json`;
+            a.download = `heritage-bulacan-${new Date().toISOString().slice(0,10)}.json`;
             a.click();
+            
+            const feedback = document.getElementById('selection-feedback');
+            feedback.textContent = '📊 Data Exported';
+            feedback.classList.add('show');
+            setTimeout(() => feedback.classList.remove('show'), 2000);
+        });
+
+        // ==================== VR MODE ====================
+        document.getElementById('scene').addEventListener('enter-vr', () => {
+            document.body.classList.add('vr-mode');
+        });
+        
+        document.getElementById('scene').addEventListener('exit-vr', () => {
+            document.body.classList.remove('vr-mode');
         });
 
         // ==================== INIT ====================
@@ -898,7 +988,12 @@
             setTimeout(() => loading.style.display = 'none', 1500);
             
             document.getElementById('gaze-status').innerHTML = '● Active';
-            document.getElementById('gaze-status').style.color = '#4ade80';
+            document.getElementById('gaze-status').style.color = '#d4af37';
+            
+            // Initialize latency display
+            updateLatencyStats();
+            
+            console.log('VR Heritage initialized - Latency recording fixed');
         };
     </script>
 </body>
