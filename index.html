@@ -9,13 +9,13 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     
-    <title>VR Heritage · Bulacan Historical Sites</title>
+    <title>VR Heritage · Bulacan Historical Sites · Gaze Control</title>
     
-    <!-- A-Frame -->
+    <!-- A-Frame with VR support -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     
     <style>
-        /* RESET & BASE - SAME SIMPLE STYLE AS DEL PILAR SHRINE */
+        /* RESET & BASE - SIMPLE STYLE LIKE DEL PILAR */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -96,7 +96,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.3s ease;
         }
 
         #back-button:hover {
@@ -104,7 +103,69 @@
             border-color: gold;
         }
         
-        /* SITE SELECTOR - SIMPLE DOTS LIKE DEL PILAR */
+        /* GAZE PROGRESS INDICATOR - SIMPLE LIKE DEL PILAR */
+        #gaze-progress {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            z-index: 10000;
+            pointer-events: none;
+        }
+        
+        .progress-ring-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .progress-ring-fill {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid transparent;
+            border-top-color: gold;
+            border-right-color: gold;
+            transform: rotate(0deg);
+            transition: transform 0.1s linear;
+            box-shadow: 0 0 20px gold;
+        }
+        
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 0 0 10px gold;
+        }
+        
+        /* HOVER TARGET DISPLAY */
+        #hover-target {
+            position: fixed;
+            bottom: 120px;
+            right: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #4ECDC4;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10000;
+            border: 1px solid #4ECDC4;
+            backdrop-filter: blur(5px);
+            pointer-events: none;
+        }
+        
+        /* SITE SELECTOR DOTS - LIKE DEL PILAR */
         .site-selector {
             position: fixed;
             bottom: 90px;
@@ -132,11 +193,6 @@
             background: #FFD700;
             transform: scale(1.3);
             box-shadow: 0 0 10px gold;
-        }
-        
-        .site-dot:hover {
-            background: rgba(255, 215, 0, 0.7);
-            transform: scale(1.2);
         }
         
         /* LOADING - SIMPLE STYLE */
@@ -190,24 +246,90 @@
                 padding: 10px 16px;
                 font-size: 13px;
             }
+            
+            #gaze-progress {
+                bottom: 20px;
+                right: 20px;
+                width: 60px;
+                height: 60px;
+            }
+            
+            #hover-target {
+                bottom: 100px;
+                right: 20px;
+                font-size: 12px;
+                padding: 8px 16px;
+            }
         }
         
-        /* CURSOR STYLING */
-        a-cursor {
+        /* CURSOR - SIMPLE GAZE POINT */
+        #gaze-dot {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 12px;
+            height: 12px;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+            box-shadow: 0 0 20px white;
+            opacity: 0.8;
+        }
+        
+        #gaze-ring {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            z-index: 9998;
+            pointer-events: none;
+        }
+        
+        /* Gyroscope prompt */
+        #gyro-prompt {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            z-index: 10002;
+            text-align: center;
+            border: 2px solid gold;
+            box-shadow: 0 0 50px gold;
+            max-width: 300px;
+            display: none;
+        }
+
+        #gyro-prompt button {
+            background: gold;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin-top: 15px;
             cursor: pointer;
-        }
-        
-        /* MENU OPTION STYLES - SIMPLE AND CLEAN */
-        .menu-option text {
-            text-shadow: 1px 1px 2px black;
-        }
-        
-        .menu-option:hover {
-            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
+    <!-- Gyroscope Permission Prompt -->
+    <div id="gyro-prompt">
+        <div style="font-size: 40px; margin-bottom: 10px;">🔄</div>
+        <h3>Enable Gyroscope?</h3>
+        <p>This VR menu needs access to your device's gyroscope for gaze-based selection.</p>
+        <button onclick="requestGyroscope()">Enable Gyroscope</button>
+    </div>
+
     <!-- METRICS PANEL - SIMPLE LIKE DEL PILAR -->
     <div id="metrics-panel">
         <h3 style="color: gold; margin-top: 0; margin-bottom: 5px;">📊 Session Data</h3>
@@ -230,6 +352,11 @@
         <div class="metric">
             <span class="metric-label">Current:</span>
             <span id="current-site" class="metric-value">Del Pilar</span>
+        </div>
+
+        <div class="metric">
+            <span class="metric-label">Gyroscope:</span>
+            <span id="gyro-status" class="metric-value" style="color: #f44336;">Inactive</span>
         </div>
 
         <button onclick="exportData()" style="
@@ -257,6 +384,23 @@
         ↩ Back
     </button>
     
+    <!-- GAZE INDICATORS -->
+    <div id="gaze-dot"></div>
+    <div id="gaze-ring"></div>
+    
+    <!-- GAZE PROGRESS -->
+    <div id="gaze-progress">
+        <div class="progress-ring-bg"></div>
+        <div id="progress-ring-fill" class="progress-ring-fill"></div>
+        <div id="progress-text" class="progress-text">0%</div>
+    </div>
+    
+    <!-- HOVER TARGET -->
+    <div id="hover-target">None</div>
+    
+    <!-- SITE SELECTOR DOTS - LIKE DEL PILAR -->
+    <div class="site-selector" id="site-selector"></div>
+    
     <!-- LOADING - SIMPLE LIKE DEL PILAR -->
     <div id="loading">
         <div style="
@@ -268,15 +412,19 @@
             animation: spin 1s linear infinite;
         "></div>
         <div style="margin-top: 20px;">Loading VR Heritage Main Menu...</div>
-        <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Select a historical site to explore</div>
+        <div style="font-size: 12px; color: #aaa; margin-top: 5px;">Use your head/gaze to select a historical site</div>
     </div>
     
-    <!-- SITE SELECTOR DOTS - LIKE DEL PILAR SCENE SELECTOR -->
-    <div class="site-selector" id="site-selector"></div>
-    
-    <!-- A-FRAME SCENE -->
-    <a-scene cursor="rayOrigin: mouse">
-        <!-- ASSETS (You'll need to create these images) -->
+    <!-- A-FRAME SCENE - WITH GYROSCOPE SUPPORT -->
+    <a-scene 
+        id="scene"
+        vr-mode-ui="enabled: true"
+        background="color: #0a1929"
+        renderer="antialias: true; colorManagement: true; alpha: false"
+        device-orientation-permission-ui="enabled: true"
+        fog="type: exponential; color: #0a1929; density: 0.03">
+        
+        <!-- ASSETS -->
         <a-assets timeout="30000">
             <img id="del-pilar-bg" src="images/del-pilar-bg.jpg" crossorigin="anonymous">
             <img id="battle-quinga-bg" src="images/battle-quinga-bg.jpg" crossorigin="anonymous">
@@ -285,101 +433,184 @@
             <img id="bulacan-museum-bg" src="images/bulacan-museum-bg.jpg" crossorigin="anonymous">
         </a-assets>
         
-        <!-- SKY - Will be set by JavaScript -->
+        <!-- SKY -->
         <a-sky id="scene-sky" src="#del-pilar-bg"></a-sky>
         
-        <!-- CAMERA WITH CURSOR -->
-        <a-entity camera look-controls>
-            <a-cursor 
-                animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
-                animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
-                fuse="true"
-                fuse-timeout="500">
-            </a-cursor>
+        <!-- CAMERA WITH GYROSCOPE -->
+        <a-entity id="camera" 
+                  camera="active: true" 
+                  look-controls="enabled: true; magicWindowTrackingEnabled: true" 
+                  wasd-controls="enabled: false"
+                  position="0 1.6 0">
+            
+            <!-- Raycaster for gaze detection -->
+            <a-entity id="raycaster" 
+                      raycaster="objects: .menu-option; far: 10; interval: 100"
+                      line="color: red; opacity: 0"></a-entity>
         </a-entity>
         
-        <!-- MENU CONTAINER - SIMPLE 3D CARDS LIKE DEL PILAR HOTSPOTS -->
-        <a-entity id="menu-container" position="0 1.5 -3">
+        <!-- TITLE - Simple like Del Pilar -->
+        <a-entity position="0 3.5 -5">
+            <a-text value="HISTORICAL SITES" 
+                    color="gold" 
+                    align="center"
+                    width="12"
+                    material="shader: flat"
+                    scale="2 2 1"
+                    position="0 0 0"></a-text>
+            <a-text value="OF BULACAN" 
+                    color="white" 
+                    align="center"
+                    width="10"
+                    material="shader: flat"
+                    scale="1.8 1.8 1"
+                    position="0 -0.8 0"></a-text>
+        </a-entity>
+        
+        <!-- MENU OPTIONS - Simple rings like Del Pilar hotspots -->
+        <a-entity id="menu-container" position="0 1.5 -3.5">
             
             <!-- Battle of Quinga -->
             <a-entity class="menu-option" position="-2.5 0 0" data-site="battle-quinga" data-name="Battle of Quinga">
-                <!-- Simple ring like Del Pilar hotspots -->
                 <a-ring color="#FF6B6B" radius-inner="0.25" radius-outer="0.35" opacity="0.8"
-                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1200">
+                    animation="property: scale; to: 1.1 1.1 1; dir: alternate; loop: true; dur: 1500">
                 </a-ring>
-                <!-- Icon -->
-                <a-text value="⚔️" position="0 0.2 0.1" color="white" align="center" scale="2"></a-text>
-                <!-- Title -->
-                <a-text value="Battle of" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
-                <a-text value="Quinga" position="0 -0.5 0.1" color="#FF6B6B" align="center" width="2" scale="1.2"></a-text>
-                <!-- Hover effect -->
-                <a-circle color="white" radius="0.3" opacity="0" class="hotspot-hover"></a-circle>
+                <a-circle color="white" radius="0.3" opacity="0" class="hover-highlight"></a-circle>
+                <a-text value="⚔️" position="0 0.25 0.1" color="white" align="center" scale="2"></a-text>
+                <a-text value="BATTLE" position="0 -0.1 0.1" color="white" align="center" width="2" scale="0.7"></a-text>
+                <a-text value="QUINGA" position="0 -0.4 0.1" color="#FF6B6B" align="center" width="2" scale="0.9"></a-text>
             </a-entity>
             
             <!-- Hiyas ng Bulacan Museum -->
             <a-entity class="menu-option" position="-1.2 0 0" data-site="bulacan-museum" data-name="Bulacan Museum">
                 <a-ring color="#4ECDC4" radius-inner="0.25" radius-outer="0.35" opacity="0.8"
-                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1200">
+                    animation="property: scale; to: 1.1 1.1 1; dir: alternate; loop: true; dur: 1500">
                 </a-ring>
-                <a-text value="🏛️" position="0 0.2 0.1" color="white" align="center" scale="2"></a-text>
-                <a-text value="Hiyas ng" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
-                <a-text value="Bulacan" position="0 -0.5 0.1" color="#4ECDC4" align="center" width="2" scale="1.2"></a-text>
-                <a-circle color="white" radius="0.3" opacity="0" class="hotspot-hover"></a-circle>
+                <a-circle color="white" radius="0.3" opacity="0" class="hover-highlight"></a-circle>
+                <a-text value="🏛️" position="0 0.25 0.1" color="white" align="center" scale="2"></a-text>
+                <a-text value="HIYAS NG" position="0 -0.1 0.1" color="white" align="center" width="2" scale="0.7"></a-text>
+                <a-text value="BULACAN" position="0 -0.4 0.1" color="#4ECDC4" align="center" width="2" scale="0.9"></a-text>
             </a-entity>
             
-            <!-- Del Pilar Shrine (Center - Highlighted) -->
+            <!-- Del Pilar Shrine (Center) -->
             <a-entity class="menu-option" position="0 0 0" data-site="del-pilar-shrine" data-name="Del Pilar Shrine">
                 <a-ring color="gold" radius-inner="0.3" radius-outer="0.4" opacity="1"
-                    animation="property: scale; to: 1.3 1.3 1; dir: alternate; loop: true; dur: 1000">
+                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1000">
                 </a-ring>
-                <a-text value="🗽" position="0 0.25 0.1" color="white" align="center" scale="2.5"></a-text>
-                <a-text value="Del Pilar" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.9"></a-text>
-                <a-text value="Shrine" position="0 -0.5 0.1" color="gold" align="center" width="2" scale="1.3"></a-text>
-                <a-circle color="white" radius="0.35" opacity="0" class="hotspot-hover"></a-circle>
+                <a-circle color="white" radius="0.35" opacity="0" class="hover-highlight"></a-circle>
+                <a-text value="🗽" position="0 0.3 0.1" color="white" align="center" scale="2.5"></a-text>
+                <a-text value="DEL PILAR" position="0 0 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
+                <a-text value="SHRINE" position="0 -0.3 0.1" color="gold" align="center" width="2" scale="1"></a-text>
             </a-entity>
             
             <!-- Barasoain Museum -->
             <a-entity class="menu-option" position="1.2 0 0" data-site="barasoain-museum" data-name="Barasoain Museum">
                 <a-ring color="#FF8E53" radius-inner="0.25" radius-outer="0.35" opacity="0.8"
-                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1200">
+                    animation="property: scale; to: 1.1 1.1 1; dir: alternate; loop: true; dur: 1500">
                 </a-ring>
-                <a-text value="⛪" position="0 0.2 0.1" color="white" align="center" scale="2"></a-text>
-                <a-text value="Barasoain" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
-                <a-text value="Museum" position="0 -0.5 0.1" color="#FF8E53" align="center" width="2" scale="1.2"></a-text>
-                <a-circle color="white" radius="0.3" opacity="0" class="hotspot-hover"></a-circle>
+                <a-circle color="white" radius="0.3" opacity="0" class="hover-highlight"></a-circle>
+                <a-text value="⛪" position="0 0.25 0.1" color="white" align="center" scale="2"></a-text>
+                <a-text value="BARASOAIN" position="0 -0.1 0.1" color="white" align="center" width="2" scale="0.7"></a-text>
+                <a-text value="MUSEUM" position="0 -0.4 0.1" color="#FF8E53" align="center" width="2" scale="0.9"></a-text>
             </a-entity>
             
             <!-- Casa Real Shrine -->
             <a-entity class="menu-option" position="2.5 0 0" data-site="casa-real-shrine" data-name="Casa Real Shrine">
                 <a-ring color="#9B59B6" radius-inner="0.25" radius-outer="0.35" opacity="0.8"
-                    animation="property: scale; to: 1.2 1.2 1; dir: alternate; loop: true; dur: 1200">
+                    animation="property: scale; to: 1.1 1.1 1; dir: alternate; loop: true; dur: 1500">
                 </a-ring>
-                <a-text value="🏰" position="0 0.2 0.1" color="white" align="center" scale="2"></a-text>
-                <a-text value="Casa Real" position="0 -0.2 0.1" color="white" align="center" width="2" scale="0.8"></a-text>
-                <a-text value="Shrine" position="0 -0.5 0.1" color="#9B59B6" align="center" width="2" scale="1.2"></a-text>
-                <a-circle color="white" radius="0.3" opacity="0" class="hotspot-hover"></a-circle>
+                <a-circle color="white" radius="0.3" opacity="0" class="hover-highlight"></a-circle>
+                <a-text value="🏰" position="0 0.25 0.1" color="white" align="center" scale="2"></a-text>
+                <a-text value="CASA REAL" position="0 -0.1 0.1" color="white" align="center" width="2" scale="0.7"></a-text>
+                <a-text value="SHRINE" position="0 -0.4 0.1" color="#9B59B6" align="center" width="2" scale="0.9"></a-text>
             </a-entity>
         </a-entity>
         
         <!-- Simple floor grid -->
-        <a-grid position="0 -0.5 -3" width="10" height="10" color="#444" opacity="0.3"></a-grid>
+        <a-grid position="0 -0.8 -3.5" width="12" height="8" color="#4ECDC4" opacity="0.15"></a-grid>
         
-        <!-- Ambient light -->
+        <!-- Ambient lighting -->
         <a-light type="ambient" intensity="1.2"></a-light>
-        <a-light type="point" intensity="0.8" position="0 2 2"></a-light>
+        <a-light type="point" intensity="0.8" position="0 2 2" color="gold"></a-light>
     </a-scene>
 
     <script>
         // ===================== CONFIGURATION =====================
+        const DWELL_TIME = 1000; // 1 second for gaze selection
         const SITES = [
-            { id: "del-pilar-shrine", title: "Marcelo H. Del Pilar Shrine", bg: "#del-pilar-bg" },
-            { id: "battle-quinga", title: "Battle of Quinga", bg: "#battle-quinga-bg" },
-            { id: "bulacan-museum", title: "Hiyas ng Bulacan Museum", bg: "#bulacan-museum-bg" },
-            { id: "barasoain-museum", title: "Barasoain Museum", bg: "#barasoain-bg" },
-            { id: "casa-real-shrine", title: "Casa Real Shrine", bg: "#casa-real-bg" }
+            { id: "del-pilar-shrine", title: "Marcelo H. Del Pilar Shrine", bg: "#del-pilar-bg", color: "gold" },
+            { id: "battle-quinga", title: "Battle of Quinga", bg: "#battle-quinga-bg", color: "#FF6B6B" },
+            { id: "bulacan-museum", title: "Hiyas ng Bulacan Museum", bg: "#bulacan-museum-bg", color: "#4ECDC4" },
+            { id: "barasoain-museum", title: "Barasoain Museum", bg: "#barasoain-bg", color: "#FF8E53" },
+            { id: "casa-real-shrine", title: "Casa Real Shrine", bg: "#casa-real-bg", color: "#9B59B6" }
         ];
 
-        // ===================== SIMPLE METRICS SYSTEM =====================
+        // State variables
+        let currentTarget = null;
+        let dwellStartTime = 0;
+        let dwellProgress = 0;
+        let dwellTimer = null;
+        let isDwelling = false;
+        let gyroscopeEnabled = false;
+        let selections = 0;
+        let sessionStartTime = Date.now();
+        
+        // DOM elements
+        const progressRingFill = document.getElementById('progress-ring-fill');
+        const progressText = document.getElementById('progress-text');
+        const hoverTargetEl = document.getElementById('hover-target');
+        const siteNameEl = document.getElementById('site-name');
+        const currentSiteEl = document.getElementById('current-site');
+        const selectionCountEl = document.getElementById('selection-count');
+        const gyroStatusEl = document.getElementById('gyro-status');
+        const gyroPrompt = document.getElementById('gyro-prompt');
+
+        // ===================== GYROSCOPE REQUEST =====================
+        window.requestGyroscope = function() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && 
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+ devices
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            enableGyroscope();
+                        } else {
+                            alert('Gyroscope permission denied. Gaze selection will not work.');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Non-iOS devices
+                enableGyroscope();
+            }
+            gyroPrompt.style.display = 'none';
+        }
+
+        function enableGyroscope() {
+            gyroscopeEnabled = true;
+            gyroStatusEl.textContent = 'Active';
+            gyroStatusEl.style.color = '#4CAF50';
+            
+            const camera = document.querySelector('[camera]');
+            if (camera) {
+                camera.setAttribute('look-controls', 'enabled', true);
+            }
+            
+            console.log('✅ Gyroscope enabled - Use head movements to select');
+        }
+
+        function checkGyroscopePermission() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && 
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                setTimeout(() => {
+                    gyroPrompt.style.display = 'block';
+                }, 2000);
+            } else {
+                enableGyroscope();
+            }
+        }
+
+        // ===================== METRICS SYSTEM =====================
         class SimpleMetrics {
             constructor() {
                 this.metrics = {
@@ -391,10 +622,9 @@
 
                 this.startMonitoring();
                 this.startSessionTimer();
-                this.setupMenuInteractions();
+                this.setupGazeInteraction();
                 this.createSiteDots();
 
-                // Hide loading screen
                 setTimeout(() => {
                     document.getElementById('loading').style.opacity = '0';
                     setTimeout(() => {
@@ -454,66 +684,25 @@
                 });
             }
 
-            setupMenuInteractions() {
+            setupGazeInteraction() {
                 const scene = document.querySelector('a-scene');
+                const raycaster = document.querySelector('#raycaster');
 
-                // Hover effects - like Del Pilar hotspots
-                scene.addEventListener('mouseenter', (e) => {
-                    if (e.target.classList.contains('menu-option')) {
-                        const hoverCircle = e.target.querySelector('.hotspot-hover');
-                        if (hoverCircle) {
-                            hoverCircle.setAttribute('opacity', '0.3');
+                if (raycaster) {
+                    raycaster.addEventListener('raycaster-intersection', (evt) => {
+                        const els = evt.detail.els;
+                        if (els && els.length > 0) {
+                            const intersectedEl = els[0];
+                            if (intersectedEl && intersectedEl.classList.contains('menu-option')) {
+                                handleGazeEnter(intersectedEl);
+                            }
                         }
-                    }
-                });
-
-                scene.addEventListener('mouseleave', (e) => {
-                    if (e.target.classList.contains('menu-option')) {
-                        const hoverCircle = e.target.querySelector('.hotspot-hover');
-                        if (hoverCircle) {
-                            hoverCircle.setAttribute('opacity', '0');
-                        }
-                    }
-                });
-
-                // Click to select site
-                scene.addEventListener('click', (e) => {
-                    const menuOption = e.target.closest('.menu-option');
-                    if (menuOption) {
-                        const siteId = menuOption.getAttribute('data-site');
-                        const siteName = menuOption.getAttribute('data-name');
-                        
-                        this.metrics.selections++;
-                        this.metrics.currentSite = siteName;
-                        
-                        document.getElementById('site-name').textContent = `📍 ${siteName}`;
-                        document.getElementById('current-site').textContent = siteName;
-                        
-                        this.updateDisplay();
-                        
-                        // Find site index and update dots
-                        const siteIndex = SITES.findIndex(s => s.id === siteId);
-                        if (siteIndex !== -1) {
-                            document.querySelectorAll('.site-dot').forEach((dot, i) => {
-                                dot.classList.toggle('active', i === siteIndex);
-                            });
-                        }
-                        
-                        // Visual feedback - flash the ring
-                        const ring = menuOption.querySelector('a-ring');
-                        if (ring) {
-                            const originalColor = ring.getAttribute('color');
-                            ring.setAttribute('color', 'white');
-                            setTimeout(() => {
-                                ring.setAttribute('color', originalColor);
-                            }, 300);
-                        }
-                        
-                        // In a real implementation, you would navigate to the site
-                        // window.location.href = `${siteId}/index.html`;
-                        alert(`📍 Selected: ${siteName}\n(This would navigate to the site in production)`);
-                    }
-                });
+                    });
+                    
+                    raycaster.addEventListener('raycaster-intersection-cleared', () => {
+                        handleGazeLeave();
+                    });
+                }
             }
 
             selectSite(index) {
@@ -521,22 +710,29 @@
                 
                 const site = SITES[index];
                 
-                // Update sky background if available
-                const sky = document.querySelector('#scene-sky');
-                if (sky && site.bg) {
-                    sky.setAttribute('src', site.bg);
-                }
-                
                 // Update site info
                 this.metrics.currentSite = site.title;
-                document.getElementById('site-name').textContent = `📍 ${site.title}`;
-                document.getElementById('current-site').textContent = site.title;
+                siteNameEl.textContent = `📍 ${site.title}`;
+                currentSiteEl.textContent = site.title;
                 
                 // Update site dots
                 document.querySelectorAll('.site-dot').forEach((dot, i) => {
                     dot.classList.toggle('active', i === index);
                 });
                 
+                // Update sky background if available
+                const sky = document.querySelector('#scene-sky');
+                if (sky && site.bg) {
+                    sky.setAttribute('src', site.bg);
+                }
+                
+                this.updateDisplay();
+            }
+
+            recordSelection() {
+                this.metrics.selections++;
+                selections = this.metrics.selections;
+                selectionCountEl.textContent = selections;
                 this.updateDisplay();
             }
 
@@ -546,14 +742,117 @@
             }
         }
 
-        // ===================== NAVIGATION =====================
+        // ===================== GAZE HANDLERS =====================
+        function handleGazeEnter(entity) {
+            if (!entity || !gyroscopeEnabled) return;
+            
+            // Show hover effect
+            const hoverHighlight = entity.querySelector('.hover-highlight');
+            if (hoverHighlight) {
+                hoverHighlight.setAttribute('opacity', '0.3');
+            }
+            
+            const siteName = entity.getAttribute('data-name') || 'Unknown Site';
+            hoverTargetEl.textContent = siteName;
+            hoverTargetEl.style.color = entity.getAttribute('data-site') === 'del-pilar-shrine' ? 'gold' : '#4ECDC4';
+
+            // If new target, reset dwell
+            if (currentTarget !== entity) {
+                if (dwellTimer) {
+                    clearTimeout(dwellTimer);
+                    dwellTimer = null;
+                }
+                
+                currentTarget = entity;
+                dwellStartTime = Date.now();
+                isDwelling = true;
+                
+                updateDwellProgress();
+            }
+        }
+
+        function handleGazeLeave() {
+            // Hide hover effect
+            if (currentTarget) {
+                const hoverHighlight = currentTarget.querySelector('.hover-highlight');
+                if (hoverHighlight) {
+                    hoverHighlight.setAttribute('opacity', '0');
+                }
+            }
+            
+            hoverTargetEl.textContent = 'None';
+            
+            // Reset dwell state
+            currentTarget = null;
+            isDwelling = false;
+            
+            if (dwellTimer) {
+                clearTimeout(dwellTimer);
+                dwellTimer = null;
+            }
+            
+            dwellProgress = 0;
+            progressText.textContent = '0%';
+            progressRingFill.style.transform = 'rotate(0deg)';
+        }
+
+        function updateDwellProgress() {
+            if (!isDwelling || !currentTarget || !gyroscopeEnabled) return;
+            
+            const elapsed = Date.now() - dwellStartTime;
+            dwellProgress = Math.min((elapsed / DWELL_TIME) * 100, 100);
+            
+            // Update progress indicators
+            progressText.textContent = Math.round(dwellProgress) + '%';
+            progressRingFill.style.transform = `rotate(${dwellProgress * 3.6}deg)`;
+
+            if (dwellProgress >= 100) {
+                // SELECTION TRIGGERED!
+                const siteId = currentTarget.getAttribute('data-site');
+                const siteName = currentTarget.getAttribute('data-name');
+                
+                if (siteId) {
+                    // Visual feedback
+                    const ring = currentTarget.querySelector('a-ring');
+                    if (ring) {
+                        const originalColor = ring.getAttribute('color');
+                        ring.setAttribute('color', 'white');
+                        setTimeout(() => {
+                            ring.setAttribute('color', originalColor);
+                        }, 300);
+                    }
+                    
+                    metrics.recordSelection();
+                    
+                    // Find and select the site
+                    const siteIndex = SITES.findIndex(s => s.id === siteId);
+                    if (siteIndex !== -1) {
+                        metrics.selectSite(siteIndex);
+                    }
+                    
+                    // Show feedback
+                    hoverTargetEl.textContent = `✓ ${siteName} Selected!`;
+                    setTimeout(() => {
+                        hoverTargetEl.textContent = siteName;
+                    }, 1500);
+                    
+                    // In production, navigate to the site
+                    // window.location.href = `${siteId}/index.html`;
+                    
+                    handleGazeLeave();
+                }
+            } else {
+                dwellTimer = setTimeout(updateDwellProgress, 50);
+            }
+        }
+
+        // ===================== UTILITIES =====================
         function goToMenu() {
             if (confirm("Return to main menu?")) {
                 window.location.href = "index.html";
             }
         }
 
-        // ===================== EXPORT FUNCTION =====================
         window.exportData = function () {
             if (typeof metrics === 'undefined') {
                 alert('System not initialized yet.');
@@ -561,11 +860,12 @@
             }
 
             const data = {
-                project: "VR Heritage Bulacan",
+                project: "VR Heritage Bulacan - Gaze Control",
                 timestamp: new Date().toISOString(),
                 sessionDuration: Date.now() - metrics.metrics.sessionStart,
                 selections: metrics.metrics.selections,
                 currentSite: metrics.metrics.currentSite,
+                gyroscopeEnabled: gyroscopeEnabled,
                 performance: {
                     fps: metrics.metrics.fps
                 }
@@ -575,7 +875,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `vr-heritage-session-${new Date().toISOString().slice(0, 10)}.json`;
+            a.download = `vr-heritage-gaze-${new Date().toISOString().slice(0, 10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -584,14 +884,36 @@
             alert('✅ Session data exported!');
         };
 
+        // Update session timer
+        setInterval(() => {
+            const now = Date.now();
+            const sessionSeconds = Math.floor((now - sessionStartTime) / 1000);
+            const mins = Math.floor(sessionSeconds / 60);
+            const secs = sessionSeconds % 60;
+            document.getElementById('session-time').textContent = 
+                `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }, 1000);
+
+        // VR mode handling
+        const scene = document.getElementById('scene');
+        scene.addEventListener('enter-vr', () => {
+            document.body.classList.add('vr-mode');
+            console.log('Entered VR mode - Use head gaze to select');
+        });
+        
+        scene.addEventListener('exit-vr', () => {
+            document.body.classList.remove('vr-mode');
+        });
+
         // ===================== INITIALIZE =====================
         let metrics;
         document.addEventListener('DOMContentLoaded', function() {
             metrics = new SimpleMetrics();
+            setTimeout(checkGyroscopePermission, 1000);
             
             setTimeout(() => {
-                console.log('📍 VR Heritage Main Menu');
-                console.log('Click on the colored rings to select a historical site');
+                console.log('📍 VR Heritage - Gaze Control Mode');
+                console.log('Look at a site and hold your gaze for 1 second to select');
             }, 3000);
         });
     </script>
