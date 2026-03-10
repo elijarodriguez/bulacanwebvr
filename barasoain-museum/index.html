@@ -435,7 +435,7 @@
     <a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-hotspot]">
         <!-- ASSETS - 7 SCENES -->
         <a-assets timeout="30000">
-            <img id="scene1" src="/images/1stscene.jpg" crossorigin="anonymous">
+            <img id="scene1" src="barasoain-museum/images/1stscene.jpg" crossorigin="anonymous">
             <img id="scene2" src="barasoain-museum/images/2ndscene.jpg" crossorigin="anonymous">
             <img id="scene3" src="barasoain-museum/images/3rdscene.jpg" crossorigin="anonymous">
             <img id="scene4" src="barasoain-museum/images/4thscene.jpg" crossorigin="anonymous">
@@ -630,36 +630,37 @@
             }
 
             preloadImages() {
-                const images = ['scene1', 'scene2', 'scene3', 'scene4', 'scene5', 'scene6', 'scene7'];
-                let loaded = 0;
+    const images = ['scene1', 'scene2', 'scene3', 'scene4', 'scene5', 'scene6', 'scene7'];
+    let loaded = 0;
 
-                images.forEach(imgId => {
-                    const img = new Image();
-                    img.onload = () => {
-                        loaded++;
-                        if (loaded === images.length) {
-                            setTimeout(() => {
-                                document.getElementById('loading').style.opacity = '0';
-                                setTimeout(() => {
-                                    document.getElementById('loading').style.display = 'none';
-                                }, 500);
-                            }, 500);
-                        }
-                    };
-                    img.onerror = () => {
-                        loaded++; // Count as loaded even if error
-                        if (loaded === images.length) {
-                            setTimeout(() => {
-                                document.getElementById('loading').style.opacity = '0';
-                                setTimeout(() => {
-                                    document.getElementById('loading').style.display = 'none';
-                                }, 500);
-                            }, 500);
-                        }
-                    };
-                    img.src = `images/${imgId.replace('scene', '')}thscene.jpg`;
-                });
+    images.forEach(imgId => {
+        const img = new Image();
+        img.onload = () => {
+            loaded++;
+            if (loaded === images.length) {
+                setTimeout(() => {
+                    document.getElementById('loading').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                    }, 500);
+                }, 500);
             }
+        };
+        img.onerror = () => {
+            console.error(`Failed to load: barasoain-museum/images/${imgId.replace('scene', '')}thscene.jpg`);
+            loaded++; // Count as loaded even if error
+            if (loaded === images.length) {
+                setTimeout(() => {
+                    document.getElementById('loading').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                    }, 500);
+                }, 500);
+            }
+        };
+        img.src = `barasoain-museum/images/${imgId.replace('scene', '')}thscene.jpg`;
+    });
+}
 
             setupBackButton() {
                 document.getElementById('back-button').addEventListener('click', () => {
